@@ -1,0 +1,5 @@
+# my B shoppy - https://mybshoppy.com
+User-agent: *
+Allow: /
+
+Sitemap: https://mybshoppy.com/sitemap.xml
