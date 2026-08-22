@@ -1,0 +1,6 @@
+{
+  "name": "my B shoppy - Luxury E-Commerce Store",
+  "description": "A luxury e-commerce catalog and store featuring Supabase product integration, advanced sidebar filtering, responsive grid/list views, cart drawer, and Cash on Delivery order processing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
