@@ -288,7 +288,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Clips, luxury claw clips, headbands & barrettes",
     description: "Handcrafted hair clips, pearled barrettes, and durable non-slip claws.",
     startingPrice: 250,
-    imageUrl: "/Hair%20Accessories.jpg",
+    imageUrl: "/Hair%20Accessories.jpeg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'hair-accessories')
   },
   {
