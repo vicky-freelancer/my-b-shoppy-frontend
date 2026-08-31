@@ -57,13 +57,9 @@ export const CategoryHeroSlider: React.FC = () => {
               src={category.imageUrl}
               alt={`${category.name} collection`}
               loading={index === 0 ? 'eager' : 'lazy'}
-              className={`absolute inset-0 w-full h-full object-cover transition-transform duration-[6000ms] ease-out ${
-                isActive ? 'scale-105' : 'scale-100'
-              }`}
+              className="absolute inset-0 w-full h-full object-cover"
             />
-            {/* Luxury dark gradient overlay for readability */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0f0e0d]/95 via-[#0f0e0d]/70 to-[#0f0e0d]/30"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0f0e0d]/90 via-transparent to-transparent"></div>
+
 
             {/* Slide content */}
             <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
@@ -84,7 +80,7 @@ export const CategoryHeroSlider: React.FC = () => {
                   )}
                 </div>
 
-                <h1 className="font-display text-4xl sm:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.05] text-[#f3f0e6]">
+                <h1 className="font-display text-2xl sm:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.05] text-[#d4af37]">
                   {category.name}
                 </h1>
 
@@ -92,15 +88,7 @@ export const CategoryHeroSlider: React.FC = () => {
                   {category.tagline}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold">
-                  <span className="font-mono text-[#d4af37] text-sm font-bold">
-                    From ₹{category.startingPrice.toLocaleString('en-IN')}
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-slate-600 hidden sm:block"></span>
-                  <span className="text-slate-400 uppercase tracking-widest text-[11px]">
-                    {category.count}+ Curated Items
-                  </span>
-                </div>
+
 
                 <div className="flex flex-col sm:flex-row gap-3.5 pt-2">
                   <Link

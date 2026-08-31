@@ -288,7 +288,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Clips, luxury claw clips, headbands & barrettes",
     description: "Handcrafted hair clips, pearled barrettes, and durable non-slip claws.",
     startingPrice: 250,
-    imageUrl: "/Hair%20Accessories.jpeg",
+    imageUrl: "/Hair%20Accessories.png",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'hair-accessories')
   },
   {
@@ -403,7 +403,7 @@ export const STORE_CONFIG: StoreConfig = {
   },
   contact: {
     email: "contact@mybshoppy.com",
-    phone: "+1 (800) 888-2746",
+    phone: "96002 05955",
     supportHours: "Mon - Sat: 9:00 AM - 8:00 PM EST",
     address: "First floor, Basuvaraj building, 8th cross, Thillai nagar main road, Trichy - 620018"
   }
