@@ -37,7 +37,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-contain object-center bg-[#0b0a0a]"
           />
           {product.badge && (
             <span className="absolute top-2.5 left-2.5 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black/80 text-[#d4af37] border border-[#d4af37]/60 backdrop-blur-xs">
@@ -113,7 +113,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           src={product.imageUrl}
           alt={product.name}
           onClick={() => onQuickView(product)}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 cursor-pointer"
+          className="w-full h-full object-contain object-center cursor-pointer"
         />
 
         {/* Top Left Badge (from screenshot) */}

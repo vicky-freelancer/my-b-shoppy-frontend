@@ -56,7 +56,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </button>
           </div>
 
-          {/* COD Value Highlight */}
+          {/* Delivery Value Highlight */}
           <div className="bg-[#1b1916] px-5 py-2.5 border-b border-[#272420] flex items-center justify-between text-xs text-slate-300">
             <span className="flex items-center gap-1.5 text-[#d4af37] font-semibold">
               <Truck className="w-4 h-4" />
@@ -64,7 +64,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </span>
             <span className="flex items-center gap-1 text-emerald-400 font-bold">
               <ShieldCheck className="w-4 h-4" />
-              <span>100% COD Verified</span>
+              <span>100% Verified</span>
             </span>
           </div>
 
@@ -158,7 +158,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 }}
                 className="w-full py-3.5 px-4 bg-[#d4af37] hover:bg-[#fae19c] text-black font-extrabold text-xs uppercase tracking-widest rounded-xl transition duration-200 shadow-xl flex items-center justify-center space-x-2 cursor-pointer"
               >
-                <span>ORDER CASH ON DELIVERY</span>
+                <span>ORDER NOW</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

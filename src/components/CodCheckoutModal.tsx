@@ -116,7 +116,8 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
       const response = await submitCodOrder(payload);
 
       if (response.success) {
-        setConfirmedOrderId(response.orderId || `MBS-${Math.floor(100000 + Math.random() * 900000)}`);
+        const orderId = response.orderId || `MBS-${Math.floor(100000 + Math.random() * 900000)}`;
+        setConfirmedOrderId(orderId);
         setOrderSuccess(true);
         onClearCart();
 
@@ -154,7 +155,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
       className="fixed inset-0 z-[60] overflow-y-auto overscroll-contain bg-black/85 backdrop-blur-sm px-4 py-6 sm:px-6 sm:py-10"
       role="dialog"
       aria-modal="true"
-      aria-label="Cash on Delivery Checkout"
+      aria-label="Checkout"
     >
       <div className="relative w-full max-w-2xl mx-auto bg-[#141312] border border-[#38332c] rounded-2xl shadow-2xl overflow-hidden text-white">
         
@@ -163,7 +164,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-5 h-5 text-[#d4af37]" />
             <h2 className="font-serif-luxury text-base sm:text-lg font-bold text-[#fae19c]">
-              Cash on Delivery Checkout
+              Checkout
             </h2>
           </div>
           <button
@@ -186,7 +187,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                 Order Placed Successfully!
               </h3>
               <p className="text-sm text-slate-400 max-w-md mx-auto">
-                Thank you for shopping with <span className="text-[#d4af37] font-semibold">my B shoppy</span>. Your Cash on Delivery order has been submitted and recorded in Supabase.
+                Thank you for shopping with <span className="text-[#d4af37] font-semibold">my B shoppy</span>. Your order has been submitted and recorded.
               </p>
             </div>
 
@@ -391,7 +392,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
               ) : (
                 <>
                   <Truck className="w-4 h-4" />
-                  <span>CONFIRM & PLACE CASH ON DELIVERY ORDER</span>
+                  <span>CONFIRM & PLACE ORDER</span>
                 </>
               )}
             </button>

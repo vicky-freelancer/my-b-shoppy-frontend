@@ -249,7 +249,7 @@ export const ContactPage: React.FC = () => {
               <ul className="space-y-2.5 text-xs text-slate-400 leading-relaxed list-none">
                 <li className="flex items-start gap-2">
                   <span className="text-[#d4af37] mt-0.5">◆</span>
-                  Cash on Delivery is available across India — inspect before you pay.
+                  Flexible payment options are available across India — inspect before you pay.
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#d4af37] mt-0.5">◆</span>

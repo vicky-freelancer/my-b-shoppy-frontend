@@ -163,7 +163,7 @@ CREATE POLICY "Public Orders Insert" ON orders FOR INSERT WITH CHECK (true);
             <div className="flex items-center justify-between pt-2 border-t border-[#26231f]">
               <span className="text-xs text-slate-400 font-medium">Configured Tables:</span>
               <span className="text-xs font-mono text-slate-200">
-                <span className="text-[#d4af37]">products</span> (Catalog) & <span className="text-[#d4af37]">orders</span> (Cash on Delivery)
+                <span className="text-[#d4af37]">products</span> (Catalog) & <span className="text-[#d4af37]">orders</span> (Checkout)
               </span>
             </div>
 

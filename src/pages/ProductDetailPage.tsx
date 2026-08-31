@@ -99,7 +99,7 @@ export const ProductDetailPage: React.FC = () => {
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className="w-full aspect-square object-cover object-center"
+                className="w-full aspect-square object-contain object-center"
               />
               {product.badge && (
                 <span className="absolute top-4 left-4 text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-lg bg-black/85 text-[#d4af37] border border-[#d4af37]/70 backdrop-blur-sm">
@@ -116,7 +116,7 @@ export const ProductDetailPage: React.FC = () => {
             {/* Assurance row */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: Banknote, label: 'Cash on Delivery' },
+                { icon: Banknote, label: 'Easy Checkout' },
                 { icon: Truck, label: '24h Dispatch' },
                 { icon: ShieldCheck, label: 'Secure Packaging' },
               ].map((item) => (
@@ -266,7 +266,7 @@ export const ProductDetailPage: React.FC = () => {
                   className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-[#d4af37] hover:bg-[#d4af37] text-[#d4af37] hover:text-black font-extrabold text-xs sm:text-sm uppercase tracking-widest transition-colors cursor-pointer"
                 >
                   <Banknote className="w-4 h-4" />
-                  Order Now · COD
+                  Order Now
                 </button>
               </div>
             </div>
@@ -309,7 +309,7 @@ export const ProductDetailPage: React.FC = () => {
             </li>
             <li className="flex items-start gap-2">
               <Banknote className="w-4 h-4 text-[#d4af37] shrink-0 mt-0.5" />
-              Inspect before you pay � Cash on Delivery available pan-India.
+              Inspect before you pay — easy, flexible payment available pan-India.
             </li>
           </ul>
         </section>
@@ -367,7 +367,7 @@ export const ProductDetailPage: React.FC = () => {
 
       {/* Closing gold band � alternates with the dark product detail above */}
       <GoldBand
-        eyebrow="Cash On Delivery"
+        eyebrow="Convenient Checkout"
         title="Complete Your Look Today"
         text="Pair it with matching pieces from the collection � gift-wrapped, wear-tested and delivered to your door."
         primaryCta={{ label: 'Back to Shop', path: '/shop' }}

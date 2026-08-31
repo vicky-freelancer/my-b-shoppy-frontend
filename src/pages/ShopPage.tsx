@@ -47,7 +47,7 @@ export const ShopPage: React.FC = () => {
           { label: 'Home', path: '/' },
           { label: 'Shop' },
         ]}
-        subtitle="Curated fine artificial jewelry, luxury hair adornments, accessories & gifts with Cash on Delivery"
+        subtitle="Curated fine artificial jewelry, luxury hair adornments, accessories & gifts with easy checkout"
         metaText={`${sortedProducts.length} Items Available`}
       />
 
@@ -96,7 +96,7 @@ export const ShopPage: React.FC = () => {
       <GoldBand
         eyebrow="Zero-Risk Shopping"
         title="Love It First, Pay at Your Door"
-        text="Every my B shoppy order ships with Cash on Delivery — inspect your treasures before a single rupee leaves your pocket."
+        text="Every my B shoppy order ships with easy, flexible payment — inspect your treasures before a single rupee leaves your pocket."
         primaryCta={{ label: 'Contact Support', path: '/contact' }}
         secondaryCta={{ label: 'Browse Categories', path: '/categories' }}
       />

@@ -90,7 +90,7 @@ export const CategoryDetailPage: React.FC = () => {
         <div className="mb-8 bg-[#141312] border border-[#272420] rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
             {categoryMeta.description} Every piece in this edit ships with dust-proof protective
-            packaging and Cash on Delivery.
+            packaging and easy, flexible payment.
           </p>
           <Link
             to="/shop"
@@ -145,7 +145,7 @@ export const CategoryDetailPage: React.FC = () => {
       <GoldBand
         eyebrow="Keep Exploring"
         title={`More From ${categoryMeta.name} Awaits`}
-        text="New pieces land every week — each one wear-tested, gift-wrapped and Cash on Delivery ready."
+        text="New pieces land every week — each one wear-tested, gift-wrapped and checkout ready."
         primaryCta={{ label: 'View Full Catalogue', path: '/shop' }}
         secondaryCta={{ label: 'All Categories', path: '/categories' }}
       />

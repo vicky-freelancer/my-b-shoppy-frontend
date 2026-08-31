@@ -57,11 +57,11 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2">
           
           {/* Left: Product Image & Badges */}
-          <div className="relative aspect-square md:aspect-auto bg-black flex items-center justify-center overflow-hidden">
+          <div className="relative aspect-square bg-black flex items-center justify-center overflow-hidden">
             <img
               src={product.imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover object-center"
+              className="w-full h-full object-contain object-center"
             />
             {product.badge && (
               <span className="absolute top-4 left-4 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded bg-black/80 text-[#d4af37] border border-[#d4af37]/70">
@@ -97,7 +97,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                   </span>
                 )}
                 <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wide bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
-                  Cash on Delivery
+                  Convenient Checkout
                 </span>
               </div>
 
@@ -211,7 +211,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 onClick={handleBuyNow}
                 className="w-full py-3.5 px-4 rounded-xl bg-[#d4af37] hover:bg-[#fae19c] text-black font-extrabold text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 shadow-xl cursor-pointer"
               >
-                <span>ORDER NOW (CASH ON DELIVERY)</span>
+                <span>ORDER NOW</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

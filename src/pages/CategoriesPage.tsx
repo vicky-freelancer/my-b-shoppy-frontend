@@ -87,7 +87,7 @@ export const CategoriesPage: React.FC = () => {
 
       {/* Closing gold band — alternates with the dark catalogue above */}
       <GoldBand
-        eyebrow="Cash On Delivery"
+        eyebrow="Convenient Checkout"
         title="Every Category, Delivered to Your Doorstep"
         text="Browse freely, order confidently and pay only after inspecting your parcel at the door."
         primaryCta={{ label: 'Start Shopping', path: '/shop' }}

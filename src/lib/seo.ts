@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 export const SITE_URL = 'https://mybshoppy.com';
 export const SITE_NAME = 'my B shoppy';
 export const DEFAULT_DESCRIPTION =
-  'Discover luxury jewels, hair accessories, bows, scrunchies, and lifestyle essentials with Cash on Delivery & Supabase synchronization.';
+  'Discover luxury jewels, hair accessories, bows, scrunchies, and lifestyle essentials with convenient checkout.';
 
 interface SeoInput {
   title: string;

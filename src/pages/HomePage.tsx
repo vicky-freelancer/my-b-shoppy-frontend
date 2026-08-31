@@ -25,7 +25,7 @@ const testimonials = [
   },
   {
     quote:
-      'Ordered on Monday with Cash on Delivery, wearing my Pearl Bloom Claw by Thursday. Packaging felt like unboxing a luxury boutique.',
+      'Ordered on Monday and my Pearl Bloom Claw arrived by Thursday. Packaging felt like unboxing a luxury boutique.',
     name: 'Ritika M.',
     location: 'Bengaluru, IN',
   },
@@ -42,7 +42,7 @@ export const HomePage: React.FC = () => {
   useSeo({
     title: 'my B shoppy — Luxury E-Commerce & Fine Accessories',
     description:
-      'Shop curated artificial jewels, hair accessories, bows, scrunchies, mobile charms & luxury gifts at my B shoppy. Premium quality, Cash on Delivery available.',
+      'Shop curated artificial jewels, hair accessories, bows, scrunchies, mobile charms & luxury gifts at my B shoppy. Premium quality, easy checkout available.',
     path: '/',
   });
 
@@ -59,13 +59,13 @@ export const HomePage: React.FC = () => {
       <CategoryHeroSlider />
 
       {/* ============ TRUST STRIP ============ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
               icon: Banknote,
-              title: 'Cash on Delivery',
-              desc: 'Pay when your treasure arrives at your door.',
+              title: 'Easy Checkout',
+              desc: 'Simple, secure checkout with flexible payment options.',
             },
             {
               icon: BadgeCheck,
@@ -273,7 +273,7 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ============ NEWSLETTER / COD CTA — FULL GOLD CLOSER ============ */}
+      {/* ============ NEWSLETTER / CTA — FULL GOLD CLOSER ============ */}
       <section className="relative bg-gradient-to-br from-[#e9cd77] via-[#d4af37] to-[#b8942a] overflow-hidden">
         {/* Ambient sheen */}
         <div className="absolute -top-24 right-1/4 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -286,8 +286,7 @@ export const HomePage: React.FC = () => {
               Shop Now, Pay at Your Doorstep
             </h2>
             <p className="text-sm sm:text-base text-[#3d2f0a] font-medium leading-relaxed">
-              Cash on Delivery available across India. Browse freely, order confidently, and pay
-              only when your package is safely in your hands.
+              Browse freely, order confidently, and pay only when your package is safely in your hands.
             </p>
             <Link
               to="/shop"

@@ -11,7 +11,7 @@ export const AboutPage: React.FC = () => {
   useSeo({
     title: 'About Us',
     description:
-      'The story of my B shoppy — a luxury e-commerce house curating artificial jewels, hair accessories & gifts with premium quality, fair pricing and Cash on Delivery.',
+      'The story of my B shoppy — a luxury e-commerce house curating artificial jewels, hair accessories & gifts with premium quality and fair pricing.',
     path: '/about',
   });
 
@@ -47,7 +47,7 @@ export const AboutPage: React.FC = () => {
               not an errand.
             </p>
             <p className="text-sm text-slate-400 leading-relaxed">
-              And because trust is our most treasured material, Cash on Delivery lets you inspect
+              And because trust is our most treasured material, protected delivery lets you inspect
               every treasure before you pay a single rupee.
             </p>
           </div>
@@ -121,7 +121,7 @@ export const AboutPage: React.FC = () => {
               {
                 icon: ShieldCheck,
                 title: 'Trust Built In',
-                desc: 'Cash on Delivery, protective packaging and responsive human support — your confidence is part of the product.',
+                desc: 'Convenient payment options, protective packaging and responsive human support — your confidence is part of the product.',
               },
               {
                 icon: Leaf,
