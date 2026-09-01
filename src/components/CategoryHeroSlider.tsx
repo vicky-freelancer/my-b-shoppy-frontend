@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight, Package } from 'lucide-react';
-import { CATEGORIES_CATALOG } from '../storeConfig';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CATEGORIES_CATALOG, SLIDER_IMAGES } from '../storeConfig';
 
 const AUTOPLAY_MS = 4000;
 
@@ -68,10 +68,12 @@ export const CategoryHeroSlider: React.FC = () => {
             <div className="relative aspect-square rounded-2xl sm:rounded-3xl overflow-hidden border border-[#a5821f]/60 shadow-2xl">
               {CATEGORIES_CATALOG.map((category, index) => {
                 const isActive = index === activeIndex;
+                const slideImage =
+                  SLIDER_IMAGES[index % SLIDER_IMAGES.length]?.imageUrl || category.imageUrl;
                 return (
                   <img
                     key={category.id}
-                    src={category.imageUrl}
+                    src={slideImage}
                     alt={`${category.name} collection`}
                     loading={index === 0 ? 'eager' : 'lazy'}
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-out ${
@@ -109,32 +111,14 @@ export const CategoryHeroSlider: React.FC = () => {
           {/* ---------- SIDE INFO ---------- */}
           <div className="flex-1 w-full text-left max-w-xl lg:max-w-none text-center lg:text-left">
             <div className="space-y-4 sm:space-y-5">
-              {/* Counter + label */}
-              <div className="flex flex-col sm:flex-row items-center lg:items-start gap-2 sm:gap-3 text-center sm:text-left">
-                <span className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full border border-[#4a3a10]/50 bg-[#241b06]/5 text-[9px] sm:text-[10.5px] font-extrabold uppercase tracking-widest text-[#4a3a10]">
-                  <Package className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  {(activeIndex + 1).toString().padStart(2, '0')} / {CATEGORIES_CATALOG.length.toString().padStart(2, '0')}
-                </span>
-                <h2 className="font-display text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.05] text-[#241b06]">
-                  {activeCategory.name}
-                </h2>
-              </div>
+              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.08] text-[#241b06]">
+                Find Something Special for Everyone
+              </h1>
 
               <p className="text-[#3d2f0a] text-sm sm:text-base lg:text-lg leading-relaxed font-medium">
-                {activeCategory.tagline}
+                From elegant gifts to delightful everyday essentials, explore our handpicked
+                collection made for celebrations, surprises, and memorable moments.
               </p>
-
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs font-semibold">
-                  <span className="font-mono text-[#241b06] text-sm sm:text-base font-extrabold">
-                    From ₹{activeCategory.startingPrice.toLocaleString('en-IN')}
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-[#4a3a10]/40 hidden sm:inline-block"></span>
-                  <span className="text-[#5a4712] uppercase tracking-widest text-[11px] font-bold">
-                    {activeCategory.count}+ Curated Items
-                  </span>
-                </div>
-              </div>
 
               <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3.5 pt-1 sm:pt-2 justify-center sm:justify-start">
                 <Link
@@ -142,7 +126,7 @@ export const CategoryHeroSlider: React.FC = () => {
                   tabIndex={0}
                   className="group inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-xl bg-[#241b06] hover:bg-black text-[#f5e6b8] hover:text-[#fae19c] font-extrabold text-xs sm:text-sm uppercase tracking-widest shadow-lg transition-all duration-300 hover:-translate-y-0.5"
                 >
-                  Explore {activeCategory.name}
+                  Explore More
                   <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link

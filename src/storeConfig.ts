@@ -288,7 +288,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Clips, luxury claw clips, headbands & barrettes",
     description: "Handcrafted hair clips, pearled barrettes, and durable non-slip claws.",
     startingPrice: 250,
-    imageUrl: "/Hair%20Accessories.png",
+    imageUrl: "/categories/Hair%20Accessories.png",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'hair-accessories')
   },
   {
@@ -299,7 +299,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     description: "Anti-tarnish, water-resistant everyday necklaces, dainty bracelets, and rings.",
     startingPrice: 2600,
     badge: "Popular",
-    imageUrl: "/Artificial%20Jewels.jpg",
+    imageUrl: "/categories/Artificial%20Jewels.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'artificial-jewels')
   },
   {
@@ -309,7 +309,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Satin ribbons, French oversized clip bows & coquette",
     description: "French satin and organza statement bows with sturdy alligator clips.",
     startingPrice: 450,
-    imageUrl: "/Bows.jpg",
+    imageUrl: "/categories/Bows.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'bows')
   },
   {
@@ -319,7 +319,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "100% Pure Mulberry silk & organza cloud scrunchies",
     description: "Damage-prevention hair ties engineered with gentle inner elastic.",
     startingPrice: 250,
-    imageUrl: "/Scrunchies.jpg",
+    imageUrl: "/categories/Scrunchies.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'scrunchies')
   },
   {
@@ -329,7 +329,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Aesthetic beaded phone straps, wristlet chains & charms",
     description: "Heavy-duty nylon core straps with Y2K beads, freshwater pearls, and cute charms.",
     startingPrice: 350,
-    imageUrl: "/Mobile%20Charms.jpg",
+    imageUrl: "/categories/Mobile%20Charms.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'mobile-charms')
   },
   {
@@ -339,7 +339,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Custom initial tags, cute bag charms & leather braids",
     description: "Sturdy alloy key rings paired with custom artisan charms and vegan leather straps.",
     startingPrice: 400,
-    imageUrl: "/Key%20Chains.jpg",
+    imageUrl: "/categories/Key%20Chains.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'key-chains')
   },
   {
@@ -349,7 +349,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Vintage wax seal kits, journaling essentials & gift sets",
     description: "Artisan bullet journals, brass bookmarks, wax stamp kits, and luxury gifts.",
     startingPrice: 320,
-    imageUrl: "/Stationery%20%26%20Gift%20Items.jpg",
+    imageUrl: "/categories/Stationery%20%26%20Gift%20Items.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'stationery-gift-items')
   },
   {
@@ -359,7 +359,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Cuban links, signet rings, timepieces & bead bracelets",
     description: "Masculine essentials engineered from corrosion-free titanium and stainless steel.",
     startingPrice: 850,
-    imageUrl: "/Mens%20Collection.jpg",
+    imageUrl: "/categories/Mens%20Collection.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'mens-collection')
   },
   {
@@ -370,9 +370,26 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     description: "Premium vegan leather handbags with gold hardware and roomy interiors.",
     startingPrice: 2850,
     badge: "Must Have",
-    imageUrl: "/Handbags.jpg",
+    imageUrl: "/categories/Handbags.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'hand-bags')
   }
+];
+
+/**
+ * Slider images for the homepage hero carousel.
+ * Drop your own slide images into /public/slider/ and reference them here.
+ * Each slide can also carry an optional title/tagline overlay.
+ */
+export const SLIDER_IMAGES: { imageUrl: string; title?: string; tagline?: string }[] = [
+  { imageUrl: "/slider/slide-1.jpg" },
+  { imageUrl: "/slider/slide-2.jpg" },
+  { imageUrl: "/slider/slide-3.jpg" },
+  { imageUrl: "/slider/slide-4.jpg" },
+  { imageUrl: "/slider/slide-5.jpg" },
+  { imageUrl: "/slider/slide-6.jpg" },
+  { imageUrl: "/slider/slide-7.jpg" },
+  { imageUrl: "/slider/slide-8.jpg" },
+  { imageUrl: "/slider/slide-9.jpg" },
 ];
 
 export const STORE_CONFIG: StoreConfig = {
