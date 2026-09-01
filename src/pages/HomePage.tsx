@@ -98,7 +98,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ CATEGORY SHOWCASE — FULL GOLD SECTION ============ */}
-      <section className="relative bg-gradient-to-br from-[#e9cd77] via-[#d4af37] to-[#b8942a] overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#f2c94e] via-[#e4a21b] to-[#c58b12] overflow-hidden">
         {/* Ambient sheen */}
         <div className="absolute -top-24 right-1/4 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-32 left-1/5 w-80 h-80 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -137,23 +137,10 @@ export const HomePage: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
 
-              {category.badge && (
-                <span className="absolute top-3 left-3 text-[9.5px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-black/80 text-[#d4af37] border border-[#d4af37]/60 backdrop-blur-sm">
-                  {category.badge}
-                </span>
-              )}
-
-              <div className="absolute bottom-0 inset-x-0 p-4 space-y-1">
+              <div className="absolute bottom-0 inset-x-0 p-4">
                 <h3 className="font-display text-lg font-bold text-white group-hover:text-[#fae19c] transition-colors">
                   {category.name}
                 </h3>
-                <p className="text-[11px] text-slate-300 line-clamp-1">{category.tagline}</p>
-                <div className="flex items-center justify-between pt-1.5">
-                  <span className="text-[11px] font-mono text-[#d4af37] font-bold">
-                    From ₹{category.startingPrice.toLocaleString('en-IN')}
-                  </span>
-                  <span className="text-[10px] text-slate-400">{category.count}+ items</span>
-                </div>
               </div>
             </Link>
           ))}
@@ -214,7 +201,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ EDITORIAL SPLIT BANNER — FULL GOLD SECTION ============ */}
-      <section className="relative bg-gradient-to-br from-[#e9cd77] via-[#d4af37] to-[#b8942a] overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#f2c94e] via-[#e4a21b] to-[#c58b12] overflow-hidden">
         {/* Ambient sheen */}
         <div className="absolute -top-24 right-1/4 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-32 left-1/5 w-80 h-80 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -274,7 +261,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ NEWSLETTER / CTA — FULL GOLD CLOSER ============ */}
-      <section className="relative bg-gradient-to-br from-[#e9cd77] via-[#d4af37] to-[#b8942a] overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#f2c94e] via-[#e4a21b] to-[#c58b12] overflow-hidden">
         {/* Ambient sheen */}
         <div className="absolute -top-24 right-1/4 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-32 left-1/5 w-80 h-80 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>

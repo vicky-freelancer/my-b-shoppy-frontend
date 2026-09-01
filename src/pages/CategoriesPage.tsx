@@ -42,26 +42,11 @@ export const CategoriesPage: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/10"></div>
 
-              {category.badge && (
-                <span className="absolute top-4 left-4 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded bg-black/80 text-[#d4af37] border border-[#d4af37]/60 backdrop-blur-sm">
-                  {category.badge}
-                </span>
-              )}
-
-              <div className="absolute bottom-0 inset-x-0 p-6 space-y-2">
+              <div className="absolute bottom-0 inset-x-0 p-6">
                 <h3 className="font-display text-2xl font-bold text-white group-hover:text-[#fae19c] transition-colors">
                   {category.name}
                 </h3>
-                <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">
-                  {category.description}
-                </p>
-                <div className="flex items-center justify-between pt-2">
-                  <span className="text-xs font-mono font-bold text-[#d4af37]">
-                    From ₹{category.startingPrice.toLocaleString('en-IN')}
-                  </span>
-                  <span className="text-[11px] text-slate-400">{category.count}+ items</span>
-                </div>
-                <span className="inline-flex items-center gap-1.5 pt-1 text-[11px] font-bold uppercase tracking-widest text-[#d4af37] opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                <span className="inline-flex items-center gap-1.5 pt-3 text-[11px] font-bold uppercase tracking-widest text-[#d4af37] opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
                   Explore Category
                   <ArrowRight className="w-3.5 h-3.5" />
                 </span>

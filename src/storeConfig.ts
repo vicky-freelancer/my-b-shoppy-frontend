@@ -288,7 +288,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Clips, luxury claw clips, headbands & barrettes",
     description: "Handcrafted hair clips, pearled barrettes, and durable non-slip claws.",
     startingPrice: 250,
-    imageUrl: "/categories/Hair%20Accessories.png",
+    imageUrl: "/categories/Hair%20Accessories.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'hair-accessories')
   },
   {
@@ -349,7 +349,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     tagline: "Vintage wax seal kits, journaling essentials & gift sets",
     description: "Artisan bullet journals, brass bookmarks, wax stamp kits, and luxury gifts.",
     startingPrice: 320,
-    imageUrl: "/categories/Stationery%20%26%20Gift%20Items.jpg",
+    imageUrl: "/categories/Stationery-Gift-Items.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'stationery-gift-items')
   },
   {
@@ -370,7 +370,7 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
     description: "Premium vegan leather handbags with gold hardware and roomy interiors.",
     startingPrice: 2850,
     badge: "Must Have",
-    imageUrl: "/categories/Handbags.jpg",
+    imageUrl: "/categories/Hand%20Bags.jpg",
     items: INITIAL_PRODUCTS.filter(p => p.categoryId === 'hand-bags')
   }
 ];
@@ -386,10 +386,7 @@ export const SLIDER_IMAGES: { imageUrl: string; title?: string; tagline?: string
   { imageUrl: "/slider/slide-3.jpg" },
   { imageUrl: "/slider/slide-4.jpg" },
   { imageUrl: "/slider/slide-5.jpg" },
-  { imageUrl: "/slider/slide-6.jpg" },
-  { imageUrl: "/slider/slide-7.jpg" },
-  { imageUrl: "/slider/slide-8.jpg" },
-  { imageUrl: "/slider/slide-9.jpg" },
+  { imageUrl: "/slider/slide-6.png" },
 ];
 
 export const STORE_CONFIG: StoreConfig = {

@@ -70,7 +70,7 @@ export const AboutPage: React.FC = () => {
         </section>
 
         {/* Stats band — FULL GOLD SECTION alternating with dark story above */}
-        <section className="relative bg-gradient-to-br from-[#e9cd77] via-[#d4af37] to-[#b8942a] overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
+        <section className="relative bg-gradient-to-br from-[#f2c94e] via-[#e4a21b] to-[#c58b12] overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
           <div className="absolute -top-24 right-1/4 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute -bottom-32 left-1/5 w-80 h-80 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
 

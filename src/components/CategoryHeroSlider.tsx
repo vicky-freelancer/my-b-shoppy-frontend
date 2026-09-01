@@ -4,10 +4,13 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CATEGORIES_CATALOG, SLIDER_IMAGES } from '../storeConfig';
 
 const AUTOPLAY_MS = 4000;
+const NAME_AUTOPLAY_MS = 2000;
 
 export const CategoryHeroSlider: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [nameIndex, setNameIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStartX = useRef<number | null>(null);
 
@@ -31,6 +34,13 @@ export const CategoryHeroSlider: React.FC = () => {
     };
   }, [isPaused]);
 
+  useEffect(() => {
+    const nameTimer = setInterval(() => {
+      setNameIndex((i) => (i + 1) % CATEGORIES_CATALOG.length);
+    }, NAME_AUTOPLAY_MS);
+    return () => clearInterval(nameTimer);
+  }, []);
+
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -45,11 +55,29 @@ export const CategoryHeroSlider: React.FC = () => {
     touchStartX.current = null;
   };
 
-  const activeCategory = CATEGORIES_CATALOG[activeIndex];
+  const activeName = CATEGORIES_CATALOG[nameIndex];
+
+  const getSlideSrc = (index: number) => {
+    const primary =
+      SLIDER_IMAGES[index % SLIDER_IMAGES.length]?.imageUrl || CATEGORIES_CATALOG[index].imageUrl;
+    if (!failedImages.has(primary)) return primary;
+    return primary.replace(/\.(jpg|jpeg|png)$/i, (ext) => (ext === '.png' ? '.jpg' : '.png'));
+  };
+
+  const handleSlideError = (index: number) => {
+    const primary =
+      SLIDER_IMAGES[index % SLIDER_IMAGES.length]?.imageUrl || CATEGORIES_CATALOG[index].imageUrl;
+    setFailedImages((prev) => {
+      if (prev.has(primary)) return prev;
+      const next = new Set(prev);
+      next.add(primary);
+      return next;
+    });
+  };
 
   return (
     <section
-      className="relative w-full bg-gradient-to-br from-[#e9cd77] via-[#d4af37] to-[#b8942a] overflow-hidden"
+      className="relative w-full bg-gradient-to-br from-[#f2c94e] via-[#e4a21b] to-[#c58b12] overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -65,33 +93,24 @@ export const CategoryHeroSlider: React.FC = () => {
         <div className="flex flex-col lg:flex-row items-center lg:items-center gap-8 lg:gap-14">
           {/* ---------- 1:1 SQUARE IMAGE ---------- */}
           <div className="relative w-full max-w-[300px] sm:max-w-[380px] md:max-w-[460px] lg:max-w-[520px] shrink-0">
-            <div className="relative aspect-square rounded-2xl sm:rounded-3xl overflow-hidden border border-[#a5821f]/60 shadow-2xl">
+            <div className="relative aspect-square overflow-hidden">
               {CATEGORIES_CATALOG.map((category, index) => {
                 const isActive = index === activeIndex;
-                const slideImage =
-                  SLIDER_IMAGES[index % SLIDER_IMAGES.length]?.imageUrl || category.imageUrl;
                 return (
                   <img
                     key={category.id}
-                    src={slideImage}
+                    src={getSlideSrc(index)}
                     alt={`${category.name} collection`}
                     loading={index === 0 ? 'eager' : 'lazy'}
+                    onError={() => handleSlideError(index)}
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-out ${
                       isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
                     }`}
                   />
                 );
-              })}
+})}
 
-              {/* Badge */}
-              {activeCategory.badge && (
-                <span className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 inline-flex px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-[#241b06] text-[#f5e6b8] text-[9px] sm:text-[10.5px] font-black uppercase tracking-widest shadow-lg">
-                  {activeCategory.badge}
-                </span>
-              )}
-            </div>
-
-            {/* Prev / Next arrows */}
+              {/* Prev / Next arrows */}
             <button
               onClick={(e) => { e.stopPropagation(); prev(); }}
               aria-label="Previous category"
@@ -107,22 +126,21 @@ export const CategoryHeroSlider: React.FC = () => {
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
+        </div>
 
           {/* ---------- SIDE INFO ---------- */}
           <div className="flex-1 w-full text-left max-w-xl lg:max-w-none text-center lg:text-left">
             <div className="space-y-4 sm:space-y-5">
-              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.08] text-[#241b06]">
-                Find Something Special for Everyone
+              <h1
+                key={activeName.id}
+                className="font-display text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.08] text-[#241b06] animate-hero-in"
+              >
+                {activeName.name}
               </h1>
-
-              <p className="text-[#3d2f0a] text-sm sm:text-base lg:text-lg leading-relaxed font-medium">
-                From elegant gifts to delightful everyday essentials, explore our handpicked
-                collection made for celebrations, surprises, and memorable moments.
-              </p>
 
               <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3.5 pt-1 sm:pt-2 justify-center sm:justify-start">
                 <Link
-                  to={`/categories/${activeCategory.id}`}
+                  to={`/categories/${activeName.id}`}
                   tabIndex={0}
                   className="group inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-xl bg-[#241b06] hover:bg-black text-[#f5e6b8] hover:text-[#fae19c] font-extrabold text-xs sm:text-sm uppercase tracking-widest shadow-lg transition-all duration-300 hover:-translate-y-0.5"
                 >

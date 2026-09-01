@@ -21,7 +21,7 @@ export const GoldHero: React.FC<GoldHeroProps> = ({
   metaText,
 }) => {
   return (
-    <div className="relative bg-gradient-to-br from-[#e9cd77] via-[#d4af37] to-[#b8942a] overflow-hidden py-12 sm:py-16 border-b border-[#a5821f]">
+    <div className="relative bg-gradient-to-br from-[#f2c94e] via-[#e4a21b] to-[#c58b12] overflow-hidden py-12 sm:py-16 border-b border-[#a5821f]">
       {/* Subtle ambient sheen */}
       <div className="absolute -top-24 right-1/4 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute -bottom-32 left-1/5 w-80 h-80 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>

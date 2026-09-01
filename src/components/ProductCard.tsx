@@ -28,7 +28,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   if (layoutView === 'list') {
     return (
-      <div className="group bg-gradient-to-br from-[#ecd07f] via-[#d9b23a] to-[#c39a28] border border-[#a5821f]/70 hover:border-[#8a6d15] rounded-xl overflow-hidden p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5 transition-all duration-300 shadow-md">
+      <div className="group bg-gradient-to-br from-[#f2c94e] via-[#e4a21b] to-[#c58b12] border border-[#a5821f]/70 hover:border-[#8a6d15] rounded-xl overflow-hidden p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5 transition-all duration-300 shadow-md">
         {/* Product Image */}
         <div
           onClick={() => onQuickView(product)}
@@ -105,7 +105,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   }
 
   return (
-    <div className="group relative bg-gradient-to-br from-[#ecd07f] via-[#d9b23a] to-[#c39a28] border border-[#a5821f]/70 hover:border-[#8a6d15] rounded-xl overflow-hidden p-3 sm:p-4 flex flex-col transition-all duration-300 shadow-md">
+    <div className="group relative bg-gradient-to-br from-[#f2c94e] via-[#e4a21b] to-[#c58b12] border border-[#a5821f]/70 hover:border-[#8a6d15] rounded-xl overflow-hidden p-3 sm:p-4 flex flex-col transition-all duration-300 shadow-md">
 
       {/* Product Image Frame */}
       <div className="relative w-full aspect-square bg-[#0b0a0a] overflow-hidden rounded-lg">
