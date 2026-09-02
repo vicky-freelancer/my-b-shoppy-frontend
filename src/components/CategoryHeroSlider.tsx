@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { CATEGORIES_CATALOG, SLIDER_IMAGES } from '../storeConfig';
 
 const AUTOPLAY_MS = 4000;
-const NAME_AUTOPLAY_MS = 2000;
 
 export const CategoryHeroSlider: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [nameIndex, setNameIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -34,13 +32,6 @@ export const CategoryHeroSlider: React.FC = () => {
     };
   }, [isPaused]);
 
-  useEffect(() => {
-    const nameTimer = setInterval(() => {
-      setNameIndex((i) => (i + 1) % CATEGORIES_CATALOG.length);
-    }, NAME_AUTOPLAY_MS);
-    return () => clearInterval(nameTimer);
-  }, []);
-
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -55,7 +46,7 @@ export const CategoryHeroSlider: React.FC = () => {
     touchStartX.current = null;
   };
 
-  const activeName = CATEGORIES_CATALOG[nameIndex];
+  const activeName = CATEGORIES_CATALOG[activeIndex];
 
   const getSlideSrc = (index: number) => {
     const primary =
@@ -91,9 +82,9 @@ export const CategoryHeroSlider: React.FC = () => {
 
       <div className="relative max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-8 sm:py-14 lg:py-20">
         <div className="flex flex-col lg:flex-row items-center lg:items-center gap-8 lg:gap-14">
-          {/* ---------- 1:1 SQUARE IMAGE ---------- */}
+          {/* ---------- SLIDER IMAGE (fixed 4:3 landscape) ---------- */}
           <div className="relative w-full max-w-[300px] sm:max-w-[380px] md:max-w-[460px] lg:max-w-[520px] shrink-0">
-            <div className="relative aspect-square overflow-hidden">
+            <div className="relative aspect-[4/3] overflow-hidden">
               {CATEGORIES_CATALOG.map((category, index) => {
                 const isActive = index === activeIndex;
                 return (
@@ -109,22 +100,6 @@ export const CategoryHeroSlider: React.FC = () => {
                   />
                 );
 })}
-
-              {/* Prev / Next arrows */}
-            <button
-              onClick={(e) => { e.stopPropagation(); prev(); }}
-              aria-label="Previous category"
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 items-center justify-center rounded-full bg-black/50 hover:bg-black border border-white/30 hover:border-black text-white hover:text-white backdrop-blur-md transition-all duration-300 cursor-pointer flex"
-            >
-              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); next(); }}
-              aria-label="Next category"
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 items-center justify-center rounded-full bg-black/50 hover:bg-black border border-white/30 hover:border-black text-white hover:text-white backdrop-blur-md transition-all duration-300 cursor-pointer flex"
-            >
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
           </div>
         </div>
 

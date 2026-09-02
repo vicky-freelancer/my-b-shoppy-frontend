@@ -48,6 +48,9 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-[#0f0e0d]/95 backdrop-blur-md border-b border-[#26231f] transition-colors">
+      {/* Gold divider line above the nav to separate browser bookmark bar from the website */}
+      <div className="h-[3px] w-full bg-gradient-to-r from-[#d4af37] via-[#fae19c] to-[#d4af37] shadow-[0_1px_6px_rgba(212,175,55,0.6)]"></div>
+
       {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
 

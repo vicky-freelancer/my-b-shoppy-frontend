@@ -380,13 +380,16 @@ export const CATEGORIES_CATALOG: ProductCategory[] = [
  * Drop your own slide images into /public/slider/ and reference them here.
  * Each slide can also carry an optional title/tagline overlay.
  */
-export const SLIDER_IMAGES: { imageUrl: string; title?: string; tagline?: string }[] = [
-  { imageUrl: "/slider/slide-1.jpg" },
-  { imageUrl: "/slider/slide-2.jpg" },
-  { imageUrl: "/slider/slide-3.jpg" },
-  { imageUrl: "/slider/slide-4.jpg" },
-  { imageUrl: "/slider/slide-5.jpg" },
-  { imageUrl: "/slider/slide-6.png" },
+export const SLIDER_IMAGES: { imageUrl: string; title?: string; tagline?: string; aspectRatio?: string }[] = [
+  { imageUrl: "/slider/Hair%20Accessories.png", aspectRatio: "aspect-square" },
+  { imageUrl: "/slider/Artificial%20Jewels.png", aspectRatio: "aspect-[3/2]" },
+  { imageUrl: "/slider/Bows.png", aspectRatio: "aspect-[3/2]" },
+  { imageUrl: "/slider/Scrunchies.jpg", aspectRatio: "aspect-square" },
+  { imageUrl: "/slider/Mobile%20Charms.png", aspectRatio: "aspect-[3/2]" },
+  { imageUrl: "/slider/Key%20Chains.png", aspectRatio: "aspect-[3/2]" },
+  { imageUrl: "/slider/Stationery-Gift-Items.jpg", aspectRatio: "aspect-square" },
+  { imageUrl: "/slider/Mens%20Collection.png", aspectRatio: "aspect-square" },
+  { imageUrl: "/slider/Hand%20Bags.png", aspectRatio: "aspect-square" },
 ];
 
 export const STORE_CONFIG: StoreConfig = {

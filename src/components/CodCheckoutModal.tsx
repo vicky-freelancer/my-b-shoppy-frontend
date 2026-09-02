@@ -64,6 +64,10 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
     0
   );
 
+  const COURIER_CHARGE = 60;
+  const courierCharges = activeItems.length > 0 ? COURIER_CHARGE : 0;
+  const finalAmount = totalAmount + courierCharges;
+
   const totalUnits = activeItems.reduce((total, item) => total + item.quantity, 0);
 
   const validateForm = (): boolean => {
@@ -108,7 +112,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
       product_variant: activeItems.map((i) => `${i.variant} x${i.quantity}`).join(' | '),
       quantity: totalUnits,
       notes: formData.notes ? `${formData.notes} | Items: ${itemsSummary}` : `Items: ${itemsSummary}`,
-      total_amount: totalAmount,
+      total_amount: finalAmount,
       items_summary: itemsSummary,
     };
 
@@ -157,19 +161,19 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
       aria-modal="true"
       aria-label="Checkout"
     >
-      <div className="relative w-full max-w-2xl mx-auto bg-[#141312] border border-[#38332c] rounded-2xl shadow-2xl overflow-hidden text-white">
+      <div className="relative w-full max-w-2xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden text-slate-800">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#272420] flex items-center justify-between bg-[#191715]">
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-5 h-5 text-[#d4af37]" />
-            <h2 className="font-serif-luxury text-base sm:text-lg font-bold text-[#fae19c]">
+            <h2 className="font-serif-luxury text-base sm:text-lg font-bold text-slate-900">
               Checkout
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#26231f] transition cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -178,36 +182,36 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
         {/* Order Confirmed View */}
         {orderSuccess ? (
           <div className="p-6 sm:p-10 text-center space-y-6">
-            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto text-emerald-400">
+            <div className="w-16 h-16 bg-emerald-100 border border-emerald-300 rounded-full flex items-center justify-center mx-auto text-emerald-600">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-white font-serif-luxury">
+              <h3 className="text-2xl font-bold text-slate-900 font-serif-luxury">
                 Order Placed Successfully!
               </h3>
-              <p className="text-sm text-slate-400 max-w-md mx-auto">
+              <p className="text-sm text-slate-500 max-w-md mx-auto">
                 Thank you for shopping with <span className="text-[#d4af37] font-semibold">my B shoppy</span>. Your order has been submitted and recorded.
               </p>
             </div>
 
             {/* Reference Box */}
-            <div className="p-4 rounded-xl bg-[#1c1a17] border border-[#38332c] max-w-md mx-auto flex items-center justify-between">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 max-w-md mx-auto flex items-center justify-between">
               <div className="text-left">
                 <span className="text-[11px] text-slate-500 uppercase font-mono">Order Tracking Ref</span>
-                <p className="text-base font-mono font-bold text-[#d4af37]">{confirmedOrderId}</p>
+                <p className="text-base font-mono font-bold text-[#b8860b]">{confirmedOrderId}</p>
               </div>
               <button
                 onClick={handleCopyId}
-                className="px-3 py-1.5 rounded bg-[#272420] hover:bg-[#38332c] text-xs font-semibold flex items-center gap-1.5 cursor-pointer text-slate-300"
+                className="px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer text-slate-600"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
 
-            <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-800/30 text-xs text-emerald-300 max-w-md mx-auto text-left flex items-start gap-2.5">
-              <Truck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 max-w-md mx-auto text-left flex items-start gap-2.5">
+              <Truck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <span>
                 Our courier will call or SMS you before dispatching. You will inspect your package upon delivery and pay the courier with cash or tap.
               </span>
@@ -225,8 +229,8 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
           <form onSubmit={handleSubmit} className="p-5 sm:p-7 space-y-6">
             
             {/* Order Items Preview */}
-            <div className="p-4 rounded-xl bg-[#181615] border border-[#272420] space-y-3">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#d4af37]">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#b8860b]">
                 Order Items Summary ({totalUnits} items)
               </span>
               
@@ -234,30 +238,47 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                 {activeItems.map((item) => (
                   <div key={`${item.product.id}-${item.variant}`} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 h-5 rounded bg-[#272420] flex items-center justify-center font-mono font-bold text-[10px] text-slate-300">
+                      <span className="w-5 h-5 rounded bg-slate-200 flex items-center justify-center font-mono font-bold text-[10px] text-slate-600">
                         {item.quantity}x
                       </span>
-                      <span className="truncate text-slate-200">{item.product.name}</span>
-                      <span className="text-[11px] text-slate-500 font-mono">({item.variant})</span>
+                      <span className="truncate text-slate-700">{item.product.name}</span>
+                      <span className="text-[11px] text-slate-400 font-mono">({item.variant})</span>
                     </div>
-                    <span className="font-mono font-semibold text-white ml-2">
+                    <span className="font-mono font-semibold text-slate-900 ml-2">
                       {currencySymbol}{(item.product.price * item.quantity).toLocaleString('en-US')}
                     </span>
                   </div>
                 ))}
               </div>
 
-              <div className="pt-2 border-t border-[#272420] flex items-center justify-between text-xs">
-                <span className="text-slate-400">Total Due on Doorstep Delivery</span>
-                <span className="text-base font-bold font-mono text-[#d4af37]">
-                  {currencySymbol}{totalAmount.toLocaleString('en-US')}
-                </span>
+              <div className="pt-2 border-t border-slate-200 space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500">Item Subtotal</span>
+                  <span className="font-mono font-medium text-slate-800">
+                    {currencySymbol}{totalAmount.toLocaleString('en-US')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500 flex items-center gap-1.5">
+                    <Truck className="w-3.5 h-3.5 text-[#b8860b]" />
+                    Courier Charges
+                  </span>
+                  <span className="font-mono font-medium text-slate-800">
+                    {currencySymbol}{courierCharges.toLocaleString('en-US')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500">Total Due on Doorstep Delivery</span>
+                  <span className="text-base font-bold font-mono text-[#b8860b]">
+                    {currencySymbol}{finalAmount.toLocaleString('en-US')}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Customer Information Inputs */}
             <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">
                 Delivery Address & Contact
               </h3>
 
@@ -265,74 +286,74 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                 
                 {/* Full Name */}
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-400 font-medium">Full Name *</label>
+                  <label className="text-xs text-slate-600 font-medium">Full Name *</label>
                   <input
                     type="text"
                     required
                     value={formData.customer_name}
                     onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
                     placeholder="e.g. Jessica Sterling"
-                    className="w-full bg-[#181615] border border-[#38332c] rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
                   />
                   {errors.customer_name && (
-                    <p className="text-[11px] text-rose-400">{errors.customer_name}</p>
+                    <p className="text-[11px] text-rose-500">{errors.customer_name}</p>
                   )}
                 </div>
 
                 {/* Phone Number */}
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-400 font-medium">Phone Number (For Delivery SMS) *</label>
+                  <label className="text-xs text-slate-600 font-medium">Phone Number (For Delivery SMS) *</label>
                   <input
                     type="tel"
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="e.g. +1 555 019 283"
-                    className="w-full bg-[#181615] border border-[#38332c] rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
                   />
                   {errors.phone && (
-                    <p className="text-[11px] text-rose-400">{errors.phone}</p>
+                    <p className="text-[11px] text-rose-500">{errors.phone}</p>
                   )}
                 </div>
 
                 {/* Email Address */}
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-400 font-medium">Email (For Confirmation Receipt)</label>
+                  <label className="text-xs text-slate-600 font-medium">Email (For Confirmation Receipt)</label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="e.g. customer@example.com"
-                    className="w-full bg-[#181615] border border-[#38332c] rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
                   />
                 </div>
 
                 {/* City / Province */}
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-400 font-medium">City / State / Area *</label>
+                  <label className="text-xs text-slate-600 font-medium">City / State / Area *</label>
                   <input
                     type="text"
                     required
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     placeholder="e.g. New York, NY"
-                    className="w-full bg-[#181615] border border-[#38332c] rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
                   />
                   {errors.city && (
-                    <p className="text-[11px] text-rose-400">{errors.city}</p>
+                    <p className="text-[11px] text-rose-500">{errors.city}</p>
                   )}
                 </div>
 
                 {/* Country */}
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-xs text-slate-400 font-medium">Country</label>
+                  <label className="text-xs text-slate-600 font-medium">Country</label>
                   <select
                     value={formData.country}
                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    className="w-full bg-[#181615] border border-[#38332c] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#d4af37]"
                   >
                     {STORE_CONFIG.availableCountries.map((c) => (
-                      <option key={c} value={c} className="bg-[#141312]">
+                      <option key={c} value={c} className="bg-white">
                         {c}
                       </option>
                     ))}
@@ -341,29 +362,29 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
 
                 {/* Street Address */}
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-xs text-slate-400 font-medium">Full Street Address (Building, Apt, Suite) *</label>
+                  <label className="text-xs text-slate-600 font-medium">Full Street Address (Building, Apt, Suite) *</label>
                   <textarea
                     rows={2}
                     required
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     placeholder="e.g. 742 Evergreen Terrace, Apt 4B"
-                    className="w-full bg-[#181615] border border-[#38332c] rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
                   />
                   {errors.address && (
-                    <p className="text-[11px] text-rose-400">{errors.address}</p>
+                    <p className="text-[11px] text-rose-500">{errors.address}</p>
                   )}
                 </div>
 
                 {/* Delivery Notes */}
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-xs text-slate-400 font-medium">Special Delivery Notes (Optional)</label>
+                  <label className="text-xs text-slate-600 font-medium">Special Delivery Notes (Optional)</label>
                   <input
                     type="text"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     placeholder="e.g. Leave with concierge or call before ringing"
-                    className="w-full bg-[#181615] border border-[#38332c] rounded-lg px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
                   />
                 </div>
 
@@ -371,10 +392,10 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
             </div>
 
             {/* Zero-Risk Notice */}
-            <div className="p-3.5 rounded-xl bg-[#1c1a17] border border-[#38332c] flex items-center gap-3 text-xs text-slate-300">
-              <ShieldCheck className="w-5 h-5 text-[#d4af37] shrink-0" />
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3 text-xs text-slate-600">
+              <ShieldCheck className="w-5 h-5 text-[#b8860b] shrink-0" />
               <span>
-                <strong className="text-white">0% Upfront Prepayment:</strong> You will only hand cash/card to the courier after you receive and inspect your parcel.
+                <strong className="text-slate-900">0% Upfront Prepayment:</strong> You will only hand cash/card to the courier after you receive and inspect your parcel.
               </span>
             </div>
 
