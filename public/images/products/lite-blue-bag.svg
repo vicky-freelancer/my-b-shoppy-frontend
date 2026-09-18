@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+<defs><radialGradient id="g1" cx="50%" cy="42%" r="62%">
+       <stop offset="0%" stop-color="#FFFDF6" stop-opacity="0.95"/>
+       <stop offset="55%" stop-color="#FFF6DE" stop-opacity="0.9"/>
+       <stop offset="100%" stop-color="#F4D99B" stop-opacity="0.55"/>
+     </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="48%" r="48%">
+      <stop offset="0%" stop-color="#F7E3AC" stop-opacity="0.5"/>
+      <stop offset="70%" stop-color="#F4D99B" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#F4D99B" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E9C97C"/>
+      <stop offset="48%" stop-color="#D8A83E"/>
+      <stop offset="100%" stop-color="#B8860B"/>
+    </linearGradient>
+    <linearGradient id="goldDiag" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D8A83E"/>
+      <stop offset="100%" stop-color="#B8860B"/>
+    </linearGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14"/>
+      <feOffset dy="10"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.22"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+  <rect width="600" height="600" fill="#FAF1DD" opacity="0.55"/>
+  <rect width="600" height="600" fill="url(#g1)"/>
+  <circle cx="300" cy="285" r="240" fill="url(#halo)"/>
+  <circle cx="300" cy="282" r="150" fill="none" stroke="#D8A83E" stroke-opacity="0.14" stroke-width="1.2" stroke-dasharray="1 9" stroke-linecap="round"/><radialGradient id="g1" cx="50%" cy="42%" r="62%">
+       <stop offset="0%" stop-color="#FFFDF6" stop-opacity="0.95"/>
+       <stop offset="55%" stop-color="#FBEED6" stop-opacity="0.9"/>
+       <stop offset="100%" stop-color="#F2D491" stop-opacity="0.55"/>
+     </radialGradient>
+
+    <ellipse cx="300" cy="486" rx="122" ry="24" fill="#6B5945" opacity="0.16" filter="url(#soft)"/>
+    <g filter="url(#shadow)">
+      <path d="M180 250 L184 236 Q198 200 300 200 Q402 200 416 236 L420 250 L424 420 Q424 448 396 448 L204 448 Q176 448 176 420Z" fill="#BFD7E8"/>
+      <path d="M180 250 L184 236 Q198 200 300 200 L300 448 L204 448 Q176 448 176 420Z" fill="#ACCBE0"/>
+      <path d="M300 200 Q402 200 416 236 L420 250 L424 420 Q424 448 396 448 L300 448Z" fill="#B8D4E6"/>
+    </g>
+    <g stroke="#8FB3CC" stroke-width="3" fill="none" opacity="0.8">
+      <path d="M205 302 Q250 286 298 302 Q346 318 395 302"/>
+      <path d="M205 352 Q250 336 298 352 Q346 368 395 352"/>
+      <path d="M205 402 Q250 386 298 402 Q346 418 395 402"/>
+    </g>
+    <rect x="268" y="240" width="64" height="10" rx="5" fill="url(#gold)"/>
+    <g stroke="#D8A83E" stroke-width="7" fill="none" stroke-linecap="round">
+      <path d="M252 236 Q252 176 300 176 Q348 176 348 236"/>
+    </g>
+    <circle cx="300" cy="238" r="9" fill="url(#gold)"/>
+<g fill="#E9C97C" opacity="0.85">
+  <path d="M140 130l5 12 12 5-12 5-5 12-5-12-12-5 12-5z"/>
+  <path d="M475 170l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" opacity="0.7"/>
+  <path d="M452 452l4 9 9 4-9 4-4 9-4-9-9-4 9-4z" opacity="0.8"/>
+  <path d="M128 448l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" opacity="0.55"/>
+</g>
+</svg>

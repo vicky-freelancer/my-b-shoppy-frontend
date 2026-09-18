@@ -130,7 +130,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
             particleCount: 80,
             spread: 70,
             origin: { y: 0.6 },
-            colors: ['#d4af37', '#ffffff', '#f59e0b', '#10b981'],
+            colors: ['#B8860B', '#ffffff', '#f59e0b', '#10b981'],
           });
         } catch {
           // ignore confetti errors in sandboxed iframes
@@ -156,24 +156,24 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[60] overflow-y-auto overscroll-contain bg-black/85 backdrop-blur-sm px-4 py-6 sm:px-6 sm:py-10"
+      className="fixed inset-0 z-[60] overflow-y-auto overscroll-contain bg-[#111111]/70 backdrop-blur-sm px-4 py-6 sm:px-6 sm:py-10"
       role="dialog"
       aria-modal="true"
       aria-label="Checkout"
     >
-      <div className="relative w-full max-w-2xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden text-slate-800">
-        
+      <div className="relative w-full max-w-2xl mx-auto bg-[#FFFDF6] border border-[#D8A83E]/50 rounded-[24px] shadow-2xl overflow-hidden text-[#241A12]">
+
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div className="px-6 py-4 border-b border-[#D8A83E]/40 flex items-center justify-between bg-[#FAF1DD]">
           <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-5 h-5 text-[#d4af37]" />
-            <h2 className="font-serif-luxury text-base sm:text-lg font-bold text-slate-900">
+            <ShieldCheck className="w-5 h-5 text-[#B8860B]" />
+            <h2 className="font-display text-base sm:text-lg font-bold text-[#241A12]">
               Checkout
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition cursor-pointer"
+            className="p-1.5 rounded-full text-[#6B5945] hover:text-[#241A12] hover:bg-[#E8C875]/40 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -187,23 +187,23 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-slate-900 font-serif-luxury">
+              <h3 className="text-2xl font-bold text-[#241A12] font-display">
                 Order Placed Successfully!
               </h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
-                Thank you for shopping with <span className="text-[#d4af37] font-semibold">my B shoppy</span>. Your order has been submitted and recorded.
+              <p className="text-sm text-[#6B5945] max-w-md mx-auto">
+                Thank you for shopping with <span className="text-[#B8860B] font-semibold">my B shoppy</span>. Your order has been submitted and recorded.
               </p>
             </div>
 
             {/* Reference Box */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 max-w-md mx-auto flex items-center justify-between">
+            <div className="p-4 rounded-xl bg-[#FAF1DD] border border-[#D8A83E]/40 max-w-md mx-auto flex items-center justify-between">
               <div className="text-left">
-                <span className="text-[11px] text-slate-500 uppercase font-mono">Order Tracking Ref</span>
-                <p className="text-base font-mono font-bold text-[#b8860b]">{confirmedOrderId}</p>
+                <span className="text-[11px] text-[#6B5945] uppercase font-mono">Order Tracking Ref</span>
+                <p className="text-base font-mono font-bold text-[#B8860B]">{confirmedOrderId}</p>
               </div>
               <button
                 onClick={handleCopyId}
-                className="px-3 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer text-slate-600"
+                className="px-3 py-1.5 rounded-full bg-[#FFFDF6] hover:bg-[#E8C875]/40 text-xs font-semibold flex items-center gap-1.5 cursor-pointer text-[#6B5945]"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -219,7 +219,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
 
             <button
               onClick={onClose}
-              className="px-8 py-3 rounded-xl bg-[#d4af37] hover:bg-[#fae19c] text-black font-extrabold text-xs uppercase tracking-widest transition cursor-pointer"
+              className="px-8 py-3 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-extrabold text-xs uppercase tracking-widest transition cursor-pointer"
             >
               Continue Shopping
             </button>
@@ -229,7 +229,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
           <form onSubmit={handleSubmit} className="p-5 sm:p-7 space-y-6">
             
             {/* Order Items Preview */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <div className="p-4 rounded-2xl bg-[#FAF1DD] border border-[#D8A83E]/40 space-y-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#b8860b]">
                 Order Items Summary ({totalUnits} items)
               </span>
@@ -293,7 +293,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                     value={formData.customer_name}
                     onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
                     placeholder="e.g. Jessica Sterling"
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#B8860B]"
                   />
                   {errors.customer_name && (
                     <p className="text-[11px] text-rose-500">{errors.customer_name}</p>
@@ -309,7 +309,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="e.g. +1 555 019 283"
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#B8860B]"
                   />
                   {errors.phone && (
                     <p className="text-[11px] text-rose-500">{errors.phone}</p>
@@ -324,7 +324,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="e.g. customer@example.com"
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#B8860B]"
                   />
                 </div>
 
@@ -337,7 +337,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     placeholder="e.g. New York, NY"
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#B8860B]"
                   />
                   {errors.city && (
                     <p className="text-[11px] text-rose-500">{errors.city}</p>
@@ -350,7 +350,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                   <select
                     value={formData.country}
                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#B8860B]"
                   >
                     {STORE_CONFIG.availableCountries.map((c) => (
                       <option key={c} value={c} className="bg-white">
@@ -369,7 +369,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     placeholder="e.g. 742 Evergreen Terrace, Apt 4B"
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#B8860B]"
                   />
                   {errors.address && (
                     <p className="text-[11px] text-rose-500">{errors.address}</p>
@@ -384,7 +384,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     placeholder="e.g. Leave with concierge or call before ringing"
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#d4af37]"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#B8860B]"
                   />
                 </div>
 
@@ -392,10 +392,10 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
             </div>
 
             {/* Zero-Risk Notice */}
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3 text-xs text-slate-600">
-              <ShieldCheck className="w-5 h-5 text-[#b8860b] shrink-0" />
+<div className="p-3.5 rounded-2xl bg-[#FAF1DD] border border-[#D8A83E]/40 flex items-center gap-3 text-xs text-[#6B5945]">
+              <ShieldCheck className="w-5 h-5 text-[#B8860B] shrink-0" />
               <span>
-                <strong className="text-slate-900">0% Upfront Prepayment:</strong> You will only hand cash/card to the courier after you receive and inspect your parcel.
+                <strong className="text-[#241A12]">0% Upfront Prepayment:</strong> You will only hand cash/card to the courier after you receive and inspect your parcel.
               </span>
             </div>
 
@@ -403,7 +403,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting || activeItems.length === 0}
-              className="w-full py-4 px-6 rounded-xl bg-[#d4af37] hover:bg-[#fae19c] text-black font-extrabold text-xs uppercase tracking-widest transition duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl cursor-pointer"
+              className="w-full py-4 px-6 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-extrabold text-xs uppercase tracking-widest transition duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl cursor-pointer"
             >
               {isSubmitting ? (
                 <>

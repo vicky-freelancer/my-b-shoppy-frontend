@@ -7,6 +7,8 @@ import { ShopPage } from './pages/ShopPage';
 import { CategoriesPage } from './pages/CategoriesPage';
 import { CategoryDetailPage } from './pages/CategoryDetailPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
+import { CartPage } from './pages/CartPage';
+import { WishlistPage } from './pages/WishlistPage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -23,6 +25,8 @@ export default function App() {
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/categories/:slug" element={<CategoryDetailPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
             {/* Legacy collection URLs -> categories */}
             <Route path="/collections" element={<Navigate to="/categories" replace />} />
             <Route

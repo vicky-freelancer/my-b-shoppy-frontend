@@ -55,15 +55,15 @@ export const CategoryDetailPage: React.FC = () => {
 
   if (!categoryMeta) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center space-y-5">
-        <SearchX className="w-12 h-12 text-slate-600 mx-auto" />
-        <h1 className="font-display text-3xl font-bold text-white">Category Not Found</h1>
-        <p className="text-sm text-slate-400 max-w-md mx-auto">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center space-y-5">
+        <SearchX className="w-12 h-12 text-[#B8860B]/50 mx-auto" />
+        <h1 className="font-display text-3xl font-medium text-[#241A12]">Category Not Found</h1>
+        <p className="text-sm text-[#6B5945] max-w-md mx-auto">
           The category you're looking for doesn't exist or has been renamed.
         </p>
         <Link
           to="/categories"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#d4af37] hover:bg-[#fae19c] text-black font-extrabold text-xs uppercase tracking-widest transition-colors"
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-semibold text-[12px] uppercase tracking-[0.22em] transition-all hover:-translate-y-0.5"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Categories
@@ -85,16 +85,16 @@ export const CategoryDetailPage: React.FC = () => {
         metaText={`${categoryProducts.length} Items Available`}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-8">
         {/* Category description panel */}
-        <div className="mb-8 bg-[#141312] border border-[#272420] rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
+        <div className="mb-8 bg-[#FFFDF6] border border-[#6B5945]/15 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-sm text-[#3d2f1a]/90 leading-relaxed max-w-2xl">
             {categoryMeta.description} Every piece in this edit ships with dust-proof protective
             packaging and easy, flexible payment.
           </p>
           <Link
             to="/shop"
-            className="shrink-0 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#d4af37] hover:text-[#fae19c] transition-colors"
+            className="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-[#B8860B] hover:text-[#8A6A15] transition-colors"
           >
             View Full Catalogue
             <ArrowRight className="w-4 h-4" />
@@ -131,17 +131,17 @@ export const CategoryDetailPage: React.FC = () => {
         </GoldFrame>
 
         {!isSupabaseLoading && categoryProducts.length === 0 && (
-          <div className="py-16 text-center space-y-3 bg-[#121110] rounded-2xl border border-[#272420] p-8 mt-2">
-            <SearchX className="w-10 h-10 text-slate-600 mx-auto" />
-            <h3 className="text-base font-bold text-white">No pieces here yet</h3>
-            <p className="text-sm text-slate-400">
+          <div className="py-16 text-center space-y-3 bg-[#FFFDF6] rounded-2xl border border-[#6B5945]/20 p-8 mt-2">
+            <SearchX className="w-10 h-10 text-[#B8860B]/50 mx-auto" />
+            <h3 className="text-base font-bold text-[#241A12]">No pieces here yet</h3>
+            <p className="text-sm text-[#6B5945]">
               This category is being restocked. Explore the full catalogue meanwhile.
             </p>
           </div>
         )}
       </div>
 
-      {/* Closing gold band — alternates with the dark grid above */}
+      {/* Closing gold band — alternates with the warm grid above */}
       <GoldBand
         eyebrow="Keep Exploring"
         title={`More From ${categoryMeta.name} Awaits`}

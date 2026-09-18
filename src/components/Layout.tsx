@@ -21,19 +21,15 @@ export const Layout: React.FC = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-[#0f0e0d] text-[#f5f5f5] flex flex-col font-sans selection:bg-[#d4af37]/30 selection:text-[#fae19c]">
-      {/* 1. Header Navigation Bar (my B shoppy) */}
+    <div className="min-h-screen bg-[#d9a33f] text-[#241A12] flex flex-col texture-grain selection:bg-[#D8A83E]/30 selection:text-[#241A12]">
       <Header />
 
-      {/* 2. Routed Page Content */}
       <main className="flex-1">
         <Outlet />
       </main>
 
-      {/* 3. Common Footer — navigation, address, phone & social buttons on every page */}
       <Footer />
 
-      {/* 4. Slide-Over Cart Drawer */}
       <CartDrawer
         isOpen={store.isCartOpen}
         onClose={store.closeCart}
@@ -44,7 +40,6 @@ export const Layout: React.FC = () => {
         onProceedToCod={store.openCodCheckout}
       />
 
-      {/* 4. Cash on Delivery (COD) Checkout Modal with Supabase Integration */}
       <CodCheckoutModal
         isOpen={store.isCodModalOpen}
         onClose={store.closeCodCheckout}
@@ -54,23 +49,19 @@ export const Layout: React.FC = () => {
         onClearCart={store.clearCart}
       />
 
-      {/* 5. Product Quick View Detail Modal */}
       <QuickViewModal
         product={store.quickViewProduct}
         isOpen={!!store.quickViewProduct}
         onClose={() => store.setQuickViewProduct(null)}
         currencySymbol={STORE_CONFIG.currencySymbol}
         isWishlisted={
-          store.quickViewProduct
-            ? store.wishlistIds.includes(store.quickViewProduct.id)
-            : false
+          store.quickViewProduct ? store.wishlistIds.includes(store.quickViewProduct.id) : false
         }
         onToggleWishlist={store.toggleWishlist}
         onAddToCart={(prod, variant, qty) => store.addToCart(prod, variant, qty)}
         onDirectOrder={store.openDirectCheckout}
       />
 
-      {/* 6. Wishlist Drawer Modal */}
       <WishlistModal
         isOpen={store.isWishlistOpen}
         onClose={store.closeWishlist}
@@ -81,7 +72,6 @@ export const Layout: React.FC = () => {
         onQuickView={(prod) => store.setQuickViewProduct(prod)}
       />
 
-      {/* 7. Search Overlay Modal */}
       <SearchModal
         isOpen={store.isSearchOpen}
         onClose={store.closeSearch}
@@ -90,7 +80,6 @@ export const Layout: React.FC = () => {
         onSelectProduct={(prod) => store.setQuickViewProduct(prod)}
       />
 
-      {/* 8. Supabase Database Sync & SQL Setup Modal */}
       <SupabaseSyncModal
         isOpen={store.isSupabaseModalOpen}
         onClose={store.closeSupabaseSync}

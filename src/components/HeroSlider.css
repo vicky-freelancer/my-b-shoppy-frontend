@@ -1,0 +1,628 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cormorant+Garamond:wght@400;500;600&family=Caveat:wght@400;500;600&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+/*
+   HERO SLIDER LAYOUT MEASUREMENTS (for supplying matching images)
+   ------------------------------------------------------------------
+   Two image folders per slide:
+     public/slider/desktop/<name>.png  ->  slide.image        (desktop)
+     public/slider/mobile/<name>.png   ->  slide.imageMobile  (<=700px)
+   If the mobile file is missing, the desktop image is used as fallback.
+
+   Section: 100% viewport width. Desktop height is fluid (aspect 8/3,
+   min 560px / max 720px) so an 2.67:1 image fills the section with zero
+   crop at every width up to 1920px. Beyond that the max-height caps it.
+
+   Recommended desktop image specs (2.67:1 = 16/6 aspect):
+     - Desktop 1x :  1920 x  720
+     - Desktop 2x :  3840 x 1440   (retina, sharp)
+     - All-purpose:  2560 x  960   (crisp on both 1x/2x desktop)
+
+   Tablet (<=1000px wide, hero = 650px tall) : 1.58:1, e.g. 1366 x 650.
+   Mobile  (<=700px wide, hero = 760px tall) : 0.51:1, e.g. 780 x 1520 —
+   a wide image gets heavily cropped to a vertical center band on mobile.
+
+   Safe areas (keep the product/subject inside these):
+     - Left 7% column : handwritten script lives here (cream text)
+     - Right ~45%     : headline + subtitle overlay
+     - Keep the product centered between ~35% and ~70% horizontally
+     - Avoid critical detail in the outer 5% on each edge
+*/
+
+.hero-slider {
+  position: relative;
+  width: 100%;
+
+  /* Fluid height = width / 2.667 so desktop images (8/3) fit exactly */
+  height: auto;
+  aspect-ratio: 8 / 3;
+  max-height: 720px;
+  min-height: 560px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 70% 35%,
+      rgba(255, 240, 173, 0.95) 0%,
+      rgba(245, 193, 77, 0.75) 28%,
+      rgba(202, 137, 24, 0.95) 100%
+    );
+
+  isolation: isolate;
+}
+
+.hero-slider::after {
+  content: "";
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  bottom: -100px;
+  height: 220px;
+
+  background: rgba(255, 226, 137, 0.55);
+
+  filter: blur(20px);
+
+  border-radius: 50%;
+
+  z-index: -1;
+}
+
+/* Ambient glow */
+
+.hero-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(70px);
+  z-index: 0;
+}
+
+.hero-glow-one {
+  width: 400px;
+  height: 400px;
+  left: 10%;
+  top: -150px;
+  background: rgba(255, 220, 111, 0.5);
+}
+
+.hero-glow-two {
+  width: 500px;
+  height: 500px;
+  right: -200px;
+  bottom: -250px;
+  background: rgba(255, 232, 155, 0.35);
+}
+
+/* =========================================
+   SLIDE
+========================================= */
+
+.slides-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+
+  display: grid;
+  grid-template-columns: 55% 45%;
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 0.8s ease,
+    visibility 0.8s ease;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* =========================================
+   FULL-BLEED IMAGE
+========================================= */
+
+.product-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center;
+
+  transform: none;
+
+  z-index: 1;
+}
+
+/* fixed, no zoom: slide images stay at a constant scale */
+
+/* =========================================
+   LEGIBILITY SCRIM
+========================================= */
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(96, 58, 8, 0.55) 0%,
+      rgba(96, 58, 8, 0.18) 42%,
+      rgba(255, 240, 189, 0.15) 62%,
+      rgba(255, 244, 210, 0.6) 100%
+    );
+}
+
+/* =========================================
+   LEFT + RIGHT COLUMNS (above image)
+========================================= */
+
+.hero-left,
+.hero-content {
+  position: relative;
+  z-index: 3;
+}
+
+/* grid-container children must be allowed to shrink (prevents overflow) */
+.hero-left,
+.hero-content {
+  min-width: 0;
+}
+
+.hero-slider,
+.slides-wrapper,
+.hero-slide {
+  max-width: 100%;
+}
+
+.hero-left {
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================================
+   HANDWRITTEN TEXT
+========================================= */
+
+.handwritten-text {
+  position: absolute;
+
+  left: 7%;
+  top: 38%;
+
+  z-index: 4;
+
+  display: flex;
+  flex-direction: column;
+
+  font-family: "Caveat", cursive;
+  font-size: 32px;
+  line-height: 0.95;
+
+  color: rgba(255, 248, 221, 0.95);
+
+  transform: rotate(-7deg);
+
+  text-shadow:
+    0 1px 2px rgba(86, 48, 0, 0.2);
+}
+
+.handwritten-text span:nth-child(2) {
+  margin-left: -15px;
+}
+
+.handwritten-text span:nth-child(3) {
+  margin-left: 15px;
+}
+
+/* little underline */
+
+.handwritten-text::after {
+  content: "";
+  width: 75px;
+  height: 2px;
+
+  margin-top: 14px;
+  margin-left: 35px;
+
+  background: rgba(255, 248, 221, 0.8);
+
+  transform: rotate(-8deg);
+}
+
+/* =========================================
+   HEARTS
+========================================= */
+
+.decor-heart {
+  position: absolute;
+
+  color: #fff5d0;
+
+  font-size: 35px;
+
+  font-family: serif;
+
+  z-index: 4;
+
+  animation: floatingHeart 3s ease-in-out infinite;
+}
+
+.heart-one {
+  left: 23%;
+  top: 58%;
+}
+
+.heart-two {
+  right: 7%;
+  top: 40%;
+  font-size: 28px;
+  animation-delay: 1s;
+}
+
+@keyframes floatingHeart {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+
+  50% {
+    transform: translateY(-8px) rotate(5deg);
+  }
+}
+
+/* =========================================
+   RIGHT CONTENT
+========================================= */
+
+.hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+}
+
+.title-wrapper {
+  width: 100%;
+
+  text-align: center;
+
+  transform: translateY(-10px);
+}
+
+.hero-content h1 {
+  margin: 0;
+
+  font-family: "DM Serif Display", serif;
+
+  font-size: clamp(
+    58px,
+    5.4vw,
+    105px
+  );
+
+  line-height: 0.95;
+
+  font-weight: 400;
+
+  color: #000000;
+
+  letter-spacing: -0.035em;
+
+  text-shadow:
+    0 2px 1px rgba(255, 237, 178, 0.35);
+
+  overflow-wrap: break-word;
+}
+
+/* =========================================
+   SUBTITLE
+========================================= */
+
+.subtitle {
+  margin-top: 28px;
+
+  font-family:
+    "Cormorant Garamond",
+    serif;
+
+  font-size: clamp(
+    17px,
+    1.4vw,
+    26px
+  );
+
+  font-weight: 600;
+
+  letter-spacing: 0.27em;
+
+  color: #000000;
+
+  overflow-wrap: break-word;
+}
+
+/* =========================================
+   TITLE DECORATION
+========================================= */
+
+.title-decoration {
+  margin: 30px auto 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 18px;
+
+  width: 260px;
+}
+
+.title-decoration span {
+  height: 1px;
+
+  flex: 1;
+
+  background: rgba(52, 34, 8, 0.45);
+}
+
+.small-heart {
+  font-size: 27px;
+
+  color: #171009;
+
+  line-height: 1;
+}
+
+/* =========================================
+   SLIDER NAVIGATION
+========================================= */
+
+.slider-navigation {
+  position: absolute;
+
+  bottom: 34px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  z-index: 50;
+}
+
+.slider-dot {
+  width: 9px;
+  height: 9px;
+
+  padding: 0;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: rgba(50, 31, 2, 0.38);
+
+  cursor: pointer;
+
+  transition:
+    width 0.35s ease,
+    background 0.35s ease,
+    transform 0.35s ease;
+}
+
+.slider-dot:hover {
+  transform: scale(1.25);
+}
+
+.slider-dot.active {
+  width: 37px;
+
+  border-radius: 20px;
+
+  background: #171009;
+}
+
+/* =========================================
+   DESKTOP ANIMATION
+========================================= */
+
+.hero-slide.active .hero-content {
+  animation: contentEntrance 1s ease forwards;
+}
+
+@keyframes contentEntrance {
+  from {
+    opacity: 0;
+    transform: translateX(45px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1000px) {
+  .hero-slider {
+    height: auto;
+    aspect-ratio: 8 / 3;
+    min-height: 480px;
+    max-height: 640px;
+  }
+
+  .hero-slide {
+    grid-template-columns: 52% 48%;
+  }
+
+  .handwritten-text {
+    font-size: 26px;
+    left: 5%;
+  }
+
+  .hero-content {
+    padding: 20px;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(48px, 6vw, 75px);
+  }
+
+  .subtitle {
+    font-size: 16px;
+    letter-spacing: 0.18em;
+  }
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+  .hero-slider {
+    height: 760px;
+    min-height: 760px;
+  }
+
+  .hero-slide {
+    display: flex;
+    flex-direction: column;
+
+    justify-content: flex-start;
+  }
+
+  .hero-left {
+    height: 55%;
+    min-height: 400px;
+
+    order: 1;
+  }
+
+  .hero-content {
+    height: 45%;
+
+    order: 2;
+
+    padding:
+      10px 20px 70px;
+  }
+
+  .hero-overlay {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(96, 58, 8, 0.6) 0%,
+        rgba(96, 58, 8, 0.22) 42%,
+        rgba(255, 244, 210, 0.35) 62%,
+        rgba(255, 245, 214, 0.7) 100%
+      );
+  }
+
+  .handwritten-text {
+    left: 7%;
+    top: 22%;
+
+    font-size: 23px;
+  }
+
+  .decor-heart {
+    font-size: 26px;
+  }
+
+  .heart-one {
+    left: 14%;
+    top: 55%;
+  }
+
+  .heart-two {
+    right: 8%;
+    top: 48%;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(
+      45px,
+      13vw,
+      65px
+    );
+
+    line-height: 0.95;
+  }
+
+  .subtitle {
+    margin-top: 17px;
+
+    font-size: 13px;
+
+    letter-spacing: 0.15em;
+  }
+
+  .title-decoration {
+    margin-top: 18px;
+
+    width: 180px;
+  }
+
+  .slider-navigation {
+    bottom: 24px;
+  }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 420px) {
+  .hero-slider {
+    height: 700px;
+    min-height: 700px;
+  }
+
+  .hero-left {
+    min-height: 365px;
+  }
+
+  .hero-content {
+    height: 335px;
+  }
+
+  .hero-content h1 {
+    font-size: 43px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .handwritten-text {
+    font-size: 20px;
+  }
+}

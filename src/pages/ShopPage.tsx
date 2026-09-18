@@ -82,10 +82,10 @@ export const ShopPage: React.FC = () => {
         </GoldFrame>
 
         {!isSupabaseLoading && products.length === 0 && (
-          <div className="py-20 text-center space-y-4 bg-[#121110] rounded-2xl border border-[#272420] p-8">
-            <SearchX className="w-12 h-12 text-slate-600 mx-auto" />
-            <h3 className="text-lg font-bold text-white">Catalogue is being curated</h3>
-            <p className="text-sm text-slate-400 max-w-md mx-auto">
+          <div className="py-20 text-center space-y-4 bg-[#FFFDF6] rounded-2xl border border-[#6B5945]/20 p-8">
+            <SearchX className="w-12 h-12 text-[#B8860B]/50 mx-auto" />
+            <h3 className="text-lg font-bold text-[#241A12]">Catalogue is being curated</h3>
+            <p className="text-sm text-[#6B5945] max-w-md mx-auto">
               Our products are syncing. Please check back in a few moments.
             </p>
           </div>

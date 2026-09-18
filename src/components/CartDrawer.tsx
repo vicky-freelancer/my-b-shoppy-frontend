@@ -31,38 +31,38 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
-      <div 
+      <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-xs transition-opacity"
+        className="absolute inset-0 bg-[#111111]/70 backdrop-blur-[4px] transition-opacity"
       ></div>
 
       <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-[#121110] border-l border-[#272420] text-white shadow-2xl flex flex-col">
-          
+        <div className="w-screen max-w-md bg-[#FFFDF6] border-l border-[#D8A83E]/50 text-[#241A12] shadow-2xl flex flex-col">
+
           {/* Header */}
-          <div className="p-5 border-b border-[#272420] flex items-center justify-between">
+          <div className="bg-[#FAF1DD] p-5 border-b border-[#D8A83E]/40 flex items-center justify-between">
             <div className="flex items-center space-x-2.5">
-              <ShoppingBag className="w-5 h-5 text-[#d4af37]" />
-              <h2 className="font-serif-luxury text-lg font-bold tracking-tight text-[#fae19c]">
+              <ShoppingBag className="w-5 h-5 text-[#B8860B]" />
+              <h2 className="font-display text-lg font-bold tracking-tight text-[#241A12]">
                 Shopping Bag ({cartItems.reduce((acc, i) => acc + i.quantity, 0)})
               </h2>
             </div>
             <button
               onClick={onClose}
               aria-label="Close cart"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#1f1d1a] transition cursor-pointer"
+              className="p-1.5 rounded-full text-[#6B5945] hover:text-[#241A12] hover:bg-[#E8C875]/40 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Delivery Value Highlight */}
-          <div className="bg-[#1b1916] px-5 py-2.5 border-b border-[#272420] flex items-center justify-between text-xs text-slate-300">
-            <span className="flex items-center gap-1.5 text-[#d4af37] font-semibold">
+          <div className="bg-[#F4D99B]/60 px-5 py-2.5 border-b border-[#D8A83E]/30 flex items-center justify-between text-xs">
+            <span className="flex items-center gap-1.5 text-[#8A6A15] font-semibold">
               <Truck className="w-4 h-4" />
               <span>Free Doorstep Delivery</span>
             </span>
-            <span className="flex items-center gap-1 text-emerald-400 font-bold">
+            <span className="flex items-center gap-1 text-emerald-700 font-bold">
               <ShieldCheck className="w-4 h-4" />
               <span>100% Verified</span>
             </span>
@@ -72,9 +72,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
             {cartItems.length === 0 ? (
               <div className="py-20 text-center space-y-3">
-                <ShoppingBag className="w-12 h-12 text-slate-700 mx-auto" />
-                <p className="text-slate-300 font-semibold text-sm">Your shopping bag is empty</p>
-                <p className="text-slate-500 text-xs max-w-xs mx-auto">
+                <ShoppingBag className="w-12 h-12 text-[#B8860B]/40 mx-auto" />
+                <p className="text-[#241A12] font-semibold text-sm">Your shopping bag is empty</p>
+                <p className="text-[#6B5945] text-xs max-w-xs mx-auto">
                   Explore our luxury jewelry and accessories catalog to add pieces to your collection.
                 </p>
               </div>
@@ -82,42 +82,42 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               cartItems.map((item) => (
                 <div
                   key={`${item.product.id}-${item.variant}`}
-                  className="p-3.5 rounded-xl bg-[#181615] border border-[#272420] flex gap-3.5 items-center"
+                  className="p-3.5 rounded-2xl bg-[#FAF1DD] border border-[#D8A83E]/30 flex gap-3.5 items-center"
                 >
                   <img
                     src={item.product.imageUrl}
                     alt={item.product.name}
-                    className="w-16 h-16 rounded-lg object-cover bg-black shrink-0 border border-[#38332c]"
+                    className="w-16 h-16 rounded-xl object-cover bg-[#F8ECD0] shrink-0 border border-[#D8A83E]/40"
                   />
 
                   <div className="flex-1 min-w-0 space-y-1">
-                    <h4 className="text-xs font-semibold text-white truncate">
+                    <h4 className="text-xs font-semibold text-[#241A12] truncate">
                       {item.product.name}
                     </h4>
-                    <p className="text-[11px] text-slate-400">
-                      Variant: <span className="text-[#d4af37] font-medium">{item.variant}</span>
+                    <p className="text-[11px] text-[#6B5945]">
+                      Variant: <span className="text-[#B8860B] font-medium">{item.variant}</span>
                     </p>
-                    <p className="text-xs font-bold text-white font-mono">
-                      {currencySymbol}{item.product.price.toLocaleString('en-US')}
+                    <p className="text-xs font-bold text-[#241A12] font-mono">
+                      {currencySymbol}{item.product.price.toLocaleString('en-IN')}
                     </p>
 
                     {/* Quantity controls */}
                     <div className="flex items-center gap-2 pt-1">
-                      <div className="flex items-center border border-[#38332c] rounded-md bg-[#121110]">
+                      <div className="flex items-center border border-[#6B5945]/30 rounded-full bg-[#FFFDF6]">
                         <button
                           onClick={() =>
                             onUpdateQuantity(item.product.id, item.variant, Math.max(1, item.quantity - 1))
                           }
-                          className="p-1 text-slate-400 hover:text-white cursor-pointer"
+                          className="p-1 text-[#6B5945] hover:text-[#B8860B] cursor-pointer"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="px-2 text-xs font-mono text-white">{item.quantity}</span>
+                        <span className="px-2 text-xs font-mono text-[#241A12]">{item.quantity}</span>
                         <button
                           onClick={() =>
                             onUpdateQuantity(item.product.id, item.variant, item.quantity + 1)
                           }
-                          className="p-1 text-slate-400 hover:text-white cursor-pointer"
+                          className="p-1 text-[#6B5945] hover:text-[#B8860B] cursor-pointer"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -125,7 +125,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                       <button
                         onClick={() => onRemoveItem(item.product.id, item.variant)}
-                        className="p-1 text-slate-500 hover:text-rose-400 transition cursor-pointer ml-auto"
+                        className="p-1 text-[#6B5945]/80 hover:text-rose-600 transition cursor-pointer ml-auto"
                         title="Remove item"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -139,15 +139,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
           {/* Footer Subtotal & COD Checkout Button */}
           {cartItems.length > 0 && (
-            <div className="p-5 border-t border-[#272420] bg-[#141312] space-y-4">
+            <div className="p-5 border-t border-[#D8A83E]/40 bg-[#FAF1DD] space-y-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-400 font-medium">Estimated Subtotal</span>
-                <span className="text-xl font-extrabold text-white font-mono">
-                  {currencySymbol}{subtotal.toLocaleString('en-US')}
+                <span className="text-[#6B5945] font-medium">Estimated Subtotal</span>
+                <span className="text-xl font-extrabold text-[#241A12] font-mono">
+                  {currencySymbol}{subtotal.toLocaleString('en-IN')}
                 </span>
               </div>
 
-              <p className="text-[11px] text-slate-500 text-center">
+              <p className="text-[11px] text-[#6B5945]/80 text-center">
                 Taxes, customs & express doorstep shipping calculated at zero charge.
               </p>
 
@@ -156,7 +156,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   onClose();
                   onProceedToCod();
                 }}
-                className="w-full py-3.5 px-4 bg-[#d4af37] hover:bg-[#fae19c] text-black font-extrabold text-xs uppercase tracking-widest rounded-xl transition duration-200 shadow-xl flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-full py-3.5 px-4 bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-bold text-xs uppercase tracking-[0.22em] rounded-full transition duration-200 shadow-xl flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <span>ORDER NOW</span>
                 <ArrowRight className="w-4 h-4" />

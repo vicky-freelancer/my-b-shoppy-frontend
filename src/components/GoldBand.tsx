@@ -16,8 +16,7 @@ interface GoldBandProps {
 }
 
 /**
- * Full-width solid gold content band used to alternate
- * black / gold page sections across every page.
+ * Warm champagne/cream call-to-action band used to close out inner pages.
  */
 export const GoldBand: React.FC<GoldBandProps> = ({
   eyebrow,
@@ -27,26 +26,27 @@ export const GoldBand: React.FC<GoldBandProps> = ({
   secondaryCta,
 }) => {
   return (
-    <section className="relative bg-gradient-to-br from-[#f2c94e] via-[#e4a21b] to-[#c58b12] overflow-hidden">
-      {/* Ambient sheen */}
-      <div className="absolute -top-24 right-1/4 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-32 left-1/5 w-80 h-80 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
+    <section className="relative bg-gold-soft border-y border-[#D8A83E]/30 overflow-hidden">
+      <div className="absolute -top-24 right-[18%] w-96 h-96 bg-white/50 rounded-full blur-[110px] pointer-events-none"></div>
+      <div className="absolute -bottom-32 left-[12%] w-80 h-80 bg-[#E8C875]/40 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 text-center space-y-5">
+      <div className="relative max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-14 sm:py-18 text-center space-y-5">
         {eyebrow && (
-          <span className="block text-[11px] font-black uppercase tracking-widest text-[#4a3a10]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.34em] text-[#B8860B]">
+            <span aria-hidden="true" className="mr-2">✦</span>
             {eyebrow}
-          </span>
+          </p>
         )}
 
-        <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#241b06] leading-tight max-w-2xl mx-auto">
+        <h2
+          className="font-display font-medium text-[#241A12] leading-tight max-w-2xl mx-auto"
+          style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}
+        >
           {title}
         </h2>
 
         {text && (
-          <p className="text-sm sm:text-base text-[#3d2f0a] font-medium max-w-xl mx-auto leading-relaxed">
-            {text}
-          </p>
+          <p className="max-w-xl mx-auto text-[15px] leading-relaxed text-[#3d2f1a]/90">{text}</p>
         )}
 
         {(primaryCta || secondaryCta) && (
@@ -54,16 +54,16 @@ export const GoldBand: React.FC<GoldBandProps> = ({
             {primaryCta && (
               <Link
                 to={primaryCta.path}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-[#241b06] hover:bg-black text-[#f5e6b8] hover:text-[#fae19c] font-extrabold text-xs uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-lg"
+                className="btn-arrow-cta group inline-flex items-center gap-2 px-9 py-4 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-semibold text-[12px] uppercase tracking-[0.24em] shadow-[0_18px_36px_-14px_rgba(17,17,17,0.5)] transition-all duration-300 hover:-translate-y-0.5"
               >
                 {primaryCta.label}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 arrow" />
               </Link>
             )}
             {secondaryCta && (
               <Link
                 to={secondaryCta.path}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border-2 border-[#241b06]/60 hover:border-[#241b06] text-[#241b06] hover:bg-[#241b06]/10 font-extrabold text-xs uppercase tracking-widest transition-colors"
+                className="inline-flex items-center gap-2 px-9 py-4 rounded-full border-2 border-[#111111]/50 hover:border-[#111111] text-[#111111] hover:bg-[#111111]/5 font-semibold text-[12px] uppercase tracking-[0.24em] transition-colors"
               >
                 {secondaryCta.label}
               </Link>
