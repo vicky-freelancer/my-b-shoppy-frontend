@@ -4,11 +4,13 @@ import './HeroSlider.css';
 const sliderFiles = [
   'Hair Accessories.png',
   'Artificial Jewels.png',
+  'Hand Bags.png',
 ];
 
 const slideCopy: { subtitle: string; sideText: string }[] = [
   { subtitle: 'FOR EVERY STYLE, EVERY MOOD', sideText: 'Small ♡\nAccessories\nBig Vibes' },
   { subtitle: 'STYLE IT YOUR WAY', sideText: 'Little Things\nMake\nBig Moments' },
+  { subtitle: 'CARRY YOUR STYLE', sideText: 'Totes, Clutches\n& Mini\nBags' },
 ];
 
 const titleFromFile = (file: string) => file.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
