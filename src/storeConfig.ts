@@ -520,7 +520,7 @@ export const STORE_CONFIG: StoreConfig = {
     productsTableName: 'products',
   },
   contact: {
-    email: 'contact@mybshoppy.com',
+    email: 'mybshoppy@gmail.com',
     phone: '96002 05955',
     supportHours: 'Mon - Sat: 9:00 AM - 8:00 PM IST',
     address: 'Trichy, Tamil Nadu, India',
