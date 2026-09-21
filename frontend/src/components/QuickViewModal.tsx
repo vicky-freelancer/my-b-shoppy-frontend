@@ -206,7 +206,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 </button>
               </div>
 
-              {/* Buy Now with COD */}
+              {/* Buy Now */}
               <button
                 onClick={handleBuyNow}
                 className="w-full py-3.5 px-4 rounded-full bg-[#B8860B] hover:bg-[#8A6A15] text-white font-extrabold text-xs uppercase tracking-[0.2em] transition flex items-center justify-center gap-2 shadow-[0_14px_32px_-12px_rgba(184,134,11,0.7)] cursor-pointer"

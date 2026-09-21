@@ -6,7 +6,7 @@ import { useSeo } from '../lib/seo';
 import { PageBanner } from '../components/PageBanner';
 
 export const CartPage: React.FC = () => {
-  const { cartItems, updateCartQuantity, removeCartItem, openCodCheckout } = useStore();
+  const { cartItems, updateCartQuantity, removeCartItem, openCheckout } = useStore();
 
   useSeo({
     title: 'Your Shopping Bag',
@@ -133,7 +133,7 @@ export const CartPage: React.FC = () => {
               </div>
 
               <button
-                onClick={openCodCheckout}
+                onClick={openCheckout}
                 className="w-full inline-flex items-center justify-center px-8 py-4 rounded-full bg-[#111111] text-[#F4D99B] font-semibold text-[12px] uppercase tracking-[0.22em] hover:bg-[#241A12] transition-all hover:-translate-y-0.5 cursor-pointer"
               >
                 Proceed to Checkout

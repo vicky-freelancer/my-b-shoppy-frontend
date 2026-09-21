@@ -6,9 +6,11 @@
  * catalogue (storeConfig).
  */
 import { writeFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import { CATEGORIES_CATALOG, INITIAL_PRODUCTS } from '../src/storeConfig';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const SITE_URL = 'https://mybshoppy.com';
 const TODAY = new Date().toISOString().split('T')[0];
 
@@ -93,7 +95,7 @@ Sitemap: ${SITE_URL}/sitemap.xml
 `;
 }
 
-const publicDir = join(process.cwd(), 'public');
+const publicDir = join(__dirname, '..', 'public');
 mkdirSync(publicDir, { recursive: true });
 
 writeFileSync(join(publicDir, 'sitemap.xml'), generateSitemap(), 'utf8');

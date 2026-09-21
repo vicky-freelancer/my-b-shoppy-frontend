@@ -20,7 +20,7 @@ interface StoreContextValue {
   isWishlistOpen: boolean;
   isSearchOpen: boolean;
   isSupabaseModalOpen: boolean;
-  isCodModalOpen: boolean;
+  isCheckoutOpen: boolean;
   quickViewProduct: ProductItem | null;
   directCheckoutProduct: DirectCheckoutState | null;
   setProducts: React.Dispatch<React.SetStateAction<ProductItem[]>>;
@@ -39,8 +39,8 @@ interface StoreContextValue {
   closeSupabaseSync: () => void;
   setQuickViewProduct: (product: ProductItem | null) => void;
   openDirectCheckout: (product: ProductItem, variant: string, quantity: number) => void;
-  openCodCheckout: () => void;
-  closeCodCheckout: () => void;
+  openCheckout: () => void;
+  closeCheckout: () => void;
 }
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
@@ -68,7 +68,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
-  const [isCodModalOpen, setIsCodModalOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<ProductItem | null>(null);
   const [directCheckoutProduct, setDirectCheckoutProduct] = useState<DirectCheckoutState | null>(null);
 
@@ -135,16 +135,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const openDirectCheckout = useCallback((product: ProductItem, variant: string, quantity: number) => {
     setDirectCheckoutProduct({ product, variant, quantity });
-    setIsCodModalOpen(true);
+    setIsCheckoutOpen(true);
   }, []);
 
-  const openCodCheckout = useCallback(() => {
+  const openCheckout = useCallback(() => {
     setDirectCheckoutProduct(null);
-    setIsCodModalOpen(true);
+    setIsCheckoutOpen(true);
   }, []);
 
-  const closeCodCheckout = useCallback(() => {
-    setIsCodModalOpen(false);
+  const closeCheckout = useCallback(() => {
+    setIsCheckoutOpen(false);
     setDirectCheckoutProduct(null);
   }, []);
 
@@ -164,7 +164,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     isWishlistOpen,
     isSearchOpen,
     isSupabaseModalOpen,
-    isCodModalOpen,
+    isCheckoutOpen,
     quickViewProduct,
     directCheckoutProduct,
     setProducts,
@@ -183,8 +183,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     closeSupabaseSync: () => setIsSupabaseModalOpen(false),
     setQuickViewProduct,
     openDirectCheckout,
-    openCodCheckout,
-    closeCodCheckout,
+    openCheckout,
+    closeCheckout,
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

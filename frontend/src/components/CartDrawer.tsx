@@ -9,7 +9,7 @@ interface CartDrawerProps {
   currencySymbol: string;
   onUpdateQuantity: (productId: string, variant: string, newQuantity: number) => void;
   onRemoveItem: (productId: string, variant: string) => void;
-  onProceedToCod: () => void;
+  onProceedToCheckout: () => void;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
@@ -19,7 +19,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   currencySymbol,
   onUpdateQuantity,
   onRemoveItem,
-  onProceedToCod
+  onProceedToCheckout
 }) => {
   if (!isOpen) return null;
 
@@ -137,7 +137,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             )}
           </div>
 
-          {/* Footer Subtotal & COD Checkout Button */}
+          {/* Footer Subtotal & Checkout Button */}
           {cartItems.length > 0 && (
             <div className="p-5 border-t border-[#D8A83E]/40 bg-[#FAF1DD] space-y-4">
               <div className="flex items-center justify-between text-sm">
@@ -154,7 +154,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               <button
                 onClick={() => {
                   onClose();
-                  onProceedToCod();
+                  onProceedToCheckout();
                 }}
                 className="w-full py-3.5 px-4 bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-bold text-xs uppercase tracking-[0.22em] rounded-full transition duration-200 shadow-xl flex items-center justify-center space-x-2 cursor-pointer"
               >

@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { CartDrawer } from './CartDrawer';
-import { CodCheckoutModal } from './CodCheckoutModal';
+import { CheckoutModal } from './CheckoutModal';
 import { QuickViewModal } from './QuickViewModal';
 import { WishlistModal } from './WishlistModal';
 import { SearchModal } from './SearchModal';
@@ -37,12 +37,12 @@ export const Layout: React.FC = () => {
         currencySymbol={STORE_CONFIG.currencySymbol}
         onUpdateQuantity={store.updateCartQuantity}
         onRemoveItem={store.removeCartItem}
-        onProceedToCod={store.openCodCheckout}
+        onProceedToCheckout={store.openCheckout}
       />
 
-      <CodCheckoutModal
-        isOpen={store.isCodModalOpen}
-        onClose={store.closeCodCheckout}
+      <CheckoutModal
+        isOpen={store.isCheckoutOpen}
+        onClose={store.closeCheckout}
         cartItems={store.cartItems}
         directProduct={store.directCheckoutProduct}
         currencySymbol={STORE_CONFIG.currencySymbol}

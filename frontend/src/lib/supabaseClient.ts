@@ -128,12 +128,13 @@ export async function seedProductsToSupabase(products: ProductItem[]): Promise<{
 }
 
 /**
- * Inserts a new Cash on Delivery / E-Commerce order into the Supabase database.
+ * Inserts a new paid (online) order into the Supabase database.
+ * Called only AFTER the Razorpay payment has been verified server-side.
  */
-export async function submitCodOrder(orderData: OrderFormData): Promise<{ success: boolean; error?: string; orderId?: string }> {
+export async function submitOrder(orderData: OrderFormData): Promise<{ success: boolean; error?: string; orderId?: string }> {
   try {
     const supabase = getSupabaseClient();
-    
+
     // Fallback generated ID for immediate responsive client confirmation
     const generatedRef = `MBS-${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -157,7 +158,13 @@ export async function submitCodOrder(orderData: OrderFormData): Promise<{ succes
       product_variant: orderData.product_variant,
       quantity: Number(orderData.quantity) || 1,
       notes: orderData.notes ? orderData.notes.trim() : null,
-      status: 'pending',
+      total_amount: Number(orderData.total_amount) || 0,
+      items_summary: orderData.items_summary || null,
+      status: 'paid',
+      payment_method: 'online',
+      razorpay_order_id: orderData.razorpay_order_id || null,
+      razorpay_payment_id: orderData.razorpay_payment_id || null,
+      razorpay_signature: orderData.razorpay_signature || null,
     };
 
     // Insert only operation into the configured table

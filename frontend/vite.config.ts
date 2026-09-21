@@ -17,6 +17,13 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      // Forward payment API calls to the Express backend (server.mjs) which holds the key secret.
+      proxy: {
+        '/api': {
+          target: process.env.RAZORPAY_SERVER_URL || 'http://localhost:5000',
+          changeOrigin: true,
+        },
+      },
     },
   };
 });

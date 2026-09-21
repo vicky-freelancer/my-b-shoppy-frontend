@@ -85,6 +85,10 @@ export interface OrderFormData {
   status: string;
   total_amount?: number;
   items_summary?: string;
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
+  razorpay_signature?: string;
+  payment_method?: string;
 }
 
 export interface FormErrors {

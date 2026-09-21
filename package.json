@@ -1,41 +1,26 @@
 {
-  "name": "react-example",
+  "name": "my-b-shoppy",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "my B shoppy e-commerce app — React + Vite frontend, Express + Razorpay backend",
   "type": "module",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "npm run sitemap && vite build",
-    "sitemap": "tsx scripts/generate-sitemap.ts",
-    "preview": "vite preview",
-    "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@google/genai": "^2.4.0",
-    "@supabase/supabase-js": "^2.112.3",
-    "@tailwindcss/vite": "^4.1.14",
-    "@types/canvas-confetti": "^1.9.0",
-    "@vitejs/plugin-react": "^5.0.4",
-    "canvas-confetti": "^1.9.4",
-    "dotenv": "^17.2.3",
-    "express": "^4.21.2",
-    "gsap": "^3.15.0",
-    "lucide-react": "^0.546.0",
-    "motion": "^12.23.24",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1",
-    "react-router-dom": "^7.18.2",
-    "vite": "^6.2.3"
+    "dev": "concurrently -n backend,frontend -c blue,magenta \"npm run server\" \"npm run dev --workspace frontend\"",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:backend": "npm run dev --workspace backend",
+    "server": "npm run start --workspace backend",
+    "backend": "npm run start --workspace backend",
+    "build": "npm run build --workspace frontend",
+    "sitemap": "npm run sitemap --workspace frontend",
+    "preview": "npm run preview --workspace frontend",
+    "lint": "npm run lint --workspace frontend && npm run lint --workspace backend",
+    "clean": "npm run clean --workspace frontend"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/node": "^22.14.0",
-    "autoprefixer": "^10.4.21",
-    "esbuild": "^0.25.0",
-    "tailwindcss": "^4.1.14",
-    "tsx": "^4.21.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.3"
+    "concurrently": "^9.2.0"
   }
 }

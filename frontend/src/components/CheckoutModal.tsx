@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import { CartItem, OrderFormData, FormErrors, ProductItem } from '../types';
 import { STORE_CONFIG } from '../storeConfig';
-import { submitCodOrder } from '../lib/supabaseClient';
+import { submitOrder } from '../lib/supabaseClient';
+import {
+  createRazorpayOrder,
+  loadRazorpayScript,
+  openRazorpayCheckout,
+  verifyRazorpayPayment,
+  buildRazorpayNotes,
+} from '../lib/razorpay';
 import confetti from 'canvas-confetti';
-import { X, ShieldCheck, CheckCircle2, Truck, AlertCircle, ShoppingBag, Loader2, Copy, Check } from 'lucide-react';
+import { X, ShieldCheck, CheckCircle2, Truck, AlertCircle, ShoppingBag, Loader2, Copy, Check, Lock } from 'lucide-react';
 
-interface CodCheckoutModalProps {
+interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   cartItems: CartItem[];
@@ -14,7 +21,7 @@ interface CodCheckoutModalProps {
   onClearCart: () => void;
 }
 
-export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
+export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   isOpen,
   onClose,
   cartItems,
@@ -28,18 +35,20 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
     email: '',
     city: '',
     address: '',
-    country: STORE_CONFIG.defaultCountry || 'United States',
+    country: STORE_CONFIG.defaultCountry || 'India',
     product_name: '',
     product_variant: '',
     quantity: 1,
     notes: '',
-    status: 'pending',
+    status: 'paid',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState<string>('');
+  const [confirmedPaymentId, setConfirmedPaymentId] = useState<string>('');
+  const [paymentError, setPaymentError] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
   // Lock background scroll while the checkout is open
@@ -101,6 +110,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    setPaymentError('');
 
     const itemsSummary = activeItems
       .map((i) => `${i.product.name} (${i.variant}) x${i.quantity}`)
@@ -114,33 +124,66 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
       notes: formData.notes ? `${formData.notes} | Items: ${itemsSummary}` : `Items: ${itemsSummary}`,
       total_amount: finalAmount,
       items_summary: itemsSummary,
+      status: 'paid',
     };
 
     try {
-      const response = await submitCodOrder(payload);
+      // 1. Ask the server to create a Razorpay order (amount in paise)
+      const receipt = `MBS-${Date.now().toString(36).toUpperCase()}`;
+      const amountInPaise = Math.round(finalAmount * 100);
+      const order = await createRazorpayOrder(amountInPaise, receipt, buildRazorpayNotes(payload));
 
-      if (response.success) {
-        const orderId = response.orderId || `MBS-${Math.floor(100000 + Math.random() * 900000)}`;
-        setConfirmedOrderId(orderId);
-        setOrderSuccess(true);
-        onClearCart();
+      // 2. Load Razorpay's checkout and open the payment popup
+      await loadRazorpayScript();
+      const payment = await openRazorpayCheckout({
+        key_id: order.key_id,
+        order_id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        name: STORE_CONFIG.storeName,
+        description: `${STORE_CONFIG.storeName} order — ${totalUnits} item(s)`,
+        prefill: {
+          name: payload.customer_name,
+          email: payload.email,
+          contact: payload.phone,
+        },
+        notes: buildRazorpayNotes(payload),
+      });
 
-        try {
-          confetti({
-            particleCount: 80,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#B8860B', '#ffffff', '#f59e0b', '#10b981'],
-          });
-        } catch {
-          // ignore confetti errors in sandboxed iframes
-        }
-      } else {
-        alert(response.error || 'Failed to submit order. Please retry.');
+      // 3. Server-side signature check — never trust the popup result alone
+      const isValid = await verifyRazorpayPayment(payment);
+      if (!isValid) {
+        throw new Error('Payment signature verification failed. Please contact support.');
+      }
+
+      // 4. Record the PAID order in Supabase
+      const response = await submitOrder({
+        ...payload,
+        razorpay_order_id: payment.razorpay_order_id,
+        razorpay_payment_id: payment.razorpay_payment_id,
+        razorpay_signature: payment.razorpay_signature,
+      });
+
+      const orderId = response.orderId || `MBS-${Math.floor(100000 + Math.random() * 900000)}`;
+      setConfirmedOrderId(orderId);
+      setConfirmedPaymentId(payment.razorpay_payment_id);
+      setOrderSuccess(true);
+      onClearCart();
+
+      try {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#B8860B', '#ffffff', '#f59e0b', '#10b981'],
+        });
+      } catch {
+        // ignore confetti errors in sandboxed iframes
       }
     } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Payment could not be completed. Please retry.';
       console.error(err);
-      alert('Network error submitting order to Supabase. Please retry.');
+      setPaymentError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -188,10 +231,10 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
 
             <div className="space-y-2">
               <h3 className="text-2xl font-bold text-[#241A12] font-display">
-                Order Placed Successfully!
+                Payment Successful!
               </h3>
               <p className="text-sm text-[#6B5945] max-w-md mx-auto">
-                Thank you for shopping with <span className="text-[#B8860B] font-semibold">my B shoppy</span>. Your order has been submitted and recorded.
+                Thank you for shopping with <span className="text-[#B8860B] font-semibold">my B shoppy</span>. Your payment has been received and your order is confirmed.
               </p>
             </div>
 
@@ -200,6 +243,9 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
               <div className="text-left">
                 <span className="text-[11px] text-[#6B5945] uppercase font-mono">Order Tracking Ref</span>
                 <p className="text-base font-mono font-bold text-[#B8860B]">{confirmedOrderId}</p>
+                {confirmedPaymentId && (
+                  <p className="text-[11px] text-[#6B5945] font-mono mt-1">Payment ID: {confirmedPaymentId}</p>
+                )}
               </div>
               <button
                 onClick={handleCopyId}
@@ -213,7 +259,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
             <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 max-w-md mx-auto text-left flex items-start gap-2.5">
               <Truck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <span>
-                Our courier will call or SMS you before dispatching. You will inspect your package upon delivery and pay the courier with cash or tap.
+                Our courier will call or SMS you before dispatching. A receipt has been sent to{formData.email ? ` ${formData.email}` : ' your email'}.
               </span>
             </div>
 
@@ -227,13 +273,13 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
         ) : (
           /* Active Checkout Form */
           <form onSubmit={handleSubmit} className="p-5 sm:p-7 space-y-6">
-            
+
             {/* Order Items Preview */}
             <div className="p-4 rounded-2xl bg-[#FAF1DD] border border-[#D8A83E]/40 space-y-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#b8860b]">
                 Order Items Summary ({totalUnits} items)
               </span>
-              
+
               <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
                 {activeItems.map((item) => (
                   <div key={`${item.product.id}-${item.variant}`} className="flex items-center justify-between text-xs">
@@ -245,7 +291,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                       <span className="text-[11px] text-slate-400 font-mono">({item.variant})</span>
                     </div>
                     <span className="font-mono font-semibold text-slate-900 ml-2">
-                      {currencySymbol}{(item.product.price * item.quantity).toLocaleString('en-US')}
+                      {currencySymbol}{(item.product.price * item.quantity).toLocaleString('en-IN')}
                     </span>
                   </div>
                 ))}
@@ -255,7 +301,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-500">Item Subtotal</span>
                   <span className="font-mono font-medium text-slate-800">
-                    {currencySymbol}{totalAmount.toLocaleString('en-US')}
+                    {currencySymbol}{totalAmount.toLocaleString('en-IN')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
@@ -264,13 +310,13 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                     Courier Charges
                   </span>
                   <span className="font-mono font-medium text-slate-800">
-                    {currencySymbol}{courierCharges.toLocaleString('en-US')}
+                    {currencySymbol}{courierCharges.toLocaleString('en-IN')}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500">Total Due on Doorstep Delivery</span>
+                  <span className="text-slate-500">Total Payable Online</span>
                   <span className="text-base font-bold font-mono text-[#b8860b]">
-                    {currencySymbol}{finalAmount.toLocaleString('en-US')}
+                    {currencySymbol}{finalAmount.toLocaleString('en-IN')}
                   </span>
                 </div>
               </div>
@@ -283,7 +329,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
+
                 {/* Full Name */}
                 <div className="space-y-1">
                   <label className="text-xs text-slate-600 font-medium">Full Name *</label>
@@ -308,7 +354,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="e.g. +1 555 019 283"
+                    placeholder="e.g. +91 98765 43210"
                     className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#B8860B]"
                   />
                   {errors.phone && (
@@ -318,7 +364,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
 
                 {/* Email Address */}
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-600 font-medium">Email (For Confirmation Receipt)</label>
+                  <label className="text-xs text-slate-600 font-medium">Email (For Payment Receipt)</label>
                   <input
                     type="email"
                     value={formData.email}
@@ -336,7 +382,7 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
                     required
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    placeholder="e.g. New York, NY"
+                    placeholder="e.g. Tiruchirappalli, TN"
                     className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#B8860B]"
                   />
                   {errors.city && (
@@ -391,11 +437,19 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
               </div>
             </div>
 
-            {/* Zero-Risk Notice */}
-<div className="p-3.5 rounded-2xl bg-[#FAF1DD] border border-[#D8A83E]/40 flex items-center gap-3 text-xs text-[#6B5945]">
-              <ShieldCheck className="w-5 h-5 text-[#B8860B] shrink-0" />
+            {/* Payment Error Banner */}
+            {paymentError && (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-xs text-rose-700">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{paymentError}</span>
+              </div>
+            )}
+
+            {/* Secure Payment Notice */}
+            <div className="p-3.5 rounded-2xl bg-[#FAF1DD] border border-[#D8A83E]/40 flex items-center gap-3 text-xs text-[#6B5945]">
+              <Lock className="w-5 h-5 text-[#B8860B] shrink-0" />
               <span>
-                <strong className="text-[#241A12]">0% Upfront Prepayment:</strong> You will only hand cash/card to the courier after you receive and inspect your parcel.
+                <strong className="text-[#241A12]">100% Secure Online Payment:</strong> You will be redirected to Razorpay's encrypted checkout — UPI, cards & netbanking accepted.
               </span>
             </div>
 
@@ -408,12 +462,12 @@ export const CodCheckoutModal: React.FC<CodCheckoutModalProps> = ({
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Recording Order in Supabase...</span>
+                  <span>Opening Secure Payment...</span>
                 </>
               ) : (
                 <>
-                  <Truck className="w-4 h-4" />
-                  <span>CONFIRM & PLACE ORDER</span>
+                  <Lock className="w-4 h-4" />
+                  <span>PAY ONLINE & PLACE ORDER</span>
                 </>
               )}
             </button>

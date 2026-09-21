@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Express API for my B shoppy (Razorpay orders, payment verification, webhooks). Serves the built frontend in production.",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "server": "node src/server.mjs",
+    "dev": "node --watch src/server.mjs",
+    "lint": "node --check src/server.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.14.0"
+  }
+}
