@@ -1,8 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import cors from 'cors';
 import path from 'path';
-import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
@@ -20,6 +20,23 @@ const PORT = Number(process.env.PORT) || 5000;
 const app = express();
 // Keep the raw body so the webhook signature can be verified
 app.use(express.json({ verify: (req, _res, buf) => { req['rawBody'] = buf; } }));
+
+// CORS — this backend is deployed separately from the frontend (api.mybshoppy.com),
+// so browser calls from the storefront domain must be allowed explicitly.
+const ALLOWED_ORIGINS = [
+  'https://mybshoppy.com',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Origin not allowed by CORS: ${origin}`));
+    }
+  },
+}));
 
 function razorpayHeaders() {
   const auth = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64');
@@ -119,15 +136,8 @@ app.post('/api/razorpay-webhook', (req, res) => {
   res.json({ ok: true });
 });
 
-// Serve the built frontend (production). In dev, Vite handles the UI on :3000.
-const distDir = path.join(__dirname, '..', '..', 'frontend', 'dist');
-if (fs.existsSync(distDir)) {
-  app.use(express.static(distDir));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(distDir, 'index.html'));
-  });
-}
+// Serve the backend only — the React frontend is hosted separately and calls
+// these endpoints via VITE_API_URL (see frontend/.env.example).
 
 app.listen(PORT, () => {
   console.log(`my B shoppy server running at http://localhost:${PORT}`);

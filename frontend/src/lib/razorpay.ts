@@ -1,4 +1,5 @@
 import { OrderFormData } from '../types';
+import { apiUrl } from './api';
 
 export interface RazorpayOrder {
   id: string;
@@ -53,7 +54,7 @@ export async function createRazorpayOrder(
   receipt: string,
   notes: Record<string, string>
 ): Promise<RazorpayOrder> {
-  const resp = await fetch('/api/create-order', {
+  const resp = await fetch(apiUrl('/api/create-order'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ amount: amountInPaise, currency: 'INR', receipt, notes }),
@@ -67,7 +68,7 @@ export async function createRazorpayOrder(
 
 /** Server-side signature check to confirm the payment is genuine. */
 export async function verifyRazorpayPayment(result: RazorpayPaymentResult): Promise<boolean> {
-  const resp = await fetch('/api/verify-payment', {
+  const resp = await fetch(apiUrl('/api/verify-payment'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(result),
