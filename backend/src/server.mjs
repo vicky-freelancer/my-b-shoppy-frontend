@@ -3,11 +3,11 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import cors from 'cors';
 import path from 'path';
-import { fileURLToPath } from 'url';
+
 
 dotenv.config();
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = process.cwd();
 
 // Load env vars from backend/.env (this file lives in backend/src)
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
