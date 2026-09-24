@@ -107,6 +107,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (activeItems.some((item) => item.product.inStock === false)) {
+      setPaymentError(
+        'One or more items in your order are currently out of stock. Please remove them and try again.'
+      );
+      return;
+    }
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
@@ -163,6 +170,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         razorpay_payment_id: payment.razorpay_payment_id,
         razorpay_signature: payment.razorpay_signature,
       });
+
+      if (!response.success) {
+        throw new Error(
+          response.error ||
+            'Your payment was received, but there was a problem recording your order. Please contact support and quote this reference.',
+        );
+      }
 
       const orderId = response.orderId || `MBS-${Math.floor(100000 + Math.random() * 900000)}`;
       setConfirmedOrderId(orderId);
@@ -289,6 +303,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                       </span>
                       <span className="truncate text-slate-700">{item.product.name}</span>
                       <span className="text-[11px] text-slate-400 font-mono">({item.variant})</span>
+                      {item.product.inStock === false && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 bg-rose-50 border border-rose-200 rounded-full px-2 py-0.5 shrink-0">
+                          Sold Out
+                        </span>
+                      )}
                     </div>
                     <span className="font-mono font-semibold text-slate-900 ml-2">
                       {currencySymbol}{(item.product.price * item.quantity).toLocaleString('en-IN')}
@@ -453,24 +472,39 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </span>
             </div>
 
-            {/* Submit Action Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting || activeItems.length === 0}
-              className="w-full py-4 px-6 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-extrabold text-xs uppercase tracking-widest transition duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl cursor-pointer"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Opening Secure Payment...</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4" />
-                  <span>PAY ONLINE & PLACE ORDER</span>
-                </>
-              )}
-            </button>
+            {(() => {
+              if (activeItems.some((item) => item.product.inStock === false)) {
+                return (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full py-4 px-6 rounded-full bg-[#111111] text-[#F4D99B] font-extrabold text-xs uppercase tracking-widest flex items-center justify-center space-x-2 opacity-50 cursor-not-allowed shadow-xl"
+                  >
+                    <AlertCircle className="w-4 h-4" />
+                    <span>Sold Out — Checkout Unavailable</span>
+                  </button>
+                );
+              }
+              return (
+                <button
+                  type="submit"
+                  disabled={isSubmitting || activeItems.length === 0}
+                  className="w-full py-4 px-6 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-extrabold text-xs uppercase tracking-widest transition duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Opening Secure Payment...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      <span>PAY ONLINE & PLACE ORDER</span>
+                    </>
+                  )}
+                </button>
+              );
+            })()}
 
           </form>
         )}

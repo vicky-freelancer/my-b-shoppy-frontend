@@ -58,10 +58,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#241A12]/12 to-transparent pointer-events-none"></div>
 
         {/* Badge */}
-        {product.badge && (
-          <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-[#111111]/85 text-[#F4D99B] border border-[#D8A83E]/50 backdrop-blur-sm">
-            {product.badge}
+        {product.inStock === false ? (
+          <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-rose-950/85 text-rose-200 border border-rose-400/50 backdrop-blur-sm">
+            Sold Out
           </span>
+        ) : (
+          product.badge && (
+            <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-[#111111]/85 text-[#F4D99B] border border-[#D8A83E]/50 backdrop-blur-sm">
+              {product.badge}
+            </span>
+          )
         )}
 
         {/* Wishlist button */}
@@ -78,15 +84,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </button>
 
         {/* Cart button bottom-right */}
-        <button
-          onClick={handleAddToCart}
-          aria-label={`Add ${product.name} to cart`}
-          className={`absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer shadow-lg ${
-            cartPulse ? 'animate-cart-bounce bg-[#B8860B] text-white' : 'bg-[#111111]/90 text-[#E8C875] hover:bg-[#241A12]'
-          } backdrop-blur-sm`}
-        >
-          {cartPulse ? <Check className="w-4.5 h-4.5" /> : <ShoppingBag className="w-4.5 h-4.5" />}
-        </button>
+        {product.inStock === false ? (
+          <span className="absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center bg-slate-900/80 text-slate-400 border border-slate-500/40 backdrop-blur-sm">
+            <ShoppingBag className="w-4.5 h-4.5" />
+          </span>
+        ) : (
+          <button
+            onClick={handleAddToCart}
+            aria-label={`Add ${product.name} to cart`}
+            className={`absolute bottom-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer shadow-lg ${
+              cartPulse ? 'animate-cart-bounce bg-[#B8860B] text-white' : 'bg-[#111111]/90 text-[#E8C875] hover:bg-[#241A12]'
+            } backdrop-blur-sm`}
+          >
+            {cartPulse ? <Check className="w-4.5 h-4.5" /> : <ShoppingBag className="w-4.5 h-4.5" />}
+          </button>
+        )}
       </div>
 
       {/* ------- Details ------- */}

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
+  AlertCircle,
   ArrowLeft,
   Banknote,
   Heart,
@@ -256,19 +257,28 @@ export const ProductDetailPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
                 <button
                   onClick={() => addToCart(product, activeVariant, quantity)}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-semibold text-[12px] sm:text-[13px] uppercase tracking-[0.22em] shadow-[0_18px_36px_-14px_rgba(17,17,17,0.5)] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+                  disabled={product.inStock === false}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-semibold text-[12px] sm:text-[13px] uppercase tracking-[0.22em] shadow-[0_18px_36px_-14px_rgba(17,17,17,0.5)] transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:bg-[#111111] cursor-pointer"
                 >
                   <ShoppingBag className="w-4 h-4" />
-                  Add to Cart
+                  {product.inStock === false ? 'Sold Out' : 'Add to Cart'}
                 </button>
                 <button
                   onClick={() => openDirectCheckout(product, activeVariant, quantity)}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full border-2 border-[#B8860B] hover:bg-[#B8860B] text-[#B8860B] hover:text-white font-semibold text-[12px] sm:text-[13px] uppercase tracking-[0.22em] transition-colors cursor-pointer"
+                  disabled={product.inStock === false}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full border-2 border-[#B8860B] hover:bg-[#B8860B] text-[#B8860B] hover:text-white font-semibold text-[12px] sm:text-[13px] uppercase tracking-[0.22em] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#B8860B] cursor-pointer"
                 >
                   <Banknote className="w-4 h-4" />
-                  Order Now
+                  {product.inStock === false ? 'Sold Out' : 'Order Now'}
                 </button>
               </div>
+
+              {product.inStock === false && (
+                <p className="flex items-center gap-2 text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-full px-3 py-2 w-fit">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  This piece is currently out of stock. Please check back later.
+                </p>
+              )}
             </div>
 
             {/* Meta details */}
@@ -277,7 +287,7 @@ export const ProductDetailPage: React.FC = () => {
                 ['Material', product.material],
                 ['Stone / Accent', product.stone],
                 ['Category', product.category],
-                ['Availability', product.inStock === false ? 'Made to Order' : 'In Stock'],
+                ['Availability', product.inStock === false ? 'Sold Out' : 'In Stock'],
               ]
                 .filter(([, value]) => !!value)
                 .map(([label, value]) => (

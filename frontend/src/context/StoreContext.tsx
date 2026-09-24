@@ -90,6 +90,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const addToCart = useCallback((product: ProductItem, variant?: string, quantity: number = 1) => {
+    if (product.inStock === false) return;
     const chosenVariant = variant || product.variants[0] || 'Standard';
     setCartItems((prev) => {
       const existing = prev.find(
@@ -134,6 +135,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const openDirectCheckout = useCallback((product: ProductItem, variant: string, quantity: number) => {
+    if (product.inStock === false) return;
     setDirectCheckoutProduct({ product, variant, quantity });
     setIsCheckoutOpen(true);
   }, []);

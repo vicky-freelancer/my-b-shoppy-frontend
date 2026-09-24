@@ -26,55 +26,82 @@ export const SupabaseSyncModal: React.FC<SupabaseSyncModalProps> = ({
 
   if (!isOpen) return null;
 
-  const sqlSchema = `-- Supabase Table Schemas for my B shoppy
-
--- 1. Create Products Table
+  const sqlSchema = `-- Supabase Table Schemas (shared with the Admin Dashboard)
+-- Products: admin schema (id bigint, slug unique, quantity stock) PLUS
+-- storefront columns so both apps read the same table correctly.
 CREATE TABLE IF NOT EXISTS products (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  subtitle TEXT,
-  price NUMERIC NOT NULL,
+  id BIGSERIAL PRIMARY KEY,
+  slug TEXT UNIQUE,
+  sku TEXT DEFAULT '',
+  title TEXT NOT NULL,
+  name TEXT,
+  subtitle TEXT DEFAULT '',
+  price NUMERIC NOT NULL DEFAULT 0,
+  sale_price NUMERIC NOT NULL DEFAULT 0,
+  mrp NUMERIC,
   original_price NUMERIC,
   image_url TEXT,
-  category TEXT,
+  cover_image TEXT,
+  category TEXT DEFAULT '',
   category_id TEXT,
   badge TEXT,
   rating NUMERIC DEFAULT 5.0,
-  reviews_count INTEGER DEFAULT 12,
+  reviews_count INTEGER DEFAULT 0,
   material TEXT,
   stone TEXT,
-  variants TEXT[],
-  description TEXT,
+  variants JSONB DEFAULT '[]'::jsonb,
+  quantity INTEGER DEFAULT 1,
+  stock INTEGER DEFAULT 50,
   in_stock BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  description TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Create Cash on Delivery Orders Table
+CREATE UNIQUE INDEX IF NOT EXISTS products_slug_uniq ON products (slug);
+
+-- Orders: admin schema (TEXT id, ORD-xxxxx default) PLUS online-payment and
+-- checkout columns written by the storefront.
 CREATE TABLE IF NOT EXISTS orders (
-  id BIGSERIAL PRIMARY KEY,
+  id TEXT PRIMARY KEY DEFAULT ('ORD-' || floor(extract(epoch from now()) * 1000)::text),
   customer_name TEXT NOT NULL,
   phone TEXT NOT NULL,
   email TEXT,
   city TEXT NOT NULL,
   address TEXT NOT NULL,
   country TEXT DEFAULT 'United States',
+  category TEXT DEFAULT 'General',
   product_name TEXT,
   product_variant TEXT,
   quantity INTEGER DEFAULT 1,
-  notes TEXT,
+  amount NUMERIC DEFAULT 0,
+  price_per_unit NUMERIC DEFAULT 0,
+  total_amount NUMERIC DEFAULT 0,
+  items_summary TEXT,
+  cod_amount NUMERIC DEFAULT 0,
+  sale_price NUMERIC DEFAULT 0,
+  price NUMERIC DEFAULT 0,
+  tracking_number TEXT,
   status TEXT DEFAULT 'pending',
+  payment_method TEXT,
+  razorpay_order_id TEXT,
+  razorpay_payment_id TEXT,
+  razorpay_signature TEXT,
+  notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Enable Read Access for Products
+-- 3. Enable Read/Write Access for Products
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public Read Access" ON products FOR SELECT USING (true);
 CREATE POLICY "Public Insert Access" ON products FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public Update Access" ON products FOR UPDATE USING (true);
 
--- 4. Enable Insert Access for Orders
+-- 4. Enable Access for Orders
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public Orders Read" ON orders FOR SELECT USING (true);
 CREATE POLICY "Public Orders Insert" ON orders FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public Orders Update" ON orders FOR UPDATE USING (true);
 `;
 
   const handlePushToSupabase = async () => {
