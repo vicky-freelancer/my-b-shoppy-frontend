@@ -50,7 +50,7 @@ export const ProductDetailPage: React.FC = () => {
 
   if (!product) {
     return (
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center space-y-5">
+      <div className="products-page max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center space-y-5">
         <PackageCheck className="w-12 h-12 text-[#B8860B]/50 mx-auto" />
         <h1 className="font-display text-3xl font-medium text-[#241A12]">Product Not Found</h1>
         <p className="text-sm text-[#6B5945] max-w-md mx-auto">
@@ -73,7 +73,7 @@ export const ProductDetailPage: React.FC = () => {
     : 0;
 
   return (
-    <div>
+    <div className="products-page">
       {/* Breadcrumb strip */}
       <div className="border-b border-[#D8A83E]/30 bg-[#FAF1DD]">
         <nav className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 h-12 flex items-center gap-2 text-xs font-semibold text-[#6B5945] overflow-x-auto">

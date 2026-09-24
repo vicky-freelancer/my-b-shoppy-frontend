@@ -239,6 +239,41 @@
   animation: shimmer 6s linear infinite;
 }
 
+/* ---------- Product & Shop pages: black text on gold ---------- */
+.products-page {
+  background: linear-gradient(180deg, #D8A83E 0%, #E8C875 45%, #F4D99B 100%);
+}
+
+.products-page,
+.products-page * {
+  color: #000000 !important;
+}
+
+/* Cream / ivory / white product panels -> gold blend */
+.products-page .bg-\[\#FFFDF6\],
+.products-page .bg-\[\#F8ECD0\],
+.products-page .bg-\[\#FAF1DD\],
+.products-page .bg-\[\#FFF8E8\] {
+  background-color: #E8C875 !important;
+  background-image: linear-gradient(180deg, #F4D99B 0%, #E8C875 55%, #D8A83E 100%) !important;
+}
+
+/* Dark buttons / badges -> gold so black text stays readable */
+.products-page .bg-\[\#111111\],
+.products-page .bg-\[\#241A12\],
+.products-page .bg-\[\#111111\]\/85,
+.products-page .bg-\[\#111111\]\/90,
+.products-page .bg-\[\#241A12\]\/85,
+.products-page .bg-slate-900\/80,
+.products-page .bg-rose-950\/85,
+.products-page .bg-rose-50,
+.products-page .hover\:bg-\[\#111111\]:hover,
+.products-page .hover\:bg-\[\#241A12\]:hover,
+.products-page .hover\:bg-\[\#111111\]\/5:hover {
+  background-color: #D8A83E !important;
+  background-image: linear-gradient(180deg, #F4D99B 0%, #E8C875 55%, #D8A83E 100%) !important;
+}
+
 /* Brighter champagne gradient for dark backgrounds */
 .text-gold-gradient-light {
   background: linear-gradient(120deg, #E8C875 0%, #F4D99B 40%, #FFF3D6 55%, #E8C875 100%);

@@ -40,7 +40,7 @@ export const ShopPage: React.FC = () => {
   const totalPages = Math.max(1, Math.ceil(sortedProducts.length / itemsPerPage));
 
   return (
-    <div>
+    <div className="products-page">
       <GoldHero
         title="All Products"
         breadcrumbs={[
