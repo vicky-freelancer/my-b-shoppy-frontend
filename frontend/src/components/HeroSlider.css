@@ -35,6 +35,7 @@
 .hero-slider {
   position: relative;
   width: 100%;
+  font-weight: 400;
 
   /* Fluid height = width / 2.667 so desktop images (8/3) fit exactly */
   height: auto;

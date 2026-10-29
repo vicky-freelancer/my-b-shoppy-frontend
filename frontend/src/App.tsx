@@ -24,6 +24,11 @@ export default function App() {
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/categories/:slug" element={<CategoryDetailPage />} />
+            <Route path="/categories/:slug/:subSlug" element={<CategoryDetailPage />} />
+            {/* Singular alias -> canonical /categories URLs */}
+            <Route path="/category" element={<Navigate to="/categories" replace />} />
+            <Route path="/category/:slug" element={<NavigateToCategory />} />
+            <Route path="/category/:slug/:subSlug" element={<NavigateToCategory />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
@@ -62,8 +67,9 @@ export default function App() {
   );
 }
 
-/** Redirects legacy /collections/:slug URLs to /categories/:slug */
+/** Redirects legacy /collections/:slug and /category/* URLs to /categories/* */
 function NavigateToCategory(): React.ReactElement {
   const params = useParams();
-  return <Navigate to={`/categories/${params.slug || ''}`} replace />;
+  const suffix = params.subSlug ? `/${params.subSlug}` : '';
+  return <Navigate to={`/categories/${params.slug || ''}${suffix}`} replace />;
 }

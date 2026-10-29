@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:categories": "tsx scripts/check-category-sync.ts",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "npm run sitemap && vite build",
     "sitemap": "tsx scripts/generate-sitemap.ts",

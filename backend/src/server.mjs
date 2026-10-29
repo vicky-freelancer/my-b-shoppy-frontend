@@ -3,14 +3,12 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import cors from 'cors';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { existsSync } from 'fs';
 
 
-dotenv.config();
-
-const __dirname = process.cwd();
-
-// Load env vars from backend/.env (this file lives in backend/src)
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
+const backendDir = fileURLToPath(new URL('..', import.meta.url));
+dotenv.config({ path: path.join(backendDir, '.env') });
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
@@ -51,7 +49,7 @@ app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
     razorpayConfigured: Boolean(RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET),
-    mode: RAZORPAY_KEY_ID.startsWith('rzp_test_') ? 'TEST' : 'LIVE',
+    mode: !RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET ? 'UNCONFIGURED' : RAZORPAY_KEY_ID.startsWith('rzp_test_') ? 'TEST' : 'LIVE',
   });
 });
 
@@ -61,11 +59,16 @@ app.get('/api/health', (_req, res) => {
  */
 app.post('/api/create-order', async (req, res) => {
   try {
-    const amount = Math.round(Number(req.body?.amount));
+    const amount = req.body?.amount;
     const currency = req.body?.currency || 'INR';
 
-    if (!Number.isFinite(amount) || amount < 100) {
+    if (!Number.isSafeInteger(amount) || amount < 100) {
       return res.status(400).json({ error: 'Amount must be at least 100 paise (₹1)' });
+    }
+
+    if (currency !== 'INR') return res.status(400).json({ error: 'Only INR payments are supported' });
+    if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+      return res.status(503).json({ error: 'Online payments are not configured. Please contact the store.' });
     }
 
     const receipt = String(req.body?.receipt || `MBS-${Date.now()}`).slice(0, 40);
@@ -96,6 +99,9 @@ app.post('/api/create-order', async (req, res) => {
  * Only the server can compute this, which is why cheating is hard.
  */
 app.post('/api/verify-payment', (req, res) => {
+  if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+    return res.status(503).json({ valid: false, error: 'Online payments are not configured' });
+  }
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     return res.status(400).json({ valid: false, error: 'Missing payment fields' });
@@ -106,7 +112,8 @@ app.post('/api/verify-payment', (req, res) => {
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
     .digest('hex');
 
-  const valid = expected === razorpay_signature;
+  const valid = typeof razorpay_signature === 'string' && /^[a-f0-9]{64}$/i.test(razorpay_signature) &&
+    crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(razorpay_signature, 'hex'));
   if (!valid) {
     return res.status(400).json({ valid: false, error: 'Payment signature verification failed' });
   }
@@ -136,8 +143,13 @@ app.post('/api/razorpay-webhook', (req, res) => {
   res.json({ ok: true });
 });
 
-// Serve the backend only — the React frontend is hosted separately and calls
-// these endpoints via VITE_API_URL (see frontend/.env.example).
+// API-only deployments and a combined storefront deployment are both supported.
+app.use('/api', (_req, res) => res.status(404).json({ error: 'API endpoint not found' }));
+const frontendDist = path.resolve(backendDir, '..', 'frontend', 'dist');
+if (existsSync(path.join(frontendDist, 'index.html'))) {
+  app.use(express.static(frontendDist));
+  app.get('*', (_req, res) => res.sendFile(path.join(frontendDist, 'index.html')));
+}
 
 app.listen(PORT, () => {
   console.log(`my B shoppy server running at http://localhost:${PORT}`);

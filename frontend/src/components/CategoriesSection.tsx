@@ -19,7 +19,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({ categories
         <Reveal>
           <SectionHeading
             eyebrow="Browse by category"
-            titleBefore="Nine Worlds of"
+            titleBefore="Worlds of"
             titleItalic="Elegance"
             linkLabel="View All Categories"
             linkPath="/categories"

@@ -25,6 +25,8 @@ export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+  const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const [mobileOpenCategoryId, setMobileOpenCategoryId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const headerRef = useRef<HTMLElement>(null);
@@ -35,9 +37,19 @@ export const Header: React.FC = () => {
     openCart,
     openWishlist,
     openSearch,
+    subcategories,
   } = useStore();
 
   const cartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0);
+
+  const subcategoriesFor = (categoryId: string) =>
+    subcategories
+      .filter((subcategory) => subcategory.categoryId === categoryId && subcategory.isActive !== false)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+
+  const activeCategory =
+    STORE_CONFIG.categories.find((category) => category.id === activeCategoryId);
+  const activeCategorySubcategories = activeCategory ? subcategoriesFor(activeCategory.id) : [];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -47,8 +59,11 @@ export const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    setCategoriesOpen(false);
+    setActiveCategoryId(null);
     setMobileMenuOpen(false);
     setMobileCategoriesOpen(false);
+    setMobileOpenCategoryId(null);
   }, [location.pathname]);
 
   // Close menus on Escape
@@ -105,8 +120,18 @@ export const Header: React.FC = () => {
                 <div
                   key={link.id}
                   className="relative"
-                  onMouseEnter={() => setCategoriesOpen(true)}
+                  onMouseEnter={() => {
+                    setActiveCategoryId(null);
+                    setCategoriesOpen(true);
+                  }}
                   onMouseLeave={() => setCategoriesOpen(false)}
+                  onFocus={() => setCategoriesOpen(true)}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                      setCategoriesOpen(false);
+                      setActiveCategoryId(null);
+                    }
+                  }}
                 >
                   <Link
                     to={link.path}
@@ -129,11 +154,14 @@ export const Header: React.FC = () => {
 
                   {/* Dropdown */}
                   <div
-                    className={`absolute top-full left-1/2 -translate-x-1/2 pt-3 z-50 transition-all duration-250 ${
-                      categoriesOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'
+                    className={`absolute top-full left-0 pt-3 z-50 transition-all duration-250 ${
+                      categoriesOpen
+                        ? 'opacity-100 translate-y-0 pointer-events-auto visible'
+                        : 'opacity-0 translate-y-2 pointer-events-none invisible'
                     }`}
+                    aria-hidden={!categoriesOpen}
                   >
-                    <div className="w-[340px] rounded-2xl bg-[#151210] border border-[#D8A83E]/25 shadow-2xl shadow-black/60 overflow-hidden">
+                    <div className={`max-w-[calc(100vw-2rem)] rounded-2xl bg-[#151210] border border-[#D8A83E]/25 shadow-2xl shadow-black/60 overflow-hidden ${activeCategory ? 'w-[520px]' : 'w-[240px]'}`}>
                       <div className="px-5 py-3 border-b border-[#2a2118] flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#E8C875]">
                           Shop by Category
@@ -146,28 +174,80 @@ export const Header: React.FC = () => {
                           View All
                         </Link>
                       </div>
-                      <div className="max-h-[340px] overflow-y-auto py-2">
-                        {STORE_CONFIG.categories.slice(0, 9).map((category) => (
-                          <Link
-                            key={category.id}
-                            to={`/categories/${category.id}`}
-                            onClick={() => setCategoriesOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2.5 mx-2 my-0.5 rounded-xl transition-colors hover:bg-[#241a12] group"
-                          >
-                            <span className="w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-[#D8A83E]/25 bg-[#241a12]">
-                              <img src={category.imageUrl} alt="" loading="lazy" className="w-full h-full object-cover" />
-                            </span>
-                            <span className="flex-1 min-w-0">
-                              <span className="block text-xs font-semibold text-[#F5F0E4]/90 truncate">
-                                {category.name}
-                              </span>
-                              <span className="block text-[10px] text-[#D8A83E]/70">
-                                From ₹{category.startingPrice} · {category.count}+ items
-                              </span>
-                            </span>
-                            <ArrowRight className="w-3.5 h-3.5 text-[#D8A83E]/50 group-hover:text-[#E8C875] group-hover:translate-x-0.5 transition-all" />
-                          </Link>
-                        ))}
+                      <div className="flex">
+                        <div className={`w-[238px] shrink-0 py-2 max-h-[min(420px,70vh)] overflow-y-auto ${activeCategory ? 'border-r border-[#2a2118]' : ''}`}>
+                          {STORE_CONFIG.categories.map((category) => {
+                            const isActiveCategory = category.id === activeCategory?.id;
+                            const hasSubcategories = subcategoriesFor(category.id).length > 0;
+                            return (
+                              <Link
+                                key={category.id}
+                                to={`/categories/${category.id}`}
+                                onMouseEnter={() => setActiveCategoryId(category.id)}
+                                onFocus={() => setActiveCategoryId(category.id)}
+                                aria-expanded={isActiveCategory}
+                                aria-controls={isActiveCategory ? 'desktop-subcategories' : undefined}
+                                onClick={() => setCategoriesOpen(false)}
+                                className={`flex items-center gap-2 mx-2 my-0.5 px-3 py-2 rounded-xl transition-colors ${
+                                  isActiveCategory
+                                    ? 'bg-[#241a12] text-[#E8C875]'
+                                    : 'text-[#F5F0E4]/80 hover:bg-[#241a12] hover:text-[#E8C875]'
+                                }`}
+                              >
+                                <span className="flex-1 min-w-0 truncate text-xs font-semibold">
+                                  {category.name}
+                                </span>
+                                {hasSubcategories && (
+                                  <ChevronDown
+                                    className={`w-3.5 h-3.5 shrink-0 -rotate-90 ${
+                                      isActiveCategory ? 'text-[#E8C875]' : 'text-[#D8A83E]/50'
+                                    }`}
+                                  />
+                                )}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                        {activeCategory && (
+                        <div id="desktop-subcategories" aria-label={`${activeCategory.name} subcategories`} className="flex-1 min-w-0 py-2 max-h-[min(420px,70vh)] overflow-y-auto">
+                            <>
+                              <div className="px-4 py-1.5 flex items-center justify-between gap-2">
+                                <span className="text-[9px] font-bold uppercase tracking-[0.24em] text-[#D8A83E]/70 truncate">
+                                  {activeCategory.name}
+                                </span>
+                                <Link
+                                  to={`/categories/${activeCategory.id}`}
+                                  onClick={() => setCategoriesOpen(false)}
+                                  className="shrink-0 text-[9px] font-semibold uppercase tracking-widest text-[#F5F0E4]/55 hover:text-[#E8C875] transition-colors"
+                                >
+                                  All
+                                </Link>
+                              </div>
+                              {activeCategorySubcategories.length > 0 ? (
+                                activeCategorySubcategories.map((subcategory) => (
+                                  <Link
+                                    key={subcategory.id}
+                                    to={`/categories/${activeCategory.id}/${subcategory.slug}`}
+                                    onClick={() => setCategoriesOpen(false)}
+                                    className="flex items-center justify-between gap-2 px-4 py-2 mx-1 rounded-lg text-[11px] font-medium text-[#F5F0E4]/80 hover:bg-[#241a12] hover:text-[#E8C875] transition-colors group/sub"
+                                  >
+                                    <span className="truncate">{subcategory.name}</span>
+                                    <ArrowRight className="w-3 h-3 shrink-0 text-[#D8A83E]/40 group-hover/sub:text-[#E8C875] group-hover/sub:translate-x-0.5 transition-all" />
+                                  </Link>
+                                ))
+                              ) : (
+                                <Link
+                                  to={`/categories/${activeCategory.id}?view=products`}
+                                  onClick={() => setCategoriesOpen(false)}
+                                  className="flex items-center justify-between gap-2 px-4 py-2 mx-1 rounded-lg text-[11px] font-medium text-[#F5F0E4]/70 hover:bg-[#241a12] hover:text-[#E8C875] transition-colors"
+                                >
+                                  <span>Browse all products</span>
+                                  <ArrowRight className="w-3 h-3 text-[#D8A83E]/40" />
+                                </Link>
+                              )}
+                            </>
+                        </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -267,19 +347,60 @@ export const Header: React.FC = () => {
                   <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${mobileCategoriesOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {mobileCategoriesOpen && (
-                  <div className="pl-3 grid grid-cols-2 gap-1.5 pt-1">
-                    {STORE_CONFIG.categories.slice(0, 9).map((category) => (
-                      <Link
-                        key={category.id}
-                        to={`/categories/${category.id}`}
-                        className="px-3 py-2 text-[11px] font-medium rounded-lg text-[#F5F0E4]/75 hover:bg-white/5 hover:text-[#E8C875] transition-colors truncate"
-                      >
-                        {category.name}
-                      </Link>
-                    ))}
+                  <div className="space-y-1 pt-1">
+                    {STORE_CONFIG.categories.slice(0, 10).map((category) => {
+                      const subcategoryItems = subcategoriesFor(category.id);
+                      const isCategoryOpen = mobileOpenCategoryId === category.id;
+                      return (
+                        <div
+                          key={category.id}
+                          className="rounded-xl border border-[#2a2118]/80 overflow-hidden"
+                        >
+                          <div className="flex items-center">
+                            <Link
+                              to={`/categories/${category.id}`}
+                              className="flex-1 min-w-0 px-3 py-2.5 text-[11px] font-medium text-[#F5F0E4]/80 hover:text-[#E8C875] transition-colors truncate"
+                            >
+                              {category.name}
+                            </Link>
+                            {subcategoryItems.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setMobileOpenCategoryId(isCategoryOpen ? null : category.id)
+                                }
+                                aria-expanded={isCategoryOpen}
+                                aria-label={`${isCategoryOpen ? 'Hide' : 'Show'} ${category.name} collections`}
+                                className="shrink-0 px-3 py-2.5 text-[#D8A83E] cursor-pointer"
+                              >
+                                <ChevronDown
+                                  className={`w-4 h-4 transition-transform duration-300 ${
+                                    isCategoryOpen ? 'rotate-180' : ''
+                                  }`}
+                                />
+                              </button>
+                            )}
+                          </div>
+                          {isCategoryOpen && subcategoryItems.length > 0 && (
+                            <div className="px-2 pb-2 space-y-0.5 bg-black/20">
+                              {subcategoryItems.map((subcategory) => (
+                                <Link
+                                  key={subcategory.id}
+                                  to={`/categories/${category.id}/${subcategory.slug}`}
+                                  className="flex items-center justify-between gap-2 px-3 py-2 text-[11px] rounded-lg text-[#F5F0E4]/70 hover:bg-white/5 hover:text-[#E8C875] transition-colors"
+                                >
+                                  <span className="truncate">{subcategory.name}</span>
+                                  <ArrowRight className="w-3 h-3 shrink-0 text-[#D8A83E]/50" />
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                     <Link
                       to="/categories"
-                      className="col-span-2 px-3 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-xl text-[#E8C875] border border-[#D8A83E]/30 text-center"
+                      className="block px-3 py-2.5 mt-1 text-[11px] font-bold uppercase tracking-widest rounded-xl text-[#E8C875] border border-[#D8A83E]/30 text-center"
                     >
                       View All Categories
                     </Link>

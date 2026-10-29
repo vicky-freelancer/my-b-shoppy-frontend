@@ -8,10 +8,8 @@ import {
   Minus,
   PackageCheck,
   Plus,
-  ShieldCheck,
   ShoppingBag,
   Star,
-  Truck,
 } from 'lucide-react';
 import { ProductCard } from '../components/ProductCard';
 import { GoldBand } from '../components/GoldBand';
@@ -25,9 +23,24 @@ const formatPrice = (price: number) => price.toLocaleString('en-IN');
 export const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { products, wishlistIds, toggleWishlist, addToCart, openDirectCheckout } = useStore();
+  const { products, subcategories, wishlistIds, toggleWishlist, addToCart, openDirectCheckout } = useStore();
 
   const product = useMemo(() => products.find((p) => p.id === id), [products, id]);
+
+  const productSubcategory = useMemo(() => {
+    if (!product) return undefined;
+    const name = product.subcategory?.trim().toLowerCase();
+    return (
+      subcategories.find((subcategory) => subcategory.id === product.subcategoryId) ||
+      subcategories.find(
+        (subcategory) =>
+          subcategory.categoryId === product.categoryId &&
+          !!name &&
+          (subcategory.name.trim().toLowerCase() === name ||
+            subcategory.slug.trim().toLowerCase() === name)
+      )
+    );
+  }, [product, subcategories]);
 
   const [selectedVariant, setSelectedVariant] = useState<string | undefined>(undefined);
   const [quantity, setQuantity] = useState(1);
@@ -87,6 +100,17 @@ export const ProductDetailPage: React.FC = () => {
           >
             {product.category}
           </Link>
+          {productSubcategory && (
+            <>
+              <span className="text-[#B8860B]/60">/</span>
+              <Link
+                to={`/categories/${product.categoryId}/${productSubcategory.slug}`}
+                className="hover:text-[#B8860B] transition whitespace-nowrap"
+              >
+                {productSubcategory.name}
+              </Link>
+            </>
+          )}
           <span className="text-[#B8860B]/60">/</span>
           <span className="text-[#B8860B] font-bold truncate">{product.name}</span>
         </nav>
@@ -102,10 +126,16 @@ export const ProductDetailPage: React.FC = () => {
                 alt={product.name}
                 className="w-full aspect-square object-contain object-center"
               />
-              {product.badge && (
-                <span className="absolute top-4 left-4 text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#241A12]/85 text-[#E8C875] border border-[#E8C875]/60 backdrop-blur-sm">
-                  {product.badge}
+              {product.inStock === false ? (
+                <span className="absolute top-4 left-4 text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-rose-950/85 text-rose-200 border border-rose-400/50 backdrop-blur-sm">
+                  Sold Out
                 </span>
+              ) : (
+                product.badge && (
+                  <span className="absolute top-4 left-4 text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#241A12]/85 text-[#E8C875] border border-[#E8C875]/60 backdrop-blur-sm">
+                    {product.badge}
+                  </span>
+                )
               )}
               {discountPercent > 0 && (
                 <span className="absolute top-4 right-4 text-xs font-extrabold px-2.5 py-1 rounded-full bg-rose-600/90 text-white shadow-lg">
@@ -114,24 +144,7 @@ export const ProductDetailPage: React.FC = () => {
               )}
             </div>
 
-            {/* Assurance row */}
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { icon: Banknote, label: 'Easy Checkout' },
-                { icon: Truck, label: '24h Dispatch' },
-                { icon: ShieldCheck, label: 'Secure Packaging' },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex flex-col items-center gap-1.5 bg-[#FFFDF6] border border-[#D8A83E]/30 rounded-2xl py-3.5 px-2 text-center card-lift"
-                >
-                  <item.icon className="w-5 h-5 text-[#B8860B]" />
-                  <span className="text-[10px] sm:text-[11px] font-bold text-[#6B5945] uppercase tracking-wide">
-                    {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {/* Assurance row removed */}
           </div>
 
           {/* Right: Details */}
@@ -173,19 +186,26 @@ export const ProductDetailPage: React.FC = () => {
             </div>
 
             {/* Price block */}
-            <div className="flex items-baseline gap-3 pb-6 border-b border-[#D8A83E]/30">
-              <span className="font-display font-bold text-[#241A12] font-mono" style={{ fontSize: 'clamp(30px, 3.4vw, 40px)' }}>
-                ₹{formatPrice(product.price)}
-              </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <>
-                  <span className="text-base text-[#6B5945]/70 line-through font-mono">
-                    ₹{formatPrice(product.originalPrice)}
-                  </span>
-                  <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-wide">
-                    Save ₹{formatPrice(product.originalPrice - product.price)}
-                  </span>
-                </>
+            <div className="space-y-4">
+              <div className="flex items-baseline gap-3 pb-6 border-b border-[#D8A83E]/30">
+                <span className="font-display font-bold text-[#241A12] font-mono" style={{ fontSize: 'clamp(30px, 3.4vw, 40px)' }}>
+                  ₹{formatPrice(product.price)}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <>
+                    <span className="text-base text-[#6B5945]/70 line-through font-mono">
+                      ₹{formatPrice(product.originalPrice)}
+                    </span>
+                    <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-wide">
+                      Save ₹{formatPrice(product.originalPrice - product.price)}
+                    </span>
+                  </>
+                )}
+              </div>
+              {product.description && (
+                <p className="text-sm sm:text-[15px] text-[#3d2f1a]/90 leading-relaxed">
+                  {product.description}
+                </p>
               )}
             </div>
 
@@ -282,7 +302,7 @@ export const ProductDetailPage: React.FC = () => {
             </div>
 
             {/* Meta details */}
-            <dl className="pt-6 border-t border-[#D8A83E]/30 grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
+            <div className="pt-6 border-t border-[#D8A83E]/30 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
               {[
                 ['Material', product.material],
                 ['Stone / Accent', product.stone],
@@ -291,40 +311,18 @@ export const ProductDetailPage: React.FC = () => {
               ]
                 .filter(([, value]) => !!value)
                 .map(([label, value]) => (
-                  <div key={label as string} className="flex flex-col gap-0.5">
-                    <dt className="text-[#6B5945]/80 uppercase tracking-wider font-bold text-[10px]">
-                      {label}
-                    </dt>
-                    <dd className="text-[#241A12] font-semibold">{value}</dd>
+                  <div key={label as string} className="flex items-center gap-2">
+                    <span className="text-[#6B5945]/80 uppercase tracking-wider font-bold text-[10px]">
+                      {label}:
+                    </span>
+                    <span className="text-[#241A12] font-semibold">{value}</span>
                   </div>
                 ))}
-            </dl>
+            </div>
           </div>
         </div>
 
-        {/* Description panel */}
-        <section className="mt-14 bg-[#FFFDF6] border border-[#D8A83E]/30 rounded-[28px] p-6 sm:p-9 space-y-3">
-          <h2 className="font-display text-2xl font-medium text-[#241A12]">
-            About This <em className="italic text-gold-gradient">Piece</em>
-          </h2>
-          <p className="text-sm sm:text-[15px] text-[#3d2f1a]/90 leading-relaxed max-w-3xl">
-            {product.description}
-          </p>
-          <ul className="pt-3 space-y-2 text-xs text-[#6B5945]">
-            <li className="flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#B8860B] shrink-0 mt-0.5" />
-              Anti-tarnish finish — water &amp; sweat resistant for everyday confidence.
-            </li>
-            <li className="flex items-start gap-2">
-              <PackageCheck className="w-4 h-4 text-[#B8860B] shrink-0 mt-0.5" />
-              Ships in signature my B shoppy protective gift packaging.
-            </li>
-            <li className="flex items-start gap-2">
-              <Banknote className="w-4 h-4 text-[#B8860B] shrink-0 mt-0.5" />
-              Inspect before you pay — easy, flexible payment available pan-India.
-            </li>
-          </ul>
-        </section>
+        {/* Description panel removed as requested */}
 
         {/* Related products — warm champagne section alternating with the cream detail above */}
         {relatedProducts.length > 0 && (
@@ -338,7 +336,7 @@ export const ProductDetailPage: React.FC = () => {
                   You May Also <em className="italic text-gold-gradient">Love</em>
                 </h2>
                 <Link
-                  to={`/categories/${product.categoryId}`}
+                  to={`/categories/${product.categoryId}?view=products`}
                   className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-[#B8860B] hover:text-[#8A6A15] transition-colors"
                 >
                   More From {product.category}

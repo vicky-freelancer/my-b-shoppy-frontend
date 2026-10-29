@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Express API for my B shoppy (Razorpay orders, payment verification, webhooks). Serves the built frontend in production.",
   "scripts": {
+    "test": "node --test src/server.test.mjs",
     "start": "node src/server.mjs",
     "server": "node src/server.mjs",
     "dev": "node --watch src/server.mjs",

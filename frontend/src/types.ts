@@ -7,7 +7,9 @@ export interface ProductItem {
   imageUrl: string;
   category: string;
   categoryId: string;
-  badge?: 'EXCLUSIVE' | 'NEW' | 'BESTSELLER' | 'SALE' | string;
+  subcategory?: string;
+  subcategoryId?: string;
+  badge?: string;
   rating: number;
   reviewsCount: number;
   material?: string;
@@ -17,6 +19,16 @@ export interface ProductItem {
   inStock?: boolean;
   isSupabaseSynced?: boolean;
   created_at?: string;
+}
+
+export interface SubcategoryItem {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  featuredImage: string;
+  isActive: boolean;
+  sortOrder: number;
 }
 
 export interface ProductCategory {

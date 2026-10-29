@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { STORE_CONFIG } from '../storeConfig';
-import { OrderFormData, ProductItem } from '../types';
+import { STORE_CONFIG, CATEGORIES_CATALOG } from '../storeConfig';
+import { OrderFormData, ProductItem, SubcategoryItem } from '../types';
 
 let clientInstance: SupabaseClient | null = null;
 
@@ -42,6 +42,63 @@ function slugifyCategory(value: string): string {
     .replace(/&/g, 'and')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+/** Keep products from legacy category ids mapped to the current catalogue. */
+const CATEGORY_ID_ALIASES: Record<string, string> = {
+  'artificial-jewels': 'ad-jewellery',
+  'artificial-jewellery': 'ad-jewellery',
+  necklaces: 'anti-tarnish-jewellery',
+  'anti-tarnish': 'anti-tarnish-jewellery',
+  rings: 'ad-jewellery',
+  earrings: 'ad-jewellery',
+  bracelets: 'ad-jewellery',
+  'mobile-charm': 'mobile-charms',
+  'key-chain': 'key-chains',
+  'keychains': 'key-chains',
+  'mens-collection': 'men-accessories',
+  'mens-accessories': 'men-accessories',
+  'men-s-accessories': 'men-accessories',
+  'bow-and-scrunchies': 'bows-and-scrunchies',
+  bows: 'bows-and-scrunchies',
+  scrunchies: 'bows-and-scrunchies',
+  handbags: 'bags',
+  'hand-bags': 'bags',
+  'stationery-gift-items': 'stationery-and-gifts',
+};
+
+const ALLOWED_CATEGORY_IDS = CATEGORIES_CATALOG.map((category) => category.id);
+
+function resolveCategoryId(value: string): string {
+  const normalized = value.trim();
+  if (!normalized) return '';
+  const slug = slugifyCategory(normalized);
+  return CATEGORY_ID_ALIASES[normalized] || CATEGORY_ID_ALIASES[slug] || slug;
+}
+
+const CATEGORY_NAME_ALIASES: Record<string, string> = {
+  'artificial jewels': 'AD Jewellery',
+  'artificial jewellery': 'AD Jewellery',
+  necklaces: 'Anti Tarnish Jewellery',
+  'anti tarnish': 'Anti Tarnish Jewellery',
+  rings: 'AD Jewellery',
+  earrings: 'AD Jewellery',
+  bracelets: 'AD Jewellery',
+  'mobile charms': 'Mobile charms',
+  'mobile charm': 'Mobile charms',
+  'key chains': 'Key chains',
+  'mens collection': 'Men accessories',
+  bows: 'Bows & Scrunchies',
+  scrunchies: 'Bows & Scrunchies',
+  handbags: 'Bags',
+  'hand bags': 'Bags',
+  'stationery gift items': 'Stationery and Gifts',
+  'stationary and gifts': 'Stationery and Gifts',
+};
+
+function resolveCategoryName(value: string): string {
+  return CATEGORIES_CATALOG.find((category) => category.id === resolveCategoryId(value))?.name ||
+    CATEGORY_NAME_ALIASES[value.trim().toLowerCase()] || value;
 }
 
 /**
@@ -101,40 +158,113 @@ export async function fetchSupabaseProducts(): Promise<{ data: ProductItem[] | n
 
     if (data && data.length > 0) {
       const mapped: ProductItem[] = data.map((row: any) => {
-        const stockQty = Number(row.quantity ?? row.stock ?? 1);
+        const stockQtyRaw = row.quantity ?? row.stock ?? row.qty ?? row.Quantity ?? row.Stock ?? row.Qty ?? row.IN_STOCK_QTY ?? row.inStockQty;
+        const stockQty = stockQtyRaw === undefined || stockQtyRaw === null ? 1 : Number(stockQtyRaw);
+        const inStockRaw = row.in_stock ?? row.inStock ?? row.IN_STOCK ?? row.stock_status ?? row.status;
+        const inStockByFlag = inStockRaw === undefined || inStockRaw === null
+          ? undefined
+          : typeof inStockRaw === 'boolean'
+            ? inStockRaw
+            : typeof inStockRaw === 'string'
+              ? !['false', '0', 'out of stock', 'sold out', 'unavailable'].includes(inStockRaw.toLowerCase().trim())
+              : Number(inStockRaw) !== 0;
+        const inStock = inStockByFlag === undefined ? stockQty > 0 : inStockByFlag && stockQty > 0;
         return {
-          id: row.slug || String(row.id),
-          name: row.name || row.title || 'Product',
-          subtitle: row.subtitle || '',
-          price: Number(row.price) || Number(row.sale_price) || 0,
+          id: row.slug || row.Slug || String(row.id || row.ID),
+          name: row.name || row.title || row.Name || row.Title || 'Product',
+          subtitle: row.subtitle || row.Subtitle || '',
+          price: Number(row.price) || Number(row.sale_price) || Number(row.Price) || Number(row.SalePrice) || 0,
           originalPrice: row.original_price
             ? Number(row.original_price)
             : row.mrp
             ? Number(row.mrp)
+            : row.originalPrice
+            ? Number(row.originalPrice)
+            : row.MRP
+            ? Number(row.MRP)
             : undefined,
-          imageUrl: row.image_url || row.cover_image || row.imageUrl || DEFAULT_PRODUCT_IMAGE,
-          category: row.category || 'Artificial Jewels',
-          categoryId:
+          imageUrl: row.image_url || row.cover_image || row.imageUrl || row.ImageURL || row.image || DEFAULT_PRODUCT_IMAGE,
+          category: resolveCategoryName(row.category_id || row.categoryId || row.category || row.Category || '') || 'AD Jewellery',
+          categoryId: resolveCategoryId(
             row.category_id ||
-            slugifyCategory(row.category || '') ||
-            row.categoryId ||
-            'artificial-jewels',
-          badge: row.badge || undefined,
-          rating: Number(row.rating) || 5,
-          reviewsCount: Number(row.reviews_count || row.reviewsCount) || 12,
-          material: row.material || undefined,
-          stone: row.stone || undefined,
-          variants: parseVariants(row.variants),
-          description: row.description || '',
-          inStock: row.in_stock !== false && stockQty > 0,
+              row.categoryId ||
+              slugifyCategory(row.category || row.Category || '') ||
+              'ad-jewellery'
+          ),
+          subcategory: row.subcategory || row.Subcategory || undefined,
+          subcategoryId:
+            row.subcategory_id !== undefined && row.subcategory_id !== null
+              ? String(row.subcategory_id)
+              : row.subcategoryId !== undefined && row.subcategoryId !== null
+              ? String(row.subcategoryId)
+              : undefined,
+          badge: (() => {
+            const b = row.badge ?? row.Badge ?? row.promotion_tag ?? row.promotionTag ?? row.tag ?? row.tags ?? row.PromotionTag ?? row.Badges ?? row.badges;
+            if (Array.isArray(b)) return b[0] ? String(b[0]) : undefined;
+            if (typeof b === 'string' && b.trim() === '') return undefined;
+            if (b == null) return undefined;
+            return String(b);
+          })(),
+          rating: Number(row.rating) || Number(row.Rating) || 5,
+          reviewsCount: Number(row.reviews_count || row.reviewsCount || row.ReviewsCount) || 12,
+          material: row.material || row.Material || undefined,
+          stone: row.stone || row.Stone || undefined,
+          variants: parseVariants(row.variants || row.Variants),
+          description: row.description || row.Description || '',
+          inStock,
           isSupabaseSynced: true,
-          created_at: row.created_at,
+          created_at: row.created_at || row.createdAt,
         };
       });
       return { data: mapped, error: null };
     }
 
     return { data: [], error: null };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return { data: null, error: message };
+  }
+}
+
+/**
+ * Fetch active subcategories from Supabase. Newly created admin subcategories
+ * appear here immediately — no storefront rebuild is required.
+ */
+export async function fetchSupabaseSubcategories(): Promise<{
+  data: SubcategoryItem[] | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return { data: null, error: 'Supabase client not initialized' };
+    }
+
+    const { data, error } = await supabase
+      .from('subcategories')
+      .select('id, category_id, name, slug, featured_image, is_active, sort_order')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.info('Notice from Supabase fetch subcategories:', error.message);
+      return { data: null, error: error.message };
+    }
+
+    const mapped: SubcategoryItem[] = (data || [])
+      .map((row: any) => ({
+        id: String(row.id),
+        categoryId: resolveCategoryId(String(row.category_id || '')),
+        name: row.name || '',
+        slug: row.slug || '',
+        featuredImage: row.featured_image || row.image_url || '',
+        isActive: row.is_active !== false,
+        sortOrder: Number(row.sort_order) || 0,
+      }))
+      .filter((subcategory) => ALLOWED_CATEGORY_IDS.includes(subcategory.categoryId));
+
+    return { data: mapped, error: null };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return { data: null, error: message };
@@ -215,10 +345,9 @@ export async function submitOrder(orderData: OrderFormData): Promise<{ success: 
 
   const supabase = getSupabaseClient();
   if (!supabase) {
-    console.warn('Supabase not configured, providing local order reference');
     return {
-      success: true,
-      orderId: generatedRef,
+      success: false,
+      error: 'Order storage is not configured. Please contact the store.',
     };
   }
 

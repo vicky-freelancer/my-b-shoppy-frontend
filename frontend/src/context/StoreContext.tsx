@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { INITIAL_PRODUCTS } from '../storeConfig';
-import { CartItem, ProductItem } from '../types';
-import { fetchSupabaseProducts, getSupabaseClient } from '../lib/supabaseClient';
+import { CartItem, ProductItem, SubcategoryItem } from '../types';
+import { fetchSupabaseProducts, fetchSupabaseSubcategories, getSupabaseClient } from '../lib/supabaseClient';
 
 interface DirectCheckoutState {
   product: ProductItem;
@@ -11,6 +11,10 @@ interface DirectCheckoutState {
 
 interface StoreContextValue {
   products: ProductItem[];
+  subcategories: SubcategoryItem[];
+  subcategoriesLoaded: boolean;
+  subcategoriesError: string | null;
+  refreshSubcategories: () => Promise<void>;
   isSupabaseLoading: boolean;
   supabaseConnected: boolean;
   cartItems: CartItem[];
@@ -55,6 +59,9 @@ export const useStore = (): StoreContextValue => {
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
+  const [subcategories, setSubcategories] = useState<SubcategoryItem[]>([]);
+  const [subcategoriesLoaded, setSubcategoriesLoaded] = useState(false);
+  const [subcategoriesError, setSubcategoriesError] = useState<string | null>(null);
   const [isSupabaseLoading, setIsSupabaseLoading] = useState(false);
   const [supabaseConnected, setSupabaseConnected] = useState(false);
 
@@ -72,22 +79,55 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [quickViewProduct, setQuickViewProduct] = useState<ProductItem | null>(null);
   const [directCheckoutProduct, setDirectCheckoutProduct] = useState<DirectCheckoutState | null>(null);
 
+  const refreshSubcategories = useCallback(async () => {
+    setSubcategoriesError(null);
+    const result = await fetchSupabaseSubcategories();
+    if (result.data) {
+      setSubcategories(result.data);
+    } else if (result.error) {
+      setSubcategoriesError(result.error);
+    }
+    setSubcategoriesLoaded(true);
+  }, []);
+
   useEffect(() => {
+    let disposed = false;
     async function loadSupabaseData() {
       const client = getSupabaseClient();
-      if (client) {
-        setSupabaseConnected(true);
-        setIsSupabaseLoading(true);
-        const { data } = await fetchSupabaseProducts();
-        if (data && data.length > 0) {
-          setProducts(data);
-        }
-        setIsSupabaseLoading(false);
+      if (!client) {
+        setSubcategoriesLoaded(true);
+        return;
       }
+
+      setSupabaseConnected(true);
+      setIsSupabaseLoading(true);
+      const [productsResult] = await Promise.all([
+        fetchSupabaseProducts(),
+        refreshSubcategories(),
+      ]);
+      if (disposed) return;
+      if (productsResult.data) {
+        setProducts(productsResult.data);
+      }
+      setIsSupabaseLoading(false);
     }
 
     loadSupabaseData();
-  }, []);
+    // Re-read when shoppers return from another tab, and while they browse.
+    // Polling also covers databases where Realtime publication is not enabled.
+    const refreshVisible = () => {
+      if (document.visibilityState === 'visible') void loadSupabaseData();
+    };
+    const interval = window.setInterval(refreshVisible, 30000);
+    window.addEventListener('focus', refreshVisible);
+    document.addEventListener('visibilitychange', refreshVisible);
+    return () => {
+      disposed = true;
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refreshVisible);
+      document.removeEventListener('visibilitychange', refreshVisible);
+    };
+  }, [refreshSubcategories]);
 
   const addToCart = useCallback((product: ProductItem, variant?: string, quantity: number = 1) => {
     if (product.inStock === false) return;
@@ -157,6 +197,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const value: StoreContextValue = {
     products,
+    subcategories,
+    subcategoriesLoaded,
+    subcategoriesError,
+    refreshSubcategories,
     isSupabaseLoading,
     supabaseConnected,
     cartItems,

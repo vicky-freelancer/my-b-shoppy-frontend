@@ -21,7 +21,11 @@ const slideCopy: { subtitle: string; sideText: string }[] = [
   { subtitle: 'CURATED FOR HIM', sideText: 'Sharp & Smart\nEveryday\nEssentials' },
 ];
 
-const titleFromFile = (file: string) => file.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+const titleFromFile = (file: string) =>
+  file
+    .replace(/\.[^.]+$/, '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/artificial jewels/i, 'AD Jewels');
 
 const slides = sliderFiles.map((file, i) => {
   const title = titleFromFile(file);

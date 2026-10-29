@@ -58,16 +58,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#241A12]/12 to-transparent pointer-events-none"></div>
 
         {/* Badge */}
-        {product.inStock === false ? (
+        {(product.inStock === false) ? (
           <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-rose-950/85 text-rose-200 border border-rose-400/50 backdrop-blur-sm">
             Sold Out
           </span>
         ) : (
-          product.badge && (
+          product.badge && String(product.badge).trim() ? (
             <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-[#111111]/85 text-[#F4D99B] border border-[#D8A83E]/50 backdrop-blur-sm">
-              {product.badge}
+              {String(product.badge).trim()}
             </span>
-          )
+          ) : null
         )}
 
         {/* Wishlist button */}

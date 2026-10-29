@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CartItem, OrderFormData, FormErrors, ProductItem } from '../types';
 import { STORE_CONFIG } from '../storeConfig';
 import { submitOrder } from '../lib/supabaseClient';
+import { getSupabaseClient } from '../lib/supabaseClient';
 import {
   createRazorpayOrder,
   loadRazorpayScript,
@@ -50,6 +51,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [confirmedPaymentId, setConfirmedPaymentId] = useState<string>('');
   const [paymentError, setPaymentError] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [pendingOrder, setPendingOrder] = useState<OrderFormData | null>(null);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setOrderSuccess(false);
+      setPaymentError('');
+      setErrors({});
+      setCopied(false);
+    }
+  }, [isOpen]);
 
   // Lock background scroll while the checkout is open
   React.useEffect(() => {
@@ -88,7 +99,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     if (!formData.phone.trim()) {
       errs.phone = 'Phone number is required for delivery SMS/calls';
-    } else if (formData.phone.trim().length < 6) {
+    } else if (formData.phone.replace(/\D/g, '').length < 6) {
       errs.phone = 'Please enter a valid phone number';
     }
 
@@ -106,6 +117,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    if (!getSupabaseClient()) {
+      setPaymentError('Ordering is temporarily unavailable. Please contact the store before making a payment.');
+      return;
+    }
+    if (activeItems.length === 0 && !pendingOrder) return;
 
     if (activeItems.some((item) => item.product.inStock === false)) {
       setPaymentError(
@@ -136,6 +153,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     try {
       // 1. Ask the server to create a Razorpay order (amount in paise)
+      let paidOrder = pendingOrder;
+      if (!paidOrder) {
       const receipt = `MBS-${Date.now().toString(36).toUpperCase()}`;
       const amountInPaise = Math.round(finalAmount * 100);
       const order = await createRazorpayOrder(amountInPaise, receipt, buildRazorpayNotes(payload));
@@ -163,26 +182,30 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         throw new Error('Payment signature verification failed. Please contact support.');
       }
 
-      // 4. Record the PAID order in Supabase
-      const response = await submitOrder({
+      paidOrder = {
         ...payload,
         razorpay_order_id: payment.razorpay_order_id,
         razorpay_payment_id: payment.razorpay_payment_id,
         razorpay_signature: payment.razorpay_signature,
-      });
+      };
+      setPendingOrder(paidOrder);
+      }
+
+      // 4. Record the PAID order in Supabase
+      const response = await submitOrder(paidOrder);
 
       if (!response.success) {
         throw new Error(
-          response.error ||
-            'Your payment was received, but there was a problem recording your order. Please contact support and quote this reference.',
+          `Payment ${paidOrder.razorpay_payment_id} was received, but your order could not be saved. Retry saving below without paying again, or contact support.`,
         );
       }
 
       const orderId = response.orderId || `MBS-${Math.floor(100000 + Math.random() * 900000)}`;
       setConfirmedOrderId(orderId);
-      setConfirmedPaymentId(payment.razorpay_payment_id);
+      setConfirmedPaymentId(paidOrder.razorpay_payment_id || '');
+      setPendingOrder(null);
       setOrderSuccess(true);
-      onClearCart();
+      if (!directProduct) onClearCart();
 
       try {
         confetti({
@@ -230,6 +253,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </div>
           <button
             onClick={onClose}
+            disabled={isSubmitting}
+            aria-label="Close checkout"
             className="p-1.5 rounded-full text-[#6B5945] hover:text-[#241A12] hover:bg-[#E8C875]/40 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -488,7 +513,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               return (
                 <button
                   type="submit"
-                  disabled={isSubmitting || activeItems.length === 0}
+                  disabled={isSubmitting || (activeItems.length === 0 && !pendingOrder)}
                   className="w-full py-4 px-6 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-extrabold text-xs uppercase tracking-widest transition duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl cursor-pointer"
                 >
                   {isSubmitting ? (
@@ -499,7 +524,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   ) : (
                     <>
                       <Lock className="w-4 h-4" />
-                      <span>PAY ONLINE & PLACE ORDER</span>
+                      <span>{pendingOrder ? 'Retry Saving Paid Order' : 'PAY ONLINE & PLACE ORDER'}</span>
                     </>
                   )}
                 </button>

@@ -53,7 +53,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search rings, necklaces, cuffs, claw clips, bags, silk scrunchies..."
+            placeholder="Search hair accessories, AD jewellery, bags, anti tarnish jewellery, stationery..."
             className="w-full bg-transparent text-sm sm:text-base text-[#241A12] placeholder-[#6B5945]/60 focus:outline-none"
           />
           {query && (

@@ -35,7 +35,7 @@ export const HomePage: React.FC = () => {
   useSeo({
     title: 'MY B SHOPPY — Style • Accessories • You',
     description:
-      'Premium Indian fashion accessories — hair clips, artificial jewellery, bows, scrunchies and handbags. Trendy, cute and made for every style and every mood.',
+      'Premium Indian fashion accessories — hair accessories, AD jewellery, bags, anti tarnish jewellery and stationery gifts. Trendy, cute and made for every style and every mood.',
     path: '/',
   });
 

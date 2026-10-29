@@ -1,5 +1,18 @@
 # MY B SHOPPY — Luxury E-Commerce Store
 
+Recent completion fixes:
+
+- Both the storefront and sibling admin dashboard support nine parent categories, including Bows & Scrunchies, Key chains, Mobile charms and Men accessories. The four additions are saved in the shared Supabase categories table. Their IDs are `bows-and-scrunchies`, `key-chains`, `mobile-charms`, and `men-accessories`.
+- `npm run test:categories --workspace frontend` checks admin product/collection payloads, legacy category aliases, images and the catalogue. The storefront refreshes products and collections on tab focus and every 30 seconds while visible.
+
+- `npm start` now starts the backend, which serves `frontend/dist` when built, including direct page URLs.
+- `npm run test --workspace backend` checks payment input validation, signature verification, health, and unknown API routes without contacting Razorpay.
+- Collection load failures offer a retry instead of incorrectly reporting a missing collection.
+- Checkout requires configured order storage, resets its confirmation screen between purchases, and retries saving a verified payment without opening another payment popup during the current session. Keep the checkout page open if saving fails and retain the payment ID for support.
+- The contact form composes an email in the customer's mail application; the customer must send that email.
+
+Payment capture and Supabase persistence still require an end-to-end test with your own test credentials. The existing browser-side order recording and legacy schema fallbacks remain; durable server-side reconciliation and database idempotency are still needed for production payment recovery.
+
 Premium fashion accessories storefront (hair accessories, artificial jewellery,
 bows, scrunchies, handbags) with a Razorpay payment backend.
 

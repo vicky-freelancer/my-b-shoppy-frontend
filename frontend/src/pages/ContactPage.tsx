@@ -50,9 +50,9 @@ export const ContactPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (form.name.trim() && form.email.trim() && form.message.trim()) {
+      const body = `Name: ${form.name}\nEmail: ${form.email}\nOrder: ${form.orderId || 'N/A'}\n\n${form.message}`;
+      window.location.href = `mailto:${STORE_CONFIG.contact.email}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(body)}`;
       setSubmitted(true);
-      setForm(initialForm);
-      setTimeout(() => setSubmitted(false), 5000);
     }
   };
 
@@ -113,7 +113,7 @@ export const ContactPage: React.FC = () => {
           <div className="lg:col-span-3 bg-[#FFFDF6] border border-[#D8A83E]/30 rounded-[28px] p-6 sm:p-8 space-y-6">
             <div className="space-y-1.5">
               <h2 className="font-display text-2xl sm:text-3xl font-medium text-[#241A12]">
-                Send Us a <em className="italic text-gold-gradient">Message</em>
+                Send Us a Message
               </h2>
               <p className="text-xs text-[#6B5945]">
                 Fill in the form and our care team will get back to you shortly.
@@ -211,13 +211,13 @@ export const ContactPage: React.FC = () => {
                 className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-semibold text-xs sm:text-sm uppercase tracking-[0.22em] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
               >
                 <MessageSquareText className="w-4 h-4" />
-                Send Message
+                Compose Email
               </button>
 
               {submitted && (
                 <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-500/10 border border-emerald-500/40 rounded-xl px-4 py-3">
                   <CheckCircle2 className="w-4 h-4" />
-                  Message received! Our team will reach out within 24 hours.
+                  Your email app will open with your message. Send it there to contact our team.
                 </p>
               )}
             </form>
@@ -227,7 +227,7 @@ export const ContactPage: React.FC = () => {
           <aside className="lg:col-span-2 space-y-5">
             <div className="relative rounded-[28px] overflow-hidden border border-[#D8A83E]/40 h-56">
               <img
-                src="/images/categories/Handbags.jpg"
+                src="/images/categories/Hand Bags.jpg"
                 alt="my B shoppy accessories flatlay"
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover"

@@ -10,7 +10,7 @@ export const CategoriesPage: React.FC = () => {
   useSeo({
     title: 'Categories',
     description:
-      'Explore nine curated categories at my B shoppy — artificial jewels, hair accessories, bows, scrunchies, mobile charms, key chains, stationery, mens collection & hand bags.',
+      'Explore curated categories at my B shoppy — hair accessories, bows and scrunchies, jewellery, bags, key chains, mobile charms, men accessories and gifts.',
     path: '/categories',
   });
 
@@ -22,7 +22,7 @@ export const CategoriesPage: React.FC = () => {
           { label: 'Home', path: '/' },
           { label: 'Categories' },
         ]}
-        subtitle="Nine curated worlds of elegance — from coquette bows to heirloom-inspired jewels and masculine essentials"
+        subtitle="Nine curated worlds of elegance — hair accessories, AD jewellery, bags, anti tarnish jewellery and thoughtful gifts"
         metaText={`${CATEGORIES_CATALOG.length} Curated Worlds`}
       />
 

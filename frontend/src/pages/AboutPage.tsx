@@ -35,7 +35,7 @@ export const AboutPage: React.FC = () => {
               className="font-display font-medium text-[#241A12] leading-tight"
               style={{ fontSize: 'clamp(30px, 4vw, 44px)' }}
             >
-              Born From a Simple <em className="italic text-gold-gradient">Belief</em>
+              Born From a Simple Belief
             </h2>
             <p className="text-sm sm:text-base text-[#3d2f1a]/90 leading-relaxed">
               my B shoppy started with one frustration: beautiful accessories were either
@@ -111,7 +111,7 @@ export const AboutPage: React.FC = () => {
               className="font-display font-medium text-[#241A12]"
               style={{ fontSize: 'clamp(30px, 4vw, 46px)' }}
             >
-              The Values Behind <em className="italic text-gold-gradient">Every Order</em>
+              The Values Behind Every Order
             </h2>
           </div>
 
