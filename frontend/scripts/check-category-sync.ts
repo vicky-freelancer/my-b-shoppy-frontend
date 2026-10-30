@@ -5,11 +5,12 @@ import { fetchSupabaseProducts, fetchSupabaseSubcategories } from '../src/lib/su
 
 const parents = [
   ['bows-and-scrunchies', 'Bows & Scrunchies'],
-  ['key-chains', 'Key chains'],
-  ['mobile-charms', 'Mobile charms'],
-  ['men-accessories', 'Men accessories'],
+  ['key-chains', 'Key Chains'],
+  ['mobile-charms', 'Mobile Charms'],
+  ['men-accessories', 'Mens Accessories'],
 ];
-assert.equal(CATEGORIES_CATALOG.length, 9);
+assert.equal(CATEGORIES_CATALOG.length, 10);
+assert.deepEqual(CATEGORIES_CATALOG.map((category) => category.name), ["AD Jewellery", "Hair Accessories", "Anti Tarnish Jewellery", "Ear Rings", "Bows & Scrunchies", "Bags", "Mobile Charms", "Key Chains", "Mens Accessories", "Stationery & Gifts"]);
 for (const [id, name] of parents) {
   const category = CATEGORIES_CATALOG.find((category) => category.id === id);
   assert.equal(category?.name, name);
@@ -20,8 +21,8 @@ for (const id of ['silk-luxe-scrunchie', 'rust-scrunchie', 'satin-bow', 'velvet-
 }
 
 const fixtures = [
-  ...parents.map(([id]) => id), 'bows', 'scrunchies', 'mens-collection', 'Key chains',
-  'Mobile charms', 'Men accessories', 'Bows & Scrunchies',
+  ...parents.map(([id]) => id), 'bows', 'scrunchies', 'mens-collection', 'Key Chains',
+  'Mobile Charms', 'Mens Accessories', 'Bows & Scrunchies',
 ];
 const expected = [...parents.map(([id]) => id), 'bows-and-scrunchies', 'bows-and-scrunchies',
   'men-accessories', 'key-chains', 'mobile-charms', 'men-accessories', 'bows-and-scrunchies'];
@@ -39,4 +40,4 @@ assert.deepEqual(products.data?.map((product) => product.categoryId), expected);
 const subcategories = await fetchSupabaseSubcategories();
 assert.equal(subcategories.error, null);
 assert.deepEqual(subcategories.data?.map((subcategory) => subcategory.categoryId), expected);
-console.log('Category sync checks passed: nine parents, images, sample products, admin payloads and legacy aliases.');
+console.log('Category sync checks passed: ten parents, images, sample products, admin payloads and legacy aliases.');

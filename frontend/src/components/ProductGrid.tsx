@@ -149,7 +149,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
       {/* Pagination Bar */}
       {totalPages > 1 && (
-        <div className="pt-8 pb-4 flex items-center justify-center space-x-2">
+        <div className="pt-8 pb-4 flex flex-wrap items-center justify-center gap-2">
           {/* Previous Page */}
           <button
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}

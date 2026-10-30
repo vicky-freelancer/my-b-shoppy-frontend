@@ -106,7 +106,7 @@ export const Hero: React.FC = () => {
           >
             {active.headlineLine1}
             <br />
-            <em className="italic text-gold-gradient-light">{active.headlineLine2}</em>
+            <em className="not-italic text-gold-gradient-light">{active.headlineLine2}</em>
           </h1>
 
           <p

@@ -157,7 +157,7 @@ CREATE POLICY "Public Orders Update" ON orders FOR UPDATE USING (true);
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#111111]/70 backdrop-blur-md flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#111111]/70 backdrop-blur-md flex items-start justify-center p-4">
       <div className="relative w-full max-w-2xl bg-[#FFFDF6] border border-[#D8A83E]/50 rounded-[24px] shadow-2xl overflow-hidden text-[#241A12] my-8">
 
         {/* Header */}

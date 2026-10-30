@@ -1,0 +1,113 @@
+{
+  "results": [
+    {
+      "name": "Fresh and forged local-storage sessions require login",
+      "status": "PASS"
+    },
+    {
+      "name": "Incorrect credentials are rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Requested credentials sign in using the real server",
+      "status": "PASS"
+    },
+    {
+      "name": "Session survives reload",
+      "status": "PASS"
+    },
+    {
+      "name": "Product search matching and empty results",
+      "status": "PASS"
+    },
+    {
+      "name": "Product modal displays exact category order",
+      "status": "PASS"
+    },
+    {
+      "name": "Dashboard navigation renders",
+      "status": "PASS"
+    },
+    {
+      "name": "Subcategories navigation renders",
+      "status": "PASS"
+    },
+    {
+      "name": "Products navigation renders",
+      "status": "PASS"
+    },
+    {
+      "name": "Orders navigation renders",
+      "status": "PASS"
+    },
+    {
+      "name": "Customers navigation renders",
+      "status": "PASS"
+    },
+    {
+      "name": "Analytics navigation renders",
+      "status": "PASS"
+    },
+    {
+      "name": "Subcategory form exact parent order",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings modal opens",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings save persists after reload",
+      "status": "PASS"
+    },
+    {
+      "name": "Order CSV export downloads",
+      "status": "PASS"
+    },
+    {
+      "name": "All admin tabs fit at 320px",
+      "status": "PASS"
+    },
+    {
+      "name": "All admin tabs fit at 375px",
+      "status": "PASS"
+    },
+    {
+      "name": "All admin tabs fit at 390px",
+      "status": "PASS"
+    },
+    {
+      "name": "All admin tabs fit at 768px",
+      "status": "PASS"
+    },
+    {
+      "name": "All admin tabs fit at 1024px",
+      "status": "PASS"
+    },
+    {
+      "name": "All admin tabs fit at 1440px",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile navigation Escape and backdrop close",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile notification panel remains inside viewport",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile product and settings forms fit and scroll",
+      "status": "PASS"
+    },
+    {
+      "name": "Logout revokes session and reload remains signed out",
+      "status": "PASS"
+    },
+    {
+      "name": "No uncaught browser errors",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

@@ -358,3 +358,23 @@ body *:not(.hero-slider):not(.hero-slider *) {
     transform: none;
   }
 }
+/* Let content shrink and wrap inside narrow flex and grid layouts. */
+@layer base {
+  #root { width: 100%; min-width: 0; }
+  body { min-width: 0; }
+  main, section, article, aside, form, .grid > *, .flex > * { min-width: 0; }
+  h1, h2, h3, h4, p, label, li { overflow-wrap: anywhere; }
+  img, video, iframe { max-width: 100%; }
+  input, select, textarea { min-width: 0; max-width: 100%; }
+}
+
+@media (max-width: 639px) {
+  /* Avoid browser zoom taking mobile forms out of their layout. */
+  input, select, textarea { font-size: 16px !important; }
+}
+
+/* All heading text, including nested emphasis, stays upright. */
+h1, h2, h3, h4, h5, h6,
+:is(h1, h2, h3, h4, h5, h6) * {
+  font-style: normal !important;
+}

@@ -6,12 +6,11 @@ const config = readFileSync(new URL('../../frontend/src/storeConfig.ts', import.
 const url = config.match(/url: '(https:\/\/[^']+)'/)?.[1];
 const key = config.match(/publishableKey: '([^']+)'/)?.[1];
 const client = createClient(url, key, { auth: { persistSession: false } });
-const additions = [
-  { id: 'bows-and-scrunchies', name: 'Bows & Scrunchies' },
-  { id: 'key-chains', name: 'Key chains' },
-  { id: 'mobile-charms', name: 'Mobile charms' },
-  { id: 'men-accessories', name: 'Men accessories' },
-];
+const ids = JSON.parse(config.match(/const CATEGORY_DISPLAY_ORDER = (\[[^;]+\]);/)?.[1] || '[]');
+const names = JSON.parse(config.match(/const CATEGORY_DISPLAY_NAMES: Record<string, string> = (\{[^;]+\});/)?.[1] || '{}');
+if (ids.length !== 10 || ids.some((id) => !names[id])) throw new Error('Invalid category configuration');
+const additions = ids.map((id) => ({ id, name: names[id] }));
+
 const { data: existing, error: readError } = await client.from('categories').select('id,name,slug');
 if (readError) throw new Error(`Cannot read parent categories: ${readError.message}`);
 for (const category of additions) {
@@ -28,4 +27,4 @@ for (const category of additions) {
     throw new Error(`Verification failed: ${category.name}`);
   }
 }
-console.log('Verified all four parent categories in the shared Supabase database.');
+console.log('Verified all ten parent categories in the shared Supabase database.');

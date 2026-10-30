@@ -79,7 +79,7 @@ export const HomePage: React.FC = () => {
                 className="font-display font-medium text-black leading-[1.06]"
                 style={{ fontSize: 'clamp(32px, 4vw, 50px)' }}
               >
-                Words From Our <em className="italic text-black">Style Circle</em>
+                Words From Our <em className="not-italic text-black">Style Circle</em>
               </h2>
             </div>
           </Reveal>

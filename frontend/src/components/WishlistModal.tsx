@@ -30,8 +30,8 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
         className="absolute inset-0 bg-[#111111]/70 backdrop-blur-[4px] transition-opacity"
       ></div>
 
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-[#FFFDF6] border-l border-[#D8A83E]/50 text-[#241A12] shadow-2xl flex flex-col">
+      <div className="absolute inset-y-0 right-0 w-full max-w-md flex sm:pl-10">
+        <div className="w-full min-w-0 max-w-md bg-[#FFFDF6] border-l border-[#D8A83E]/50 text-[#241A12] shadow-2xl flex flex-col">
 
           {/* Header */}
           <div className="bg-[#FAF1DD] p-5 border-b border-[#D8A83E]/40 flex items-center justify-between">

@@ -167,7 +167,7 @@ export const AboutPage: React.FC = () => {
               className="font-display font-medium text-[#FFF8E8] leading-tight"
               style={{ fontSize: 'clamp(30px, 4vw, 44px)' }}
             >
-              Details You Can <em className="italic text-[#F4D99B]">Feel</em>
+              Details You Can <em className="not-italic text-[#F4D99B]">Feel</em>
             </h2>
             <p className="text-sm sm:text-base text-[#F5F0E4]/85 leading-relaxed">
               Hammered textures that catch candlelight. French velvet with real weight. Springs

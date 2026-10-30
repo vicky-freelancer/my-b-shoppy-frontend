@@ -43,7 +43,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#111111]/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#111111]/70 backdrop-blur-sm flex items-start justify-center p-4">
       <div className="relative w-full max-w-3xl bg-[#FFFDF6] border border-[#D8A83E]/50 rounded-[24px] shadow-2xl overflow-hidden text-[#241A12] my-8">
 
         {/* Close Button */}
@@ -172,7 +172,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
 
             {/* Action Buttons */}
             <div className="space-y-2.5 pt-4 border-t border-[#D8A83E]/30">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                 {/* Add to Cart */}
                 <button

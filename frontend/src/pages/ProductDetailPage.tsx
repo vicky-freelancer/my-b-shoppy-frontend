@@ -89,7 +89,7 @@ export const ProductDetailPage: React.FC = () => {
     <div className="products-page">
       {/* Breadcrumb strip */}
       <div className="border-b border-[#D8A83E]/30 bg-[#FAF1DD]">
-        <nav className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 h-12 flex items-center gap-2 text-xs font-semibold text-[#6B5945] overflow-x-auto">
+        <nav className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 min-h-12 py-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-[#6B5945]">
           <Link to="/" className="hover:text-[#B8860B] transition whitespace-nowrap">Home</Link>
           <span className="text-[#B8860B]/60">/</span>
           <Link to="/categories" className="hover:text-[#B8860B] transition whitespace-nowrap">Categories</Link>
@@ -112,7 +112,7 @@ export const ProductDetailPage: React.FC = () => {
             </>
           )}
           <span className="text-[#B8860B]/60">/</span>
-          <span className="text-[#B8860B] font-bold truncate">{product.name}</span>
+          <span className="text-[#B8860B] font-bold break-words">{product.name}</span>
         </nav>
       </div>
 
@@ -165,7 +165,7 @@ export const ProductDetailPage: React.FC = () => {
                 <p className="text-sm text-[#6B5945] leading-relaxed">{product.subtitle}</p>
               )}
 
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex flex-wrap items-center gap-3 pt-1">
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
@@ -235,7 +235,7 @@ export const ProductDetailPage: React.FC = () => {
 
             {/* Quantity + Actions */}
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 <span className="text-[11px] font-black uppercase tracking-[0.24em] text-[#B8860B]">
                   Quantity
                 </span>
@@ -333,7 +333,7 @@ export const ProductDetailPage: React.FC = () => {
             <div className="relative py-14 space-y-7">
               <div className="flex items-end justify-between gap-4 max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
                 <h2 className="font-display font-medium text-[#241A12]" style={{ fontSize: 'clamp(28px, 3.6vw, 42px)' }}>
-                  You May Also <em className="italic text-gold-gradient">Love</em>
+                  You May Also <em className="not-italic text-gold-gradient">Love</em>
                 </h2>
                 <Link
                   to={`/categories/${product.categoryId}?view=products`}

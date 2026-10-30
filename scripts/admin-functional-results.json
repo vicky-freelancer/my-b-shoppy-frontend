@@ -1,0 +1,121 @@
+[
+  {
+    "name": "Category filter sorting and legacy labels",
+    "status": "PASS"
+  },
+  {
+    "name": "Category fallback exact order and stable IDs",
+    "status": "PASS"
+  },
+  {
+    "name": "Old category cache reordered, renamed, expanded; IDs preserved",
+    "status": "PASS"
+  },
+  {
+    "name": "Live category rows normalized in requested order",
+    "status": "PASS"
+  },
+  {
+    "name": "Category database error uses ordered cache",
+    "status": "PASS"
+  },
+  {
+    "name": "Corrupt category cache recovers",
+    "status": "PASS"
+  },
+  {
+    "name": "Subcategory input validation",
+    "status": "PASS"
+  },
+  {
+    "name": "Create subcategory and cache",
+    "status": "PASS"
+  },
+  {
+    "name": "Duplicate subcategory rejected",
+    "status": "PASS"
+  },
+  {
+    "name": "Edit subcategory and cache",
+    "status": "PASS"
+  },
+  {
+    "name": "Deactivate and reactivate subcategory",
+    "status": "PASS"
+  },
+  {
+    "name": "Assigned subcategory cannot be deleted",
+    "status": "PASS"
+  },
+  {
+    "name": "Unassigned subcategory deletes",
+    "status": "PASS"
+  },
+  {
+    "name": "Subcategory write failure reported",
+    "status": "PASS"
+  },
+  {
+    "name": "Create product and cache",
+    "status": "PASS"
+  },
+  {
+    "name": "Edit product price and inventory",
+    "status": "PASS"
+  },
+  {
+    "name": "Duplicate product",
+    "status": "PASS"
+  },
+  {
+    "name": "Missing duplicate product rejected",
+    "status": "PASS"
+  },
+  {
+    "name": "Delete product and cache",
+    "status": "PASS"
+  },
+  {
+    "name": "Product deletion database failure reported",
+    "status": "PASS"
+  },
+  {
+    "name": "Inventory summary calculations",
+    "status": "PASS"
+  },
+  {
+    "name": "Custom order cannot decrement catalog stock",
+    "status": "PASS"
+  },
+  {
+    "name": "Create order and cache",
+    "status": "PASS"
+  },
+  {
+    "name": "Order status and tracking update",
+    "status": "PASS"
+  },
+  {
+    "name": "Order analytics aggregate statuses and totals",
+    "status": "PASS"
+  },
+  {
+    "name": "Stored order price is stable after catalog price changes",
+    "status": "FAIL",
+    "error": "Expected values to be strictly equal:\n\n600 !== 400\n"
+  },
+  {
+    "name": "Database order status failure returns failure",
+    "status": "FAIL",
+    "error": "Expected values to be strictly equal:\n\ntrue !== false\n"
+  },
+  {
+    "name": "Database order creation failure returns failure",
+    "status": "FAIL",
+    "error": "Expected values to be strictly equal:\n\ntrue !== false\n"
+  },
+  {
+    "name": "Delete order",
+    "status": "PASS"
+  }
+]

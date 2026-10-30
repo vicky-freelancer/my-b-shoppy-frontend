@@ -9,7 +9,7 @@ export interface BreadcrumbItem {
 
 interface PageBannerProps {
   eyebrow?: string;
-  title: string; // may contain <em> for italic accents
+  title: string; // may contain <em> for emphasized accents
   subtitle?: string;
   breadcrumbs: BreadcrumbItem[];
   metaText?: string;

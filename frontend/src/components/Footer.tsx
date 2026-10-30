@@ -141,7 +141,7 @@ export const Footer: React.FC = () => {
             <h4 className="text-[11px] font-bold uppercase tracking-[0.3em] text-[#E8C875]">
               Newsletter
             </h4>
-            <p className="mt-5 text-[20px] font-display italic text-[#F4D99B]">
+            <p className="mt-5 text-[20px] font-display not-italic text-[#F4D99B]">
               Join our style circle
             </p>
             <p className="mt-2 text-[12px] text-[#F5F0E4]/55 max-w-xs">

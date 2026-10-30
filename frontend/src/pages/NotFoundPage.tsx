@@ -19,7 +19,7 @@ export const NotFoundPage: React.FC = () => {
           className="font-display font-medium text-[#241A12] -mt-4 sm:-mt-10"
           style={{ fontSize: 'clamp(28px, 4.4vw, 44px)' }}
         >
-          This Page <em className="italic text-gold-gradient">Wandered Off</em>
+          This Page <em className="not-italic text-gold-gradient">Wandered Off</em>
         </h1>
 
         <p className="text-sm sm:text-base text-[#6B5945] max-w-md mx-auto leading-relaxed">

@@ -93,25 +93,25 @@ export const Header: React.FC = () => {
       {/* Thin gold accent line on top */}
       <div className="h-[3px] w-full bg-gradient-to-r from-[#B8860B] via-[#E8C875] to-[#B8860B]"></div>
 
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 h-[92px] flex items-center justify-between gap-4">
+      <div className="max-w-[1440px] mx-auto px-3 sm:px-8 xl:px-12 min-h-[80px] sm:h-[92px] flex flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1 py-3 sm:py-0">
 
         {/* ------- LEFT: Brand ------- */}
-        <Link to="/" className="flex items-center gap-3 group shrink-0" aria-label="MY B SHOPPY home">
-          <span className="relative w-12 h-12 sm:w-[52px] sm:h-[52px] rounded-full overflow-hidden border-2 border-[#D8A83E]/70 shadow-[0_0_0_4px_rgba(216,168,62,0.14),0_8px_24px_-8px_rgba(0,0,0,0.6)] ring-1 ring-[#E8C875]/40 transition-transform duration-300 group-hover:scale-105">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 group min-w-0" aria-label="MY B SHOPPY home">
+          <span className="relative w-9 h-9 shrink-0 sm:w-[52px] sm:h-[52px] rounded-full overflow-hidden border-2 border-[#D8A83E]/70 shadow-[0_0_0_4px_rgba(216,168,62,0.14),0_8px_24px_-8px_rgba(0,0,0,0.6)] ring-1 ring-[#E8C875]/40 transition-transform duration-300 group-hover:scale-105">
             <img src="/images/logo/logo.png" alt="MY B SHOPPY logo" className="w-full h-full object-cover" />
           </span>
           <span className="leading-none">
-            <span className="block text-lg sm:text-[22px] font-bold tracking-[0.08em] text-[#E8C875] font-display group-hover:text-[#F4D99B] transition-colors">
+            <span className="block text-[13px] min-[380px]:text-base sm:text-[22px] font-bold tracking-[0.08em] text-[#E8C875] font-display group-hover:text-[#F4D99B] transition-colors">
               MY B SHOPPY
             </span>
-            <span className="block mt-1 text-[8.5px] sm:text-[9px] tracking-[0.34em] text-[#D8A83E]/90">
+            <span className="block mt-1 text-[6px] min-[380px]:text-[7px] sm:text-[9px] tracking-[0.12em] sm:tracking-[0.34em] text-[#D8A83E]/90">
               STYLE • ACCESSORIES • YOU
             </span>
           </span>
         </Link>
 
         {/* ------- CENTER: Nav (desktop) ------- */}
-        <nav className="hidden lg:flex items-center gap-9">
+        <nav className="hidden xl:flex items-center gap-6 2xl:gap-9 shrink-0">
           {navLinks.map((link) => {
             const isActive = isLinkActive(link);
 
@@ -275,12 +275,12 @@ export const Header: React.FC = () => {
         </nav>
 
         {/* ------- RIGHT: Actions ------- */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex shrink-0 items-center gap-0 sm:gap-2">
 
           <button
             onClick={openSearch}
             aria-label="Search products"
-            className="relative p-2.5 text-[#F5F0E4]/85 hover:text-[#E8C875] transition rounded-full hover:bg-white/5 cursor-pointer"
+            className="relative p-2 sm:p-2.5 text-[#F5F0E4]/85 hover:text-[#E8C875] transition rounded-full hover:bg-white/5 cursor-pointer"
           >
             <Search className="w-5 h-5" />
           </button>
@@ -288,7 +288,7 @@ export const Header: React.FC = () => {
           <button
             onClick={openWishlist}
             aria-label={`Wishlist, ${wishlistIds.length} saved`}
-            className="relative p-2.5 text-[#F5F0E4]/85 hover:text-[#E8C875] transition rounded-full hover:bg-white/5 cursor-pointer"
+            className="relative p-2 sm:p-2.5 text-[#F5F0E4]/85 hover:text-[#E8C875] transition rounded-full hover:bg-white/5 cursor-pointer"
           >
             <Heart className="w-5 h-5" />
             {wishlistIds.length > 0 && (
@@ -300,7 +300,7 @@ export const Header: React.FC = () => {
 
           <button
             aria-label="My account"
-            className="hidden sm:block p-2.5 text-[#F5F0E4]/85 hover:text-[#E8C875] transition rounded-full hover:bg-white/5 cursor-pointer"
+            className="hidden sm:block p-2 sm:p-2.5 text-[#F5F0E4]/85 hover:text-[#E8C875] transition rounded-full hover:bg-white/5 cursor-pointer"
           >
             <User className="w-5 h-5" />
           </button>
@@ -308,7 +308,7 @@ export const Header: React.FC = () => {
           <button
             onClick={openCart}
             aria-label={`View cart, ${cartCount} items`}
-            className="relative p-2.5 text-[#E8C875] hover:text-white transition rounded-full hover:bg-white/5 cursor-pointer"
+            className="relative p-2 sm:p-2.5 text-[#E8C875] hover:text-white transition rounded-full hover:bg-white/5 cursor-pointer"
           >
             <ShoppingBag className="w-5 h-5" />
             {cartCount > 0 && (
@@ -321,7 +321,7 @@ export const Header: React.FC = () => {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileMenuOpen((v) => !v)}
-            className="lg:hidden p-2.5 text-[#F5F0E4] hover:text-[#E8C875] transition cursor-pointer"
+            className="xl:hidden p-2 sm:p-2.5 text-[#F5F0E4] hover:text-[#E8C875] transition cursor-pointer"
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileMenuOpen}
           >
@@ -332,7 +332,7 @@ export const Header: React.FC = () => {
 
       {/* ------- Mobile drawer ------- */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-[#151210]/98 backdrop-blur-md border-t border-[#2a2118] px-5 pt-4 pb-6 space-y-3">
+        <div className="xl:hidden max-h-[calc(100dvh-96px)] overflow-y-auto overscroll-contain bg-[#151210]/98 backdrop-blur-md border-t border-[#2a2118] px-5 pt-4 pb-6 space-y-3">
           {navLinks.map((link) =>
             link.hasDropdown ? (
               <React.Fragment key={link.id}>
@@ -348,7 +348,7 @@ export const Header: React.FC = () => {
                 </button>
                 {mobileCategoriesOpen && (
                   <div className="space-y-1 pt-1">
-                    {STORE_CONFIG.categories.slice(0, 10).map((category) => {
+                    {STORE_CONFIG.categories.map((category) => {
                       const subcategoryItems = subcategoriesFor(category.id);
                       const isCategoryOpen = mobileOpenCategoryId === category.id;
                       return (

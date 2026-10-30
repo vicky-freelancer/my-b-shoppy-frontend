@@ -41,7 +41,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
           style={{ fontSize: 'clamp(34px, 4.6vw, 58px)' }}
         >
           {titleBefore}{' '}
-          {titleItalic && <em className={`italic ${light ? 'text-gold-gradient' : 'text-black'}`}>{titleItalic}</em>}
+          {titleItalic && <em className={`not-italic ${light ? 'text-gold-gradient' : 'text-black'}`}>{titleItalic}</em>}
           {titleAfter && titleAfter}
         </h2>
         {subtext && (

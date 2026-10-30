@@ -35,7 +35,7 @@ export const EditorialPromo: React.FC = () => {
               >
                 More Than Just
                 <br />
-                <em className="italic text-black">Accessories</em>
+                <em className="not-italic text-black">Accessories</em>
               </h2>
 
               <div className="mt-5 flex items-center gap-3">

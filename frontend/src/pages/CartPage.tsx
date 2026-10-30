@@ -51,7 +51,7 @@ export const CartPage: React.FC = () => {
               {cartItems.map((item) => (
                 <div
                   key={`${item.product.id}-${item.variant}`}
-                  className="bg-[#FFFDF6] border border-[#6B5945]/15 rounded-3xl p-4 flex gap-4 sm:gap-5 items-center card-lift"
+                  className="bg-[#FFFDF6] border border-[#6B5945]/15 rounded-3xl p-4 grid grid-cols-[auto_minmax(0,1fr)] sm:flex gap-4 sm:gap-5 items-center card-lift"
                 >
                   <Link
                     to={`/product/${item.product.id}`}
@@ -64,7 +64,7 @@ export const CartPage: React.FC = () => {
                     <span className="text-[9.5px] font-semibold uppercase tracking-[0.22em] text-[#B8860B]">
                       {item.product.category}
                     </span>
-                    <h3 className="font-display text-xl text-[#241A12] truncate">
+                    <h3 className="font-display text-lg sm:text-xl text-[#241A12] break-words">
                       <Link to={`/product/${item.product.id}`} className="hover:text-[#B8860B] transition-colors">
                         {item.product.name}
                       </Link>
@@ -74,7 +74,7 @@ export const CartPage: React.FC = () => {
                   </div>
 
                   {/* Quantity */}
-                  <div className="flex flex-col items-end gap-3 shrink-0">
+                  <div className="col-span-2 flex flex-row sm:flex-col justify-between items-center sm:items-end gap-3 shrink-0">
                     <div className="flex items-center border border-[#6B5945]/25 rounded-full overflow-hidden bg-[#FAF1DD]">
                       <button
                         onClick={() => updateCartQuantity(item.product.id, item.variant, Math.max(1, item.quantity - 1))}
