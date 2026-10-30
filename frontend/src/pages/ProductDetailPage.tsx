@@ -120,7 +120,22 @@ export const ProductDetailPage: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14">
           {/* Left: Image */}
           <div className="space-y-4">
-            <div className="relative rounded-[28px] overflow-hidden border border-[#D8A83E]/40 bg-[#F8ECD0] group img-zoom">
+            <div
+              key={product.id}
+              className="product-image-zoom relative rounded-[28px] overflow-hidden border border-[#D8A83E]/40 bg-[#F8ECD0]"
+              onPointerMove={(event) => {
+                if (event.pointerType === 'touch') return;
+                const bounds = event.currentTarget.getBoundingClientRect();
+                const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
+                const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
+                event.currentTarget.style.setProperty('--zoom-x', `${x}%`);
+                event.currentTarget.style.setProperty('--zoom-y', `${y}%`);
+              }}
+              onPointerLeave={(event) => {
+                event.currentTarget.style.removeProperty('--zoom-x');
+                event.currentTarget.style.removeProperty('--zoom-y');
+              }}
+            >
               <img
                 src={product.imageUrl}
                 alt={product.name}

@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* Product detail zoom follows the pointer without rerendering the page. */
+.product-image-zoom > img {
+  transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+  transition: transform 200ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-image-zoom { cursor: zoom-in; }
+  .product-image-zoom:hover > img { transform: scale(2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-image-zoom > img { transition: none; }
+}
+
 @theme {
   --color-gold: #D8A83E;
   --color-gold-light: #E8C875;
