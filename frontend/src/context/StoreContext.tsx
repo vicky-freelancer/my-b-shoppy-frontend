@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { INITIAL_PRODUCTS } from '../storeConfig';
 import { CartItem, ProductItem, SubcategoryItem } from '../types';
 import { fetchSupabaseProducts, fetchSupabaseSubcategories, getSupabaseClient } from '../lib/supabaseClient';
@@ -64,6 +64,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [subcategoriesError, setSubcategoriesError] = useState<string | null>(null);
   const [isSupabaseLoading, setIsSupabaseLoading] = useState(false);
   const [supabaseConnected, setSupabaseConnected] = useState(false);
+  const productsLoaded = useRef(false);
 
   // Cart always starts empty on page load / reload
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -92,24 +93,37 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     let disposed = false;
+    let inFlight = false;
+    let lastRefreshStarted = 0;
     async function loadSupabaseData() {
+      // Focus and visibility events often arrive together. Share that refresh.
+      if (disposed || inFlight || Date.now() - lastRefreshStarted < 3000) return;
       const client = getSupabaseClient();
       if (!client) {
         setSubcategoriesLoaded(true);
         return;
       }
 
+      inFlight = true;
+      lastRefreshStarted = Date.now();
       setSupabaseConnected(true);
-      setIsSupabaseLoading(true);
-      const [productsResult] = await Promise.all([
-        fetchSupabaseProducts(),
-        refreshSubcategories(),
-      ]);
-      if (disposed) return;
-      if (productsResult.data) {
-        setProducts(productsResult.data);
+      // Only the first product fetch blocks the grid. Subsequent refreshes
+      // keep the current catalogue visible, including an empty live catalogue.
+      if (!productsLoaded.current) setIsSupabaseLoading(true);
+      const subcategoriesRequest = refreshSubcategories();
+      try {
+        const productsResult = await fetchSupabaseProducts();
+        if (disposed) return;
+        if (productsResult.data) {
+          setProducts(productsResult.data);
+          productsLoaded.current = true;
+        }
+      } finally {
+        // Product rendering must not wait for the independent menu query.
+        if (!disposed) setIsSupabaseLoading(false);
+        await subcategoriesRequest;
+        inFlight = false;
       }
-      setIsSupabaseLoading(false);
     }
 
     loadSupabaseData();

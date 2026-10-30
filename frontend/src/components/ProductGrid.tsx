@@ -78,9 +78,10 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           {/* Supabase status badge */}
           {onOpenSupabaseSync && (
             <button
-              onClick={onOpenSupabaseSync}
-              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider bg-[#FAF1DD] text-[#8A6A15] border border-[#D8A83E]/60 hover:border-[#B8860B] transition cursor-pointer"
-              title="Click to manage Supabase database"
+              type="button"
+              disabled
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider bg-[#FAF1DD] text-[#8A6A15] border border-[#D8A83E]/60 cursor-default"
+              title="Database status"
             >
               <Database className="w-3 h-3" />
               <span>{isSupabaseLoading ? 'Connecting...' : (isSupabaseSynced ? 'Supabase Live DB' : 'Supabase Ready')}</span>
