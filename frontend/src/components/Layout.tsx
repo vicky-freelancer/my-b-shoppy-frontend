@@ -75,7 +75,6 @@ export const Layout: React.FC = () => {
       <SearchModal
         isOpen={store.isSearchOpen}
         onClose={store.closeSearch}
-        products={store.products}
         currencySymbol={STORE_CONFIG.currencySymbol}
         onSelectProduct={(prod) => store.setQuickViewProduct(prod)}
       />

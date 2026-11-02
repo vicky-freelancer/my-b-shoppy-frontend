@@ -74,7 +74,7 @@ export const CategoriesPage: React.FC = () => {
       <GoldBand
         eyebrow="Convenient Checkout"
         title="Every Category, Delivered to Your Doorstep"
-        text="Browse freely, order confidently and pay only after inspecting your parcel at the door."
+        text="Browse freely and choose your favourites. Online checkout will be available after verification."
         primaryCta={{ label: 'Start Shopping', path: '/shop' }}
       />
     </div>

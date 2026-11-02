@@ -134,6 +134,66 @@ function parseVariants(raw: any): string[] {
 const DEFAULT_PRODUCT_IMAGE =
   'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80';
 
+export function mapProductRow(row: any): ProductItem {
+  const stockQtyRaw = row.quantity ?? row.stock ?? row.qty ?? row.Quantity ?? row.Stock ?? row.Qty ?? row.IN_STOCK_QTY ?? row.inStockQty;
+  const stockQty = stockQtyRaw === undefined || stockQtyRaw === null ? 1 : Number(stockQtyRaw);
+  const inStockRaw = row.in_stock ?? row.inStock ?? row.IN_STOCK ?? row.stock_status ?? row.status;
+  const inStockByFlag = inStockRaw === undefined || inStockRaw === null
+    ? undefined
+    : typeof inStockRaw === 'boolean'
+      ? inStockRaw
+      : typeof inStockRaw === 'string'
+        ? !['false', '0', 'out of stock', 'sold out', 'unavailable'].includes(inStockRaw.toLowerCase().trim())
+        : Number(inStockRaw) !== 0;
+  const inStock = inStockByFlag === undefined ? stockQty > 0 : inStockByFlag && stockQty > 0;
+  return {
+    id: row.slug || row.Slug || String(row.id || row.ID),
+    name: row.name || row.title || row.Name || row.Title || 'Product',
+    subtitle: row.subtitle || row.Subtitle || '',
+    price: Number(row.price) || Number(row.sale_price) || Number(row.Price) || Number(row.SalePrice) || 0,
+    originalPrice: row.original_price
+      ? Number(row.original_price)
+      : row.mrp
+      ? Number(row.mrp)
+      : row.originalPrice
+      ? Number(row.originalPrice)
+      : row.MRP
+      ? Number(row.MRP)
+      : undefined,
+    imageUrl: row.image_url || row.cover_image || row.imageUrl || row.ImageURL || row.image || DEFAULT_PRODUCT_IMAGE,
+    category: resolveCategoryName(row.category_id || row.categoryId || row.category || row.Category || '') || 'AD Jewellery',
+    categoryId: resolveCategoryId(
+      row.category_id ||
+        row.categoryId ||
+        slugifyCategory(row.category || row.Category || '') ||
+        'ad-jewellery'
+    ),
+    subcategory: row.subcategory || row.Subcategory || undefined,
+    subcategoryId:
+      row.subcategory_id !== undefined && row.subcategory_id !== null
+        ? String(row.subcategory_id)
+        : row.subcategoryId !== undefined && row.subcategoryId !== null
+        ? String(row.subcategoryId)
+        : undefined,
+    badge: (() => {
+      const b = row.badge ?? row.Badge ?? row.promotion_tag ?? row.promotionTag ?? row.tag ?? row.tags ?? row.PromotionTag ?? row.Badges ?? row.badges;
+      if (Array.isArray(b)) return b[0] ? String(b[0]) : undefined;
+      if (typeof b === 'string' && b.trim() === '') return undefined;
+      if (b == null) return undefined;
+      return String(b);
+    })(),
+    rating: Number(row.rating) || Number(row.Rating) || 5,
+    reviewsCount: Number(row.reviews_count || row.reviewsCount || row.ReviewsCount) || 12,
+    material: row.material || row.Material || undefined,
+    stone: row.stone || row.Stone || undefined,
+    variants: parseVariants(row.variants || row.Variants),
+    description: row.description || row.Description || '',
+    inStock,
+    isSupabaseSynced: true,
+    created_at: row.created_at || row.createdAt,
+  };
+}
+
 /**
  * Fetch products directly from Supabase `products` table if available.
  * Works with BOTH the storefront column set (name/price/in_stock) and the
@@ -157,65 +217,7 @@ export async function fetchSupabaseProducts(): Promise<{ data: ProductItem[] | n
     }
 
     if (data && data.length > 0) {
-      const mapped: ProductItem[] = data.map((row: any) => {
-        const stockQtyRaw = row.quantity ?? row.stock ?? row.qty ?? row.Quantity ?? row.Stock ?? row.Qty ?? row.IN_STOCK_QTY ?? row.inStockQty;
-        const stockQty = stockQtyRaw === undefined || stockQtyRaw === null ? 1 : Number(stockQtyRaw);
-        const inStockRaw = row.in_stock ?? row.inStock ?? row.IN_STOCK ?? row.stock_status ?? row.status;
-        const inStockByFlag = inStockRaw === undefined || inStockRaw === null
-          ? undefined
-          : typeof inStockRaw === 'boolean'
-            ? inStockRaw
-            : typeof inStockRaw === 'string'
-              ? !['false', '0', 'out of stock', 'sold out', 'unavailable'].includes(inStockRaw.toLowerCase().trim())
-              : Number(inStockRaw) !== 0;
-        const inStock = inStockByFlag === undefined ? stockQty > 0 : inStockByFlag && stockQty > 0;
-        return {
-          id: row.slug || row.Slug || String(row.id || row.ID),
-          name: row.name || row.title || row.Name || row.Title || 'Product',
-          subtitle: row.subtitle || row.Subtitle || '',
-          price: Number(row.price) || Number(row.sale_price) || Number(row.Price) || Number(row.SalePrice) || 0,
-          originalPrice: row.original_price
-            ? Number(row.original_price)
-            : row.mrp
-            ? Number(row.mrp)
-            : row.originalPrice
-            ? Number(row.originalPrice)
-            : row.MRP
-            ? Number(row.MRP)
-            : undefined,
-          imageUrl: row.image_url || row.cover_image || row.imageUrl || row.ImageURL || row.image || DEFAULT_PRODUCT_IMAGE,
-          category: resolveCategoryName(row.category_id || row.categoryId || row.category || row.Category || '') || 'AD Jewellery',
-          categoryId: resolveCategoryId(
-            row.category_id ||
-              row.categoryId ||
-              slugifyCategory(row.category || row.Category || '') ||
-              'ad-jewellery'
-          ),
-          subcategory: row.subcategory || row.Subcategory || undefined,
-          subcategoryId:
-            row.subcategory_id !== undefined && row.subcategory_id !== null
-              ? String(row.subcategory_id)
-              : row.subcategoryId !== undefined && row.subcategoryId !== null
-              ? String(row.subcategoryId)
-              : undefined,
-          badge: (() => {
-            const b = row.badge ?? row.Badge ?? row.promotion_tag ?? row.promotionTag ?? row.tag ?? row.tags ?? row.PromotionTag ?? row.Badges ?? row.badges;
-            if (Array.isArray(b)) return b[0] ? String(b[0]) : undefined;
-            if (typeof b === 'string' && b.trim() === '') return undefined;
-            if (b == null) return undefined;
-            return String(b);
-          })(),
-          rating: Number(row.rating) || Number(row.Rating) || 5,
-          reviewsCount: Number(row.reviews_count || row.reviewsCount || row.ReviewsCount) || 12,
-          material: row.material || row.Material || undefined,
-          stone: row.stone || row.Stone || undefined,
-          variants: parseVariants(row.variants || row.Variants),
-          description: row.description || row.Description || '',
-          inStock,
-          isSupabaseSynced: true,
-          created_at: row.created_at || row.createdAt,
-        };
-      });
+      const mapped = data.map(mapProductRow);
       return { data: mapped, error: null };
     }
 
@@ -330,106 +332,15 @@ export async function seedProductsToSupabase(products: ProductItem[]): Promise<{
 }
 
 /**
- * Inserts a new paid (online) order into the Supabase database.
- * Called only AFTER the Razorpay payment has been verified server-side.
- *
- * The insert is adaptive: it first tries the full payload (online-payment
- * columns), then the admin "core" price columns, then a minimal fallback.
- * Previously a single failed insert was swallowed and reported as success,
- * which silently dropped storefront orders from the dashboard. Now a real
- * failure returns `success:false` so the UI can surface it to the customer.
+ * Legacy browser order writes are disabled independently of availability.
+ * Never restore direct inserts when reopening checkout: Step 2B must persist
+ * orders and finalization through the trusted transactional backend instead.
+ * Existing in-memory paid-order details remain with the caller for support.
  */
-export async function submitOrder(orderData: OrderFormData): Promise<{ success: boolean; error?: string; orderId?: string }> {
-  // Fallback generated ID for immediate responsive client confirmation
-  const generatedRef = `MBS-${Math.floor(100000 + Math.random() * 900000)}`;
-
-  const supabase = getSupabaseClient();
-  if (!supabase) {
-    return {
-      success: false,
-      error: 'Order storage is not configured. Please contact the store.',
-    };
-  }
-
-  try {
-    const quantity = Math.max(1, Number(orderData.quantity) || 1);
-    const totalAmount = Number(orderData.total_amount) || 0;
-    const unitPrice = Math.round(totalAmount / quantity);
-    const now = new Date().toISOString();
-
-    const base = {
-      customer_name: orderData.customer_name.trim(),
-      phone: orderData.phone.trim(),
-      email: orderData.email ? orderData.email.trim() : null,
-      city: orderData.city.trim(),
-      address: orderData.address.trim(),
-      category: orderData.category || 'General',
-      product_variant: orderData.product_variant,
-      quantity,
-      notes: orderData.notes ? orderData.notes.trim() : null,
-      status: 'confirmed',
-      payment_method: 'Online (Razorpay)',
-      created_at: now,
-    };
-
-    // Tier 1: full payload including online-payment + storefront columns
-    const fullPayload = {
-      ...base,
-      country: orderData.country.trim(),
-      product_name: orderData.product_name,
-      amount: totalAmount,
-      total_amount: totalAmount,
-      price_per_unit: unitPrice,
-      sale_price: unitPrice,
-      price: unitPrice,
-      items_summary: orderData.items_summary || null,
-      razorpay_order_id: orderData.razorpay_order_id || null,
-      razorpay_payment_id: orderData.razorpay_payment_id || null,
-      razorpay_signature: orderData.razorpay_signature || null,
-    };
-
-    // Tier 2: admin "core" pricing columns (no country/total_amount/razorpay)
-    const corePayload = {
-      ...base,
-      product_name: orderData.product_name,
-      amount: totalAmount,
-      price_per_unit: unitPrice,
-    };
-
-    // Tier 3: minimal columns that exist in every old orders table
-    const minimalPayload = { ...base };
-
-    const attempts: { label: string; payload: Record<string, unknown> }[] = [
-      { label: 'full', payload: fullPayload },
-      { label: 'core', payload: corePayload },
-      { label: 'minimal', payload: minimalPayload },
-    ];
-
-    let lastError: string | null = null;
-    for (const attempt of attempts) {
-      const { error } = await supabase
-        .from(STORE_CONFIG.supabase.tableName)
-        .insert([attempt.payload]);
-
-      if (!error) {
-        return { success: true, orderId: generatedRef };
-      }
-      lastError = error.message;
-      console.warn(`Supabase order insert (${attempt.label}) failed:`, error.message);
-    }
-
-    console.error('Supabase order insert failed on all attempts:', lastError);
-    return {
-      success: false,
-      error:
-        lastError ||
-        'Your payment was received but the order could not be saved. Please contact support with your order reference.',
-      orderId: generatedRef,
-    };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unexpected error during order submission';
-    console.error('Unexpected error during order submission:', err);
-    return { success: false, error: message, orderId: generatedRef };
-  }
+export async function submitOrder(_orderData: OrderFormData): Promise<{ success: boolean; error?: string; orderId?: string; code?: string }> {
+  return {
+    success: false,
+    code: 'CLIENT_ORDER_WRITES_DISABLED',
+    error: 'Orders must be recorded by the secure payment service. If you already paid, retain your payment reference and contact support; do not pay again.',
+  };
 }
-

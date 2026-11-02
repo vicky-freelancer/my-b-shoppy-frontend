@@ -249,7 +249,7 @@ export const ContactPage: React.FC = () => {
               <ul className="space-y-2.5 text-xs text-[#6B5945] leading-relaxed list-none">
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8860B] mt-0.5">◆</span>
-                  Flexible payment options are available across India — inspect before you pay.
+                  Razorpay online payments are planned across India. Checkout remains temporarily unavailable.
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[#B8860B] mt-0.5">◆</span>

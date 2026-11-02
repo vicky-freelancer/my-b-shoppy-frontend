@@ -1,3 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
+import { getFeaturedProducts, productReadPolicy } from '../lib/productQueries';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -10,6 +12,8 @@ import { Reveal } from '../components/Reveal';
 import { useStore } from '../context/StoreContext';
 import { useSeo } from '../lib/seo';
 import { STORE_CONFIG } from '../storeConfig';
+import { mariaCatalogEnabled,catalogRequest } from '../lib/catalogApi';
+import { mediaUrl } from '../lib/api';
 
 const testimonials = [
   {
@@ -30,7 +34,7 @@ const testimonials = [
 ];
 
 export const HomePage: React.FC = () => {
-  const { products, wishlistIds, toggleWishlist, addToCart } = useStore();
+  const { wishlistIds, toggleWishlist, addToCart } = useStore();
 
   useSeo({
     title: 'MY B SHOPPY — Style • Accessories • You',
@@ -39,10 +43,11 @@ export const HomePage: React.FC = () => {
     path: '/',
   });
 
-  const featured = products
-    .filter((p) => p.badge && ['BESTSELLER', 'NEW', 'EXCLUSIVE'].includes(p.badge))
-    .slice(0, 4);
-  const featuredList = featured.length > 0 ? featured : products.slice(0, 4);
+  const featuredQuery = useQuery({ ...productReadPolicy, queryKey: ['products', 'featured'],
+    queryFn: ({ signal }) => getFeaturedProducts(signal) });
+  const featuredList = featuredQuery.data || [];
+  const categoriesQuery=useQuery({queryKey:['categories','mariadb'],enabled:mariaCatalogEnabled(),...productReadPolicy,queryFn:()=>catalogRequest('categories')});
+  const categories=mariaCatalogEnabled()?(categoriesQuery.data?.categories||[]).map((row:any)=>{const marketing=STORE_CONFIG.categories.find(c=>c.id===row.id);return {...marketing,...row,imageUrl:row.image_url?mediaUrl(row.image_url):marketing?.imageUrl,items:[],startingPrice:Number(row.startingPrice??0),count:Number(row.count??0)};}):STORE_CONFIG.categories;
 
   return (
     <main>
@@ -58,11 +63,11 @@ export const HomePage: React.FC = () => {
         currencySymbol={STORE_CONFIG.currencySymbol}
         wishlistIds={wishlistIds}
         onToggleWishlist={toggleWishlist}
-        onAddToCart={(product) => addToCart(product)}
+        onAddToCart={addToCart}
       />
 
       {/* ============ CATEGORIES ============ */}
-      <CategoriesSection categories={STORE_CONFIG.categories} />
+      <CategoriesSection categories={categories} />
 
       {/* ============ EDITORIAL PROMO ============ */}
       <EditorialPromo />

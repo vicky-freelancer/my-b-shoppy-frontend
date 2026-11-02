@@ -19,6 +19,10 @@ export default defineConfig(() => {
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
       // Forward payment API calls to the Express backend (server.mjs) which holds the key secret.
       proxy: {
+        '/media': {
+          target: process.env.RAZORPAY_SERVER_URL || 'http://localhost:5000',
+          changeOrigin: true,
+        },
         '/api': {
           target: process.env.RAZORPAY_SERVER_URL || 'http://localhost:5000',
           changeOrigin: true,

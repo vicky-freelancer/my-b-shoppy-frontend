@@ -1,4 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getProductByIdOrSlug, getRelatedProducts, getProductImage, productReadPolicy, productImagePolicy } from '../lib/productQueries';
+import { ProductImage } from '../components/ProductImage';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   AlertCircle,
@@ -23,9 +26,16 @@ const formatPrice = (price: number) => price.toLocaleString('en-IN');
 export const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { products, subcategories, wishlistIds, toggleWishlist, addToCart, openDirectCheckout } = useStore();
+  const navigateToProduct = useCallback((product: { id: string }) => navigate(`/product/${product.id}`), [navigate]);
+  const { subcategories, wishlistIds, toggleWishlist, addToCart, openDirectCheckout } = useStore();
 
-  const product = useMemo(() => products.find((p) => p.id === id), [products, id]);
+  const detail = useQuery({ ...productReadPolicy, queryKey: ['products', 'detail', id],
+    queryFn: ({ signal }) => getProductByIdOrSlug(id!, signal), enabled: !!id });
+  const product = detail.data;
+  const productImage = useQuery({ ...productImagePolicy, queryKey: ['products', 'image', product?.imageProductId],
+    queryFn: ({ signal }) => getProductImage(product!.imageProductId!, signal), enabled: !!product?.imageProductId });
+  const related = useQuery({ ...productReadPolicy, queryKey: ['products', 'related', product?.id, product?.categoryId],
+    queryFn: ({ signal }) => getRelatedProducts(product!, signal), enabled: !!product });
 
   const productSubcategory = useMemo(() => {
     if (!product) return undefined;
@@ -44,23 +54,21 @@ export const ProductDetailPage: React.FC = () => {
 
   const [selectedVariant, setSelectedVariant] = useState<string | undefined>(undefined);
   const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useSeo({
     title: product ? product.name : 'Product',
     description: product?.subtitle || product?.description,
     path: `/product/${id || ''}`,
-    image: product?.imageUrl,
+    image: product?.imageUrl || productImage.data,
   });
 
-  const relatedProducts = useMemo(() => {
-    if (!product) return [];
-    return products
-      .filter((p) => p.categoryId === product.categoryId && p.id !== product.id)
-      .slice(0, 4);
-  }, [products, product]);
+  const relatedProducts = related.data || [];
 
   const activeVariant = selectedVariant || product?.variants[0] || 'Standard';
 
+  if (detail.isPending) return <div className="py-20 text-center text-[#6B5945]" role="status">Loading product...</div>;
+  if (detail.error) return <div className="py-20 text-center text-[#6B5945]" role="alert">Product could not be loaded. <button onClick={() => detail.refetch()}>Try again</button></div>;
   if (!product) {
     return (
       <div className="products-page max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center space-y-5">
@@ -136,8 +144,8 @@ export const ProductDetailPage: React.FC = () => {
                 event.currentTarget.style.removeProperty('--zoom-y');
               }}
             >
-              <img
-                src={product.imageUrl}
+              <ProductImage
+                product={selectedImage && product.imageUrls?.includes(selectedImage) ? {...product,imageUrl:selectedImage} : product} priority
                 alt={product.name}
                 className="w-full aspect-square object-contain object-center"
               />
@@ -159,6 +167,7 @@ export const ProductDetailPage: React.FC = () => {
               )}
             </div>
 
+            {(product.imageUrls?.length || 0) > 1 && <div className="flex gap-2 overflow-x-auto" aria-label="Product images">{product.imageUrls!.map((url,index)=><button type="button" key={url} onClick={()=>setSelectedImage(url)} aria-label={`View image ${index+1}`} aria-pressed={(selectedImage || product.imageUrls![0])===url} className="shrink-0 rounded-lg border border-[#D8A83E] overflow-hidden"><img src={url} alt="" className="w-16 h-16 object-cover" loading="lazy" /></button>)}</div>}
             {/* Assurance row removed */}
           </div>
 
@@ -368,8 +377,8 @@ export const ProductDetailPage: React.FC = () => {
                         currencySymbol={STORE_CONFIG.currencySymbol}
                         isWishlisted={wishlistIds.includes(rel.id)}
                         onToggleWishlist={toggleWishlist}
-                        onAddToCart={(prod) => addToCart(prod)}
-                        onQuickView={(prod) => navigate(`/product/${prod.id}`)}
+                        onAddToCart={addToCart}
+                        onQuickView={navigateToProduct}
                       />
                     ))}
                   </div>

@@ -1,3 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
+import { searchProducts, productReadPolicy } from '../lib/productQueries';
+import { ProductImage } from './ProductImage';
 import React, { useState, useEffect, useRef } from 'react';
 import { ProductItem } from '../types';
 import { Search, X, ArrowRight } from 'lucide-react';
@@ -5,7 +8,6 @@ import { Search, X, ArrowRight } from 'lucide-react';
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  products: ProductItem[];
   currencySymbol: string;
   onSelectProduct: (product: ProductItem) => void;
 }
@@ -13,7 +15,6 @@ interface SearchModalProps {
 export const SearchModal: React.FC<SearchModalProps> = ({
   isOpen,
   onClose,
-  products,
   currencySymbol,
   onSelectProduct
 }) => {
@@ -28,18 +29,16 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     }
   }, [isOpen]);
 
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(query.trim()), 250);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+  const search = useQuery({ ...productReadPolicy, queryKey: ['products', 'search', debouncedQuery],
+    queryFn: ({ signal }) => searchProducts(debouncedQuery, signal),
+    enabled: isOpen && !!debouncedQuery });
+  const results = query.trim() === debouncedQuery ? search.data || [] : [];
   if (!isOpen) return null;
-
-  const results = query.trim() === ''
-    ? []
-    : products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query.toLowerCase()) ||
-          p.category.toLowerCase().includes(query.toLowerCase()) ||
-          p.description.toLowerCase().includes(query.toLowerCase()) ||
-          (p.material && p.material.toLowerCase().includes(query.toLowerCase())) ||
-          (p.stone && p.stone.toLowerCase().includes(query.toLowerCase()))
-      );
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#111111]/70 backdrop-blur-md flex items-start justify-center pt-20 p-4">
@@ -78,7 +77,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             <div className="py-8 text-center text-xs text-[#6B5945]">
               Type keywords above to search across our luxury artificial jewelry & accessory catalog.
             </div>
-          ) : results.length === 0 ? (
+          ) : (query.trim() !== debouncedQuery || search.isPending) ? (<p role="status" className="py-8 text-center text-xs text-[#6B5945]">Searching...</p>) : search.error ? (<p role="alert" className="py-8 text-center text-xs text-[#6B5945]">Search could not be loaded. <button onClick={() => search.refetch()}>Try again</button></p>) : results.length === 0 ? (
             <div className="py-12 text-center space-y-2">
               <p className="text-sm font-semibold text-[#241A12]">No products matching "{query}"</p>
               <p className="text-xs text-[#6B5945]">Try searching for Gold, Platinum, Ring, Bow, or Bag</p>
@@ -94,8 +93,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                 className="p-3 rounded-2xl bg-[#FAF1DD] hover:bg-[#F4D99B]/50 border border-[#D8A83E]/30 hover:border-[#B8860B] flex items-center justify-between gap-3 transition cursor-pointer group"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <img
-                    src={product.imageUrl}
+                  <ProductImage
+                    product={product}
                     alt={product.name}
                     className="w-12 h-12 rounded-xl object-cover bg-[#F8ECD0] shrink-0 border border-[#D8A83E]/40"
                   />

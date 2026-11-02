@@ -53,7 +53,7 @@ export const WishlistPage: React.FC = () => {
                 currencySymbol={STORE_CONFIG.currencySymbol}
                 isWishlisted
                 onToggleWishlist={toggleWishlist}
-                onAddToCart={(prod) => addToCart(prod)}
+                onAddToCart={addToCart}
               />
             ))}
           </div>

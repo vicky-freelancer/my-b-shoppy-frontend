@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SearchX } from 'lucide-react';
 import { GoldHero } from '../components/GoldHero';
 import { GoldBand } from '../components/GoldBand';
@@ -6,18 +6,18 @@ import { GoldFrame } from '../components/GoldFrame';
 import { ProductGrid } from '../components/ProductGrid';
 import { useStore } from '../context/StoreContext';
 import { useSeo } from '../lib/seo';
-import { paginate, sortProducts, SortOption } from '../lib/catalogUtils';
+import { SortOption } from '../lib/catalogUtils';
 
-const itemsPerPage = 12;
+import { useProductListing } from '../lib/useProducts';
+
+const itemsPerPage = 20;
 
 export const ShopPage: React.FC = () => {
   const {
-    products,
     wishlistIds,
     toggleWishlist,
     addToCart,
     setQuickViewProduct,
-    isSupabaseLoading,
     supabaseConnected,
     openSupabaseSync,
   } = useStore();
@@ -32,12 +32,14 @@ export const ShopPage: React.FC = () => {
     path: '/shop',
   });
 
-  const sortedProducts = useMemo(() => sortProducts(products, sortBy), [products, sortBy]);
-  const paginatedProducts = useMemo(
-    () => paginate(sortedProducts, currentPage, itemsPerPage),
-    [sortedProducts, currentPage]
-  );
-  const totalPages = Math.max(1, Math.ceil(sortedProducts.length / itemsPerPage));
+  const listing = useProductListing({ page: currentPage, sort: sortBy });
+  const paginatedProducts = listing.data?.products || [];
+  const totalCount = listing.data?.count || 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
+  const isSupabaseLoading = listing.isPending;
+  useEffect(() => {
+    if (listing.data && currentPage > totalPages) setCurrentPage(totalPages);
+  }, [listing.data, currentPage, totalPages]);
 
   return (
     <div className="products-page">
@@ -48,19 +50,19 @@ export const ShopPage: React.FC = () => {
           { label: 'Shop' },
         ]}
         subtitle="Curated fine artificial jewelry, luxury hair adornments, accessories & gifts with easy checkout"
-        metaText={`${sortedProducts.length} Items Available`}
+        metaText={`${totalCount} Items Available`}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        {listing.error && <p role="alert" className="text-sm text-[#6B5945]">Products could not be loaded. <button onClick={() => listing.refetch()}>Try again</button></p>}
         {/* Full-width catalog grid in a thick gold showcase frame */}
         <GoldFrame>
           <ProductGrid
             products={paginatedProducts}
-            allFilteredProducts={sortedProducts}
             currencySymbol="₹"
             wishlistIds={wishlistIds}
             onToggleWishlist={toggleWishlist}
-            onAddToCart={(product) => addToCart(product)}
+            onAddToCart={addToCart}
             onQuickView={setQuickViewProduct}
             sortBy={sortBy}
             onSortChange={(sort) => {
@@ -74,14 +76,14 @@ export const ShopPage: React.FC = () => {
               window.scrollTo({ top: 280, behavior: 'smooth' });
             }}
             itemsPerPage={itemsPerPage}
-            totalFilteredCount={sortedProducts.length}
+            totalFilteredCount={totalCount}
             isSupabaseLoading={isSupabaseLoading}
             isSupabaseSynced={supabaseConnected}
             onOpenSupabaseSync={openSupabaseSync}
           />
         </GoldFrame>
 
-        {!isSupabaseLoading && products.length === 0 && (
+        {!isSupabaseLoading && totalCount === 0 && (
           <div className="py-20 text-center space-y-4 bg-[#FFFDF6] rounded-2xl border border-[#6B5945]/20 p-8">
             <SearchX className="w-12 h-12 text-[#B8860B]/50 mx-auto" />
             <h3 className="text-lg font-bold text-[#241A12]">Catalogue is being curated</h3>
@@ -95,8 +97,8 @@ export const ShopPage: React.FC = () => {
       {/* Closing gold band — alternates with the dark catalogue above */}
       <GoldBand
         eyebrow="Zero-Risk Shopping"
-        title="Love It First, Pay at Your Door"
-        text="Every my B shoppy order ships with easy, flexible payment — inspect your treasures before a single rupee leaves your pocket."
+        title="Choose Your Style, Pay Securely Online"
+        text="Browse your favourites and keep them in your cart. Secure online checkout will be available after release approval."
         primaryCta={{ label: 'Contact Support', path: '/contact' }}
         secondaryCta={{ label: 'Browse Categories', path: '/categories' }}
       />

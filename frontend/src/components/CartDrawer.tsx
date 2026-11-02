@@ -1,3 +1,4 @@
+import { ProductImage } from './ProductImage';
 import React from 'react';
 import { CartItem } from '../types';
 import { X, Trash2, Plus, Minus, ShoppingBag, ShieldCheck, Truck, ArrowRight } from 'lucide-react';
@@ -84,8 +85,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   key={`${item.product.id}-${item.variant}`}
                   className="p-3.5 rounded-2xl bg-[#FAF1DD] border border-[#D8A83E]/30 flex gap-3.5 items-center"
                 >
-                  <img
-                    src={item.product.imageUrl}
+                  <ProductImage
+                    product={item.product}
                     alt={item.product.name}
                     className="w-16 h-16 rounded-xl object-cover bg-[#F8ECD0] shrink-0 border border-[#D8A83E]/40"
                   />

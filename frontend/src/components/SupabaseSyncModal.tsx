@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { STORE_CONFIG } from '../storeConfig';
 import { ProductItem } from '../types';
 import { seedProductsToSupabase, fetchSupabaseProducts } from '../lib/supabaseClient';
+import { invalidateProductQueries } from '../lib/productQueries';
+import { mariaCatalogEnabled } from '../lib/catalogApi';
 import { Database, CheckCircle2, AlertCircle, RefreshCw, UploadCloud, DownloadCloud, Code2, Copy, Check, X, ShieldCheck } from 'lucide-react';
 
 interface SupabaseSyncModalProps {
@@ -24,7 +26,7 @@ export const SupabaseSyncModal: React.FC<SupabaseSyncModalProps> = ({
   const [syncStatusMessage, setSyncStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [copiedSql, setCopiedSql] = useState(false);
 
-  if (!isOpen) return null;
+  if (!isOpen || mariaCatalogEnabled()) return null;
 
   const sqlSchema = `-- Supabase Table Schemas (shared with the Admin Dashboard)
 -- Products: admin schema (id bigint, slug unique, quantity stock) PLUS
@@ -111,6 +113,7 @@ CREATE POLICY "Public Orders Update" ON orders FOR UPDATE USING (true);
     const res = await seedProductsToSupabase(products);
 
     if (res.success) {
+      await invalidateProductQueries();
       setSyncStatusMessage({
         type: 'success',
         text: `Successfully synced ${res.count || products.length} catalog products into Supabase "products" table!`,
@@ -129,6 +132,7 @@ CREATE POLICY "Public Orders Update" ON orders FOR UPDATE USING (true);
     setSyncStatusMessage(null);
 
     const res = await fetchSupabaseProducts();
+    if (res.data) await invalidateProductQueries();
 
     if (res.data && res.data.length > 0) {
       onProductsUpdated(res.data);

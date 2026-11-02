@@ -5,6 +5,9 @@ export interface ProductItem {
   price: number;
   originalPrice?: number;
   imageUrl: string;
+  imageUrls?: string[];
+  /** Database identity for separately cached image delivery. */
+  imageProductId?: string;
   category: string;
   categoryId: string;
   subcategory?: string;
@@ -15,6 +18,7 @@ export interface ProductItem {
   material?: string;
   stone?: string;
   variants: string[];
+  variantOptions?: { id: string; label: string }[];
   description: string;
   inStock?: boolean;
   isSupabaseSynced?: boolean;

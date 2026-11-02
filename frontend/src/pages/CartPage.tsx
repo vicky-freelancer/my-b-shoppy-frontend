@@ -1,3 +1,4 @@
+import { ProductImage } from '../components/ProductImage';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Minus, Plus, Trash2, ShoppingBag, ShieldCheck, Truck } from 'lucide-react';
@@ -57,7 +58,7 @@ export const CartPage: React.FC = () => {
                     to={`/product/${item.product.id}`}
                     className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#F8ECD0] shrink-0 img-zoom"
                   >
-                    <img src={item.product.imageUrl} alt={item.product.name} className="w-full h-full object-cover" />
+                    <ProductImage product={item.product} alt={item.product.name} className="w-full h-full object-cover" />
                   </Link>
 
                   <div className="flex-1 min-w-0">

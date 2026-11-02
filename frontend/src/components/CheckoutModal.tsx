@@ -11,6 +11,9 @@ import {
   buildRazorpayNotes,
 } from '../lib/razorpay';
 import confetti from 'canvas-confetti';
+import { CHECKOUT_UNAVAILABLE_MESSAGE, getCheckoutAvailability } from '../lib/checkoutAvailability';
+import { mariaCatalogEnabled } from '../lib/catalogApi';
+import { secureGuestCheckout } from '../lib/secureCheckout';
 import { X, ShieldCheck, CheckCircle2, Truck, AlertCircle, ShoppingBag, Loader2, Copy, Check, Lock } from 'lucide-react';
 
 interface CheckoutModalProps {
@@ -52,6 +55,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [paymentError, setPaymentError] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [pendingOrder, setPendingOrder] = useState<OrderFormData | null>(null);
+  const [checkoutEnabled, setCheckoutEnabled] = useState(false);
+
+  React.useEffect(() => {
+    setCheckoutEnabled(false);
+    if (!isOpen) return;
+    const controller = new AbortController();
+    void getCheckoutAvailability(controller.signal).then(result => {
+      if (!controller.signal.aborted) setCheckoutEnabled(result.enabled);
+    });
+    return () => controller.abort();
+  }, [isOpen]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -118,6 +132,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+    if (!checkoutEnabled) {
+      setPaymentError(CHECKOUT_UNAVAILABLE_MESSAGE);
+      return;
+    }
+    if(mariaCatalogEnabled()) {
+      if(!validateForm()||!activeItems.length)return;
+      setIsSubmitting(true);setPaymentError('');
+      try { const status=await secureGuestCheckout(activeItems,formData);setConfirmedOrderId(status.order_id);setConfirmedPaymentId('Verified online payment');setOrderSuccess(true);if(!directProduct)onClearCart(); }
+      catch(error){setPaymentError(error instanceof Error?error.message:'Verification pending. Do not pay again.');}
+      finally{setIsSubmitting(false);}return;
+    }
     if (!getSupabaseClient()) {
       setPaymentError('Ordering is temporarily unavailable. Please contact the store before making a payment.');
       return;
@@ -312,6 +337,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         ) : (
           /* Active Checkout Form */
           <form onSubmit={handleSubmit} className="p-5 sm:p-7 space-y-6">
+            {!checkoutEnabled && (
+              <div role="status" className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+                {CHECKOUT_UNAVAILABLE_MESSAGE}
+              </div>
+            )}
 
             {/* Order Items Preview */}
             <div className="p-4 rounded-2xl bg-[#FAF1DD] border border-[#D8A83E]/40 space-y-3">
@@ -513,7 +543,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               return (
                 <button
                   type="submit"
-                  disabled={isSubmitting || (activeItems.length === 0 && !pendingOrder)}
+                  disabled={!checkoutEnabled || isSubmitting || (activeItems.length === 0 && !pendingOrder)}
                   className="w-full py-4 px-6 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-extrabold text-xs uppercase tracking-widest transition duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl cursor-pointer"
                 >
                   {isSubmitting ? (
@@ -524,7 +554,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   ) : (
                     <>
                       <Lock className="w-4 h-4" />
-                      <span>{pendingOrder ? 'Retry Saving Paid Order' : 'PAY ONLINE & PLACE ORDER'}</span>
+                      <span>{!checkoutEnabled ? 'Checkout Temporarily Unavailable' : pendingOrder ? 'Retry Saving Paid Order' : 'PAY ONLINE & PLACE ORDER'}</span>
                     </>
                   )}
                 </button>

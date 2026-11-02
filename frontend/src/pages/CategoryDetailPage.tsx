@@ -9,39 +9,14 @@ import { SubcategoryListingPage } from './SubcategoryListingPage';
 import { CATEGORIES_CATALOG } from '../storeConfig';
 import { useStore } from '../context/StoreContext';
 import { useSeo } from '../lib/seo';
-import { paginate, sortProducts, SortOption } from '../lib/catalogUtils';
-import { ProductItem, SubcategoryItem } from '../types';
-
-const itemsPerPage = 12;
-
-const normalizeValue = (value: string): string =>
-  value.toLowerCase().replace(/[^a-z0-9]+/g, '');
-
-function matchesSubcategory(product: ProductItem, subcategory: SubcategoryItem): boolean {
-  if (product.subcategoryId && product.subcategoryId === subcategory.id) {
-    return true;
-  }
-
-  if (!product.subcategory) return false;
-
-  const productValue = product.subcategory.trim().toLowerCase();
-  const productNormalized = normalizeValue(productValue);
-
-  return (
-    productValue === subcategory.id.toLowerCase() ||
-    productValue === subcategory.name.trim().toLowerCase() ||
-    productValue === subcategory.slug.trim().toLowerCase() ||
-    productNormalized === normalizeValue(subcategory.id) ||
-    productNormalized === normalizeValue(subcategory.name) ||
-    productNormalized === normalizeValue(subcategory.slug)
-  );
-}
+import { SortOption } from '../lib/catalogUtils';
+import { useProductListing } from '../lib/useProducts';
+const itemsPerPage = 20;
 
 export const CategoryDetailPage: React.FC = () => {
   const { slug, subSlug } = useParams<{ slug: string; subSlug?: string }>();
   const [searchParams] = useSearchParams();
   const {
-    products,
     subcategories,
     subcategoriesLoaded,
     subcategoriesError,
@@ -50,7 +25,6 @@ export const CategoryDetailPage: React.FC = () => {
     toggleWishlist,
     addToCart,
     setQuickViewProduct,
-    isSupabaseLoading,
     supabaseConnected,
     openSupabaseSync,
   } = useStore();
@@ -94,19 +68,16 @@ export const CategoryDetailPage: React.FC = () => {
       : `/categories/${slug || ''}`,
   });
 
-  const categoryProducts = useMemo(() => {
-    let items = products.filter((product) => product.categoryId === slug);
-    if (selectedSubcategory) {
-      items = items.filter((product) => matchesSubcategory(product, selectedSubcategory));
-    }
-    return sortProducts(items, sortBy);
-  }, [products, slug, selectedSubcategory, sortBy]);
-
-  const paginatedProducts = useMemo(
-    () => paginate(categoryProducts, currentPage, itemsPerPage),
-    [categoryProducts, currentPage]
-  );
-  const totalPages = Math.max(1, Math.ceil(categoryProducts.length / itemsPerPage));
+  const showProducts = !!categoryMeta && (subSlug ? !!selectedSubcategory :
+    forceProductView || (subcategoriesLoaded && !subcategoriesError && !categorySubcategories.length));
+  const listing = useProductListing({ categoryId: slug, subcategory: selectedSubcategory, page: currentPage, sort: sortBy }, showProducts);
+  const paginatedProducts = listing.data?.products || [];
+  const totalCount = listing.data?.count || 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
+  const isSupabaseLoading = listing.isPending;
+  useEffect(() => {
+    if (listing.data && currentPage > totalPages) setCurrentPage(totalPages);
+  }, [listing.data, currentPage, totalPages]);
 
   if (!categoryMeta) {
     return (
@@ -214,7 +185,7 @@ export const CategoryDetailPage: React.FC = () => {
             ? `Explore our ${selectedSubcategory.name} collection from ${categoryMeta.name}`
             : categoryMeta.tagline
         }
-        metaText={`${categoryProducts.length} Items Available`}
+        metaText={`${totalCount} Items Available`}
       />
 
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-8">
@@ -248,15 +219,15 @@ export const CategoryDetailPage: React.FC = () => {
           </Link>
         </div>
 
+        {listing.error && <p role="alert" className="text-sm text-[#6B5945]">Products could not be loaded. <button onClick={() => listing.refetch()}>Try again</button></p>}
         {/* Full-width product grid — thick gold showcase frame */}
         <GoldFrame>
           <ProductGrid
             products={paginatedProducts}
-            allFilteredProducts={categoryProducts}
             currencySymbol="₹"
             wishlistIds={wishlistIds}
             onToggleWishlist={toggleWishlist}
-            onAddToCart={(product) => addToCart(product)}
+            onAddToCart={addToCart}
             onQuickView={setQuickViewProduct}
             sortBy={sortBy}
             onSortChange={(sort) => {
@@ -270,14 +241,14 @@ export const CategoryDetailPage: React.FC = () => {
               window.scrollTo({ top: 280, behavior: 'smooth' });
             }}
             itemsPerPage={itemsPerPage}
-            totalFilteredCount={categoryProducts.length}
+            totalFilteredCount={totalCount}
             isSupabaseLoading={isSupabaseLoading}
             isSupabaseSynced={supabaseConnected}
             onOpenSupabaseSync={openSupabaseSync}
           />
         </GoldFrame>
 
-        {!isSupabaseLoading && categoryProducts.length === 0 && (
+        {!isSupabaseLoading && totalCount === 0 && (
           <div className="py-16 text-center space-y-3 bg-[#FFFDF6] rounded-2xl border border-[#6B5945]/20 p-8 mt-2">
             <SearchX className="w-10 h-10 text-[#B8860B]/50 mx-auto" />
             <h3 className="text-base font-bold text-[#241A12]">No pieces here yet</h3>

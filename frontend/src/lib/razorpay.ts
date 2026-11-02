@@ -1,5 +1,6 @@
 import { OrderFormData } from '../types';
 import { apiUrl } from './api';
+import { CheckoutUnavailableError, getCheckoutAvailability } from './checkoutAvailability';
 
 export interface RazorpayOrder {
   id: string;
@@ -54,6 +55,7 @@ export async function createRazorpayOrder(
   receipt: string,
   notes: Record<string, string>
 ): Promise<RazorpayOrder> {
+  if (!(await getCheckoutAvailability()).enabled) throw new CheckoutUnavailableError();
   const resp = await fetch(apiUrl('/api/create-order'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

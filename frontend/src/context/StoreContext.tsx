@@ -1,9 +1,13 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getProductsByIds } from '../lib/productQueries';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { INITIAL_PRODUCTS } from '../storeConfig';
 import { CartItem, ProductItem, SubcategoryItem } from '../types';
-import { fetchSupabaseProducts, fetchSupabaseSubcategories, getSupabaseClient } from '../lib/supabaseClient';
+import { fetchSupabaseSubcategories, getSupabaseClient } from '../lib/supabaseClient';
+import { mariaCatalogEnabled,apiSubcategories } from '../lib/catalogApi';
 
 interface DirectCheckoutState {
+  // Display snapshot, not a server-validated purchase quote or stock reservation.
   product: ProductItem;
   variant: string;
   quantity: number;
@@ -15,7 +19,6 @@ interface StoreContextValue {
   subcategoriesLoaded: boolean;
   subcategoriesError: string | null;
   refreshSubcategories: () => Promise<void>;
-  isSupabaseLoading: boolean;
   supabaseConnected: boolean;
   cartItems: CartItem[];
   wishlistIds: string[];
@@ -62,15 +65,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [subcategories, setSubcategories] = useState<SubcategoryItem[]>([]);
   const [subcategoriesLoaded, setSubcategoriesLoaded] = useState(false);
   const [subcategoriesError, setSubcategoriesError] = useState<string | null>(null);
-  const [isSupabaseLoading, setIsSupabaseLoading] = useState(false);
-  const [supabaseConnected, setSupabaseConnected] = useState(false);
-  const productsLoaded = useRef(false);
+  const supabaseConnected = mariaCatalogEnabled() || !!getSupabaseClient();
 
-  // Cart always starts empty on page load / reload
+  // Cart always starts empty on page load / reload. These are display snapshots;
+  // query refresh/invalidation does not turn them into authoritative purchase
+  // data. Server-side price, quantity and inventory validation is still required.
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   // Wishlist always starts empty on page load / reload
   const [wishlistIds, setWishlistIds] = useState<string[]>([]);
+  const [wishlistSnapshots, setWishlistSnapshots] = useState<ProductItem[]>([]);
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
@@ -80,68 +84,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [quickViewProduct, setQuickViewProduct] = useState<ProductItem | null>(null);
   const [directCheckoutProduct, setDirectCheckoutProduct] = useState<DirectCheckoutState | null>(null);
 
-  const refreshSubcategories = useCallback(async () => {
-    setSubcategoriesError(null);
-    const result = await fetchSupabaseSubcategories();
-    if (result.data) {
-      setSubcategories(result.data);
-    } else if (result.error) {
-      setSubcategoriesError(result.error);
-    }
-    setSubcategoriesLoaded(true);
-  }, []);
-
+  const subcategoryQuery = useQuery({
+    queryKey: ['subcategories'], staleTime: 30_000,
+    queryFn: async () => {
+      if(mariaCatalogEnabled())return apiSubcategories();
+      const result = await fetchSupabaseSubcategories();
+      if (result.error) throw new Error(result.error);
+      return result.data || [];
+    },
+  });
   useEffect(() => {
-    let disposed = false;
-    let inFlight = false;
-    let lastRefreshStarted = 0;
-    async function loadSupabaseData() {
-      // Focus and visibility events often arrive together. Share that refresh.
-      if (disposed || inFlight || Date.now() - lastRefreshStarted < 3000) return;
-      const client = getSupabaseClient();
-      if (!client) {
-        setSubcategoriesLoaded(true);
-        return;
-      }
-
-      inFlight = true;
-      lastRefreshStarted = Date.now();
-      setSupabaseConnected(true);
-      // Only the first product fetch blocks the grid. Subsequent refreshes
-      // keep the current catalogue visible, including an empty live catalogue.
-      if (!productsLoaded.current) setIsSupabaseLoading(true);
-      const subcategoriesRequest = refreshSubcategories();
-      try {
-        const productsResult = await fetchSupabaseProducts();
-        if (disposed) return;
-        if (productsResult.data) {
-          setProducts(productsResult.data);
-          productsLoaded.current = true;
-        }
-      } finally {
-        // Product rendering must not wait for the independent menu query.
-        if (!disposed) setIsSupabaseLoading(false);
-        await subcategoriesRequest;
-        inFlight = false;
-      }
-    }
-
-    loadSupabaseData();
-    // Re-read when shoppers return from another tab, and while they browse.
-    // Polling also covers databases where Realtime publication is not enabled.
-    const refreshVisible = () => {
-      if (document.visibilityState === 'visible') void loadSupabaseData();
-    };
-    const interval = window.setInterval(refreshVisible, 30000);
-    window.addEventListener('focus', refreshVisible);
-    document.addEventListener('visibilitychange', refreshVisible);
-    return () => {
-      disposed = true;
-      window.clearInterval(interval);
-      window.removeEventListener('focus', refreshVisible);
-      document.removeEventListener('visibilitychange', refreshVisible);
-    };
-  }, [refreshSubcategories]);
+    if (subcategoryQuery.data) setSubcategories(subcategoryQuery.data);
+    setSubcategoriesLoaded(!subcategoryQuery.isPending);
+    setSubcategoriesError(subcategoryQuery.error?.message || null);
+  }, [subcategoryQuery.data, subcategoryQuery.isPending, subcategoryQuery.error]);
+  const refreshSubcategories = useCallback(async () => { await subcategoryQuery.refetch(); }, [subcategoryQuery.refetch]);
 
   const addToCart = useCallback((product: ProductItem, variant?: string, quantity: number = 1) => {
     if (product.inStock === false) return;
@@ -181,6 +138,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const clearCart = useCallback(() => setCartItems([]), []);
 
   const toggleWishlist = useCallback((product: ProductItem) => {
+    setWishlistSnapshots(previous => [...previous.filter(item => item.id !== product.id), product]);
     setWishlistIds((prev) =>
       prev.includes(product.id)
         ? prev.filter((id) => id !== product.id)
@@ -204,10 +162,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setDirectCheckoutProduct(null);
   }, []);
 
-  const wishlistProducts = useMemo(
-    () => products.filter((p) => wishlistIds.includes(p.id)),
-    [products, wishlistIds]
-  );
+  const wishlistQuery = useQuery({
+    queryKey: ['products', 'wishlist', wishlistIds],
+    queryFn: ({ signal }) => getProductsByIds(wishlistIds, signal), enabled: wishlistIds.length > 0,
+  });
+  const wishlistProducts = wishlistIds.length ? (wishlistQuery.data || wishlistSnapshots.filter(p => wishlistIds.includes(p.id))) : [];
 
   const value: StoreContextValue = {
     products,
@@ -215,7 +174,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     subcategoriesLoaded,
     subcategoriesError,
     refreshSubcategories,
-    isSupabaseLoading,
     supabaseConnected,
     cartItems,
     wishlistIds,
@@ -239,7 +197,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     closeWishlist: () => setIsWishlistOpen(false),
     openSearch: () => setIsSearchOpen(true),
     closeSearch: () => setIsSearchOpen(false),
-    openSupabaseSync: () => setIsSupabaseModalOpen(true),
+    openSupabaseSync: () => { if(!mariaCatalogEnabled())setIsSupabaseModalOpen(true); },
     closeSupabaseSync: () => setIsSupabaseModalOpen(false),
     setQuickViewProduct,
     openDirectCheckout,

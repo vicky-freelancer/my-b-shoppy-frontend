@@ -1,3 +1,4 @@
+import { ProductImage } from './ProductImage';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ProductItem } from '../types';
@@ -5,6 +6,7 @@ import { Heart, ShoppingBag, Check } from 'lucide-react';
 
 interface ProductCardProps {
   product: ProductItem;
+  priority?: boolean;
   currencySymbol: string;
   isWishlisted: boolean;
   onToggleWishlist: (product: ProductItem) => void;
@@ -12,12 +14,13 @@ interface ProductCardProps {
   onQuickView?: (product: ProductItem) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
+export const ProductCard: React.FC<ProductCardProps> = React.memo(({
   product,
   currencySymbol,
   isWishlisted,
   onToggleWishlist,
   onAddToCart,
+  priority = false,
 }) => {
   const [heartPulse, setHeartPulse] = useState(false);
   const [cartPulse, setCartPulse] = useState(false);
@@ -47,8 +50,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     >
       {/* ------- Image area (~70% of card height) ------- */}
       <div className="relative aspect-[4/4.6] rounded-2xl overflow-hidden bg-[#F8ECD0] img-zoom">
-        <img
-          src={product.imageUrl}
+        <ProductImage
+          product={product} priority={priority}
           alt={product.name}
           loading="lazy"
           className="w-full h-full object-cover object-center"
@@ -122,4 +125,4 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </div>
     </Link>
   );
-};
+});

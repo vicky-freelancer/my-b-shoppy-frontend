@@ -1,3 +1,4 @@
+import { ProductImage } from './ProductImage';
 import React, { useState } from 'react';
 import { ProductItem } from '../types';
 import { X, Heart, ShoppingBag, ShieldCheck, Check, Plus, Minus, ArrowRight } from 'lucide-react';
@@ -58,8 +59,8 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
 
           {/* Left: Product Image & Badges */}
           <div className="relative aspect-square bg-[#F8ECD0] flex items-center justify-center overflow-hidden">
-            <img
-              src={product.imageUrl}
+            <ProductImage
+              product={product} priority
               alt={product.name}
               className="w-full h-full object-contain object-center"
             />

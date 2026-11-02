@@ -1,3 +1,4 @@
+import { ProductImage } from './ProductImage';
 import React from 'react';
 import { ProductItem } from '../types';
 import { X, Heart, ShoppingBag, Trash2 } from 'lucide-react';
@@ -65,8 +66,8 @@ export const WishlistModal: React.FC<WishlistModalProps> = ({
                   key={product.id}
                   className="p-3.5 rounded-2xl bg-[#FAF1DD] border border-[#D8A83E]/30 flex gap-3.5 items-center justify-between"
                 >
-                  <img
-                    src={product.imageUrl}
+                  <ProductImage
+                    product={product}
                     alt={product.name}
                     onClick={() => {
                       onQuickView(product);
