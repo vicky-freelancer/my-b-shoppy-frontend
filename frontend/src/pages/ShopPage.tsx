@@ -18,8 +18,6 @@ export const ShopPage: React.FC = () => {
     toggleWishlist,
     addToCart,
     setQuickViewProduct,
-    supabaseConnected,
-    openSupabaseSync,
   } = useStore();
 
   const [sortBy, setSortBy] = useState<SortOption>('newest');
@@ -36,7 +34,7 @@ export const ShopPage: React.FC = () => {
   const paginatedProducts = listing.data?.products || [];
   const totalCount = listing.data?.count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
-  const isSupabaseLoading = listing.isPending;
+  const isLoading = listing.isPending;
   useEffect(() => {
     if (listing.data && currentPage > totalPages) setCurrentPage(totalPages);
   }, [listing.data, currentPage, totalPages]);
@@ -57,7 +55,7 @@ export const ShopPage: React.FC = () => {
         {listing.error && <p role="alert" className="text-sm text-[#6B5945]">Products could not be loaded. <button onClick={() => listing.refetch()}>Try again</button></p>}
         {/* Full-width catalog grid in a thick gold showcase frame */}
         <GoldFrame>
-          <ProductGrid
+          {(!listing.error || listing.data) && <ProductGrid
             products={paginatedProducts}
             currencySymbol="₹"
             wishlistIds={wishlistIds}
@@ -77,13 +75,11 @@ export const ShopPage: React.FC = () => {
             }}
             itemsPerPage={itemsPerPage}
             totalFilteredCount={totalCount}
-            isSupabaseLoading={isSupabaseLoading}
-            isSupabaseSynced={supabaseConnected}
-            onOpenSupabaseSync={openSupabaseSync}
-          />
+            isLoading={isLoading}
+          />}
         </GoldFrame>
 
-        {!isSupabaseLoading && totalCount === 0 && (
+        {!isLoading && !listing.error && totalCount === 0 && (
           <div className="py-20 text-center space-y-4 bg-[#FFFDF6] rounded-2xl border border-[#6B5945]/20 p-8">
             <SearchX className="w-12 h-12 text-[#B8860B]/50 mx-auto" />
             <h3 className="text-lg font-bold text-[#241A12]">Catalogue is being curated</h3>

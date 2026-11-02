@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiCategories,mariaCatalogEnabled } from '../lib/catalogApi';
+import { apiCategories } from '../lib/catalogApi';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Layers, SearchX } from 'lucide-react';
@@ -8,7 +8,6 @@ import { GoldBand } from '../components/GoldBand';
 import { GoldFrame } from '../components/GoldFrame';
 import { ProductGrid } from '../components/ProductGrid';
 import { SubcategoryListingPage } from './SubcategoryListingPage';
-import { CATEGORIES_CATALOG } from '../storeConfig';
 import { useStore } from '../context/StoreContext';
 import { useSeo } from '../lib/seo';
 import { SortOption } from '../lib/catalogUtils';
@@ -27,18 +26,16 @@ export const CategoryDetailPage: React.FC = () => {
     toggleWishlist,
     addToCart,
     setQuickViewProduct,
-    supabaseConnected,
-    openSupabaseSync,
   } = useStore();
 
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const liveCategories=useQuery({queryKey:['categories'],queryFn:apiCategories,enabled:mariaCatalogEnabled()});
+  const liveCategories=useQuery({queryKey:['categories'],queryFn:apiCategories});
   const forceProductView = searchParams.get('view') === 'products';
 
   const categoryMeta = useMemo(
-    () => (mariaCatalogEnabled()?(liveCategories.data||[]):CATEGORIES_CATALOG).find((category) => category.id === slug),
+    () => (liveCategories.data||[]).find((category) => category.id === slug),
     [slug,liveCategories.data]
   );
 
@@ -77,12 +74,13 @@ export const CategoryDetailPage: React.FC = () => {
   const paginatedProducts = listing.data?.products || [];
   const totalCount = listing.data?.count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
-  const isSupabaseLoading = listing.isPending;
+  const isLoading = listing.isPending;
   useEffect(() => {
     if (listing.data && currentPage > totalPages) setCurrentPage(totalPages);
   }, [listing.data, currentPage, totalPages]);
 
-  if (mariaCatalogEnabled() && liveCategories.isPending) return <div role="status">Loading categories...</div>;
+  if (liveCategories.isPending) return <div role="status">Loading categories...</div>;
+  if (liveCategories.error) return <p role="alert">Categories could not be loaded. <button onClick={() => liveCategories.refetch()}>Try again</button></p>;
   if (!categoryMeta) {
     return (
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center space-y-5">
@@ -226,7 +224,7 @@ export const CategoryDetailPage: React.FC = () => {
         {listing.error && <p role="alert" className="text-sm text-[#6B5945]">Products could not be loaded. <button onClick={() => listing.refetch()}>Try again</button></p>}
         {/* Full-width product grid — thick gold showcase frame */}
         <GoldFrame>
-          <ProductGrid
+          {(!listing.error || listing.data) && <ProductGrid
             products={paginatedProducts}
             currencySymbol="₹"
             wishlistIds={wishlistIds}
@@ -246,13 +244,11 @@ export const CategoryDetailPage: React.FC = () => {
             }}
             itemsPerPage={itemsPerPage}
             totalFilteredCount={totalCount}
-            isSupabaseLoading={isSupabaseLoading}
-            isSupabaseSynced={supabaseConnected}
-            onOpenSupabaseSync={openSupabaseSync}
-          />
+            isLoading={isLoading}
+          />}
         </GoldFrame>
 
-        {!isSupabaseLoading && totalCount === 0 && (
+        {!isLoading && !listing.error && totalCount === 0 && (
           <div className="py-16 text-center space-y-3 bg-[#FFFDF6] rounded-2xl border border-[#6B5945]/20 p-8 mt-2">
             <SearchX className="w-10 h-10 text-[#B8860B]/50 mx-auto" />
             <h3 className="text-base font-bold text-[#241A12]">No pieces here yet</h3>

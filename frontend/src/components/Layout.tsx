@@ -7,7 +7,6 @@ import { CheckoutModal } from './CheckoutModal';
 import { QuickViewModal } from './QuickViewModal';
 import { WishlistModal } from './WishlistModal';
 import { SearchModal } from './SearchModal';
-import { SupabaseSyncModal } from './SupabaseSyncModal';
 import { useStore } from '../context/StoreContext';
 import { STORE_CONFIG } from '../storeConfig';
 
@@ -79,13 +78,7 @@ export const Layout: React.FC = () => {
         onSelectProduct={(prod) => store.setQuickViewProduct(prod)}
       />
 
-      <SupabaseSyncModal
-        isOpen={store.isSupabaseModalOpen}
-        onClose={store.closeSupabaseSync}
-        products={store.products}
-        onProductsUpdated={(newProducts) => store.setProducts(newProducts)}
-        supabaseConnected={store.supabaseConnected}
-      />
+
     </div>
   );
 };

@@ -1,16 +1,15 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { apiCategories,mariaCatalogEnabled } from '../lib/catalogApi';
+import { apiCategories } from '../lib/catalogApi';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { GoldHero } from '../components/GoldHero';
 import { GoldBand } from '../components/GoldBand';
-import { CATEGORIES_CATALOG } from '../storeConfig';
 import { useSeo } from '../lib/seo';
 
 export const CategoriesPage: React.FC = () => {
-  const live=useQuery({queryKey:['categories'],queryFn:apiCategories,enabled:mariaCatalogEnabled()});
-  const categories=mariaCatalogEnabled()?(live.data||[]):CATEGORIES_CATALOG;
+  const live=useQuery({queryKey:['categories'],queryFn:apiCategories});
+  const categories=live.data || [];
   useSeo({
     title: 'Categories',
     description:
@@ -31,6 +30,8 @@ export const CategoriesPage: React.FC = () => {
       />
 
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-10 sm:py-14">
+        {live.isPending && <p role="status">Loading categories...</p>}
+        {live.error && <p role="alert">Categories could not be loaded. <button onClick={() => live.refetch()}>Try again</button></p>}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {categories.map((category) => (
             <Link

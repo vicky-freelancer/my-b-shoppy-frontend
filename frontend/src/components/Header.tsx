@@ -10,7 +10,8 @@ import {
   ChevronDown,
   ArrowRight,
 } from 'lucide-react';
-import { STORE_CONFIG } from '../storeConfig';
+import { useQuery } from '@tanstack/react-query';
+import { apiCategories } from '../lib/catalogApi';
 import { useStore } from '../context/StoreContext';
 
 const navLinks = [
@@ -40,6 +41,7 @@ export const Header: React.FC = () => {
     subcategories,
   } = useStore();
 
+  const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: apiCategories });
   const cartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
   const subcategoriesFor = (categoryId: string) =>
@@ -48,7 +50,7 @@ export const Header: React.FC = () => {
       .sort((a, b) => a.sortOrder - b.sortOrder);
 
   const activeCategory =
-    STORE_CONFIG.categories.find((category) => category.id === activeCategoryId);
+    categories.find((category) => category.id === activeCategoryId);
   const activeCategorySubcategories = activeCategory ? subcategoriesFor(activeCategory.id) : [];
 
   useEffect(() => {
@@ -176,7 +178,7 @@ export const Header: React.FC = () => {
                       </div>
                       <div className="flex">
                         <div className={`w-[238px] shrink-0 py-2 max-h-[min(420px,70vh)] overflow-y-auto ${activeCategory ? 'border-r border-[#2a2118]' : ''}`}>
-                          {STORE_CONFIG.categories.map((category) => {
+                          {categories.map((category) => {
                             const isActiveCategory = category.id === activeCategory?.id;
                             const hasSubcategories = subcategoriesFor(category.id).length > 0;
                             return (
@@ -348,7 +350,7 @@ export const Header: React.FC = () => {
                 </button>
                 {mobileCategoriesOpen && (
                   <div className="space-y-1 pt-1">
-                    {STORE_CONFIG.categories.map((category) => {
+                    {categories.map((category) => {
                       const subcategoryItems = subcategoriesFor(category.id);
                       const isCategoryOpen = mobileOpenCategoryId === category.id;
                       return (

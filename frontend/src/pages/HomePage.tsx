@@ -12,8 +12,7 @@ import { Reveal } from '../components/Reveal';
 import { useStore } from '../context/StoreContext';
 import { useSeo } from '../lib/seo';
 import { STORE_CONFIG } from '../storeConfig';
-import { mariaCatalogEnabled,catalogRequest } from '../lib/catalogApi';
-import { mediaUrl } from '../lib/api';
+import { apiCategories } from '../lib/catalogApi';
 
 const testimonials = [
   {
@@ -46,8 +45,8 @@ export const HomePage: React.FC = () => {
   const featuredQuery = useQuery({ ...productReadPolicy, queryKey: ['products', 'featured'],
     queryFn: ({ signal }) => getFeaturedProducts(signal) });
   const featuredList = featuredQuery.data || [];
-  const categoriesQuery=useQuery({queryKey:['categories','mariadb'],enabled:mariaCatalogEnabled(),...productReadPolicy,queryFn:()=>catalogRequest('categories')});
-  const categories=mariaCatalogEnabled()?(categoriesQuery.data?.categories||[]).map((row:any)=>{const marketing=STORE_CONFIG.categories.find(c=>c.id===row.id);return {...marketing,...row,imageUrl:row.image_url?mediaUrl(row.image_url):marketing?.imageUrl,items:[],startingPrice:Number(row.startingPrice??0),count:Number(row.count??0)};}):STORE_CONFIG.categories;
+  const categoriesQuery = useQuery({ queryKey: ['categories'], ...productReadPolicy, queryFn: apiCategories });
+  const categories = categoriesQuery.data || [];
 
   return (
     <main>
@@ -67,6 +66,9 @@ export const HomePage: React.FC = () => {
       />
 
       {/* ============ CATEGORIES ============ */}
+      {categoriesQuery.isPending && <p role="status">Loading categories...</p>}
+      {categoriesQuery.error && <p role="alert">Categories could not be loaded. <button onClick={() => categoriesQuery.refetch()}>Try again</button></p>}
+      {featuredQuery.error && <p role="alert">Products could not be loaded. <button onClick={() => featuredQuery.refetch()}>Try again</button></p>}
       <CategoriesSection categories={categories} />
 
       {/* ============ EDITORIAL PROMO ============ */}

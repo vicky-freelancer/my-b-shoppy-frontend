@@ -1,7 +1,7 @@
 import React from 'react';
 import { ProductItem } from '../types';
 import { ProductCard } from './ProductCard';
-import { ChevronLeft, ChevronRight, Database, SearchX, RefreshCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, SearchX, RefreshCw } from 'lucide-react';
 
 interface ProductGridProps {
   products: ProductItem[];
@@ -17,9 +17,7 @@ interface ProductGridProps {
   onPageChange: (page: number) => void;
   itemsPerPage: number;
   totalFilteredCount: number;
-  isSupabaseLoading?: boolean;
-  isSupabaseSynced?: boolean;
-  onOpenSupabaseSync?: () => void;
+  isLoading?: boolean;
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
@@ -36,9 +34,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   onPageChange,
   itemsPerPage,
   totalFilteredCount,
-  isSupabaseLoading = false,
-  isSupabaseSynced = false,
-  onOpenSupabaseSync
+  isLoading = false
 }) => {
   const startIndex = totalFilteredCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endIndex = Math.min(currentPage * itemsPerPage, totalFilteredCount);
@@ -68,25 +64,14 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       {/* Top Filter and Controls Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#D8A83E]/30">
 
-        {/* Left: Product Counts & Supabase Sync Badge */}
+        {/* Left: Product counts */}
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-xs sm:text-sm text-[#6B5945] font-medium">
             Showing <span className="text-[#241A12] font-bold">{startIndex}–{endIndex}</span> of{' '}
             <span className="text-[#B8860B] font-bold">{totalFilteredCount}</span> products
           </p>
 
-          {/* Supabase status badge */}
-          {onOpenSupabaseSync && (
-            <button
-              type="button"
-              disabled
-              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider bg-[#FAF1DD] text-[#8A6A15] border border-[#D8A83E]/60 cursor-default"
-              title="Database status"
-            >
-              <Database className="w-3 h-3" />
-              <span>{isSupabaseLoading ? 'Connecting...' : (isSupabaseSynced ? 'Supabase Live DB' : 'Supabase Ready')}</span>
-            </button>
-          )}
+
         </div>
 
         {/* Right: Sort By Dropdown */}
@@ -112,16 +97,16 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         </div>
       </div>
 
-      {/* Loading state from Supabase */}
-      {isSupabaseLoading && (
+      {/* Loading state */}
+      {isLoading && (
         <div className="py-20 text-center space-y-3">
           <RefreshCw className="w-8 h-8 text-[#B8860B] animate-spin mx-auto" />
-          <p className="text-sm font-semibold text-[#6B5945]">Synchronizing products with Supabase...</p>
+          <p className="text-sm font-semibold text-[#6B5945]">Loading products...</p>
         </div>
       )}
 
       {/* Empty State */}
-      {!isSupabaseLoading && products.length === 0 && (
+      {!isLoading && products.length === 0 && (
         <div className="py-20 text-center space-y-4 bg-[#FFFDF6] rounded-2xl border border-[#6B5945]/20 p-8">
           <SearchX className="w-12 h-12 text-[#B8860B]/50 mx-auto" />
           <h3 className="text-lg font-bold text-[#241A12]">No products found</h3>
@@ -132,7 +117,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       )}
 
       {/* Product Cards Grid */}
-      {!isSupabaseLoading && products.length > 0 && (
+      {!isLoading && products.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
           {products.map((product, index) => (
             <ProductCard

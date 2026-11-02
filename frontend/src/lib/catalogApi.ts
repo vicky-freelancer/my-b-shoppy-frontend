@@ -6,7 +6,7 @@ export async function catalogRequest(path:string,signal?:AbortSignal){
   const data=await response.json();if(!response.ok)throw new Error(data.code||'Catalog service unavailable');return data;
 }
 export function apiProduct(row:any):ProductItem {
-  return {id:row.slug||String(row.id),imageProductId:String(row.id),name:row.title,subtitle:row.subtitle,price:Number(row.sale_price),originalPrice:Number(row.mrp),imageUrl:mediaUrl(row.image_url),imageUrls:(row.images||[]).map((image:any)=>mediaUrl(image.url)),
+  return {id:row.slug||String(row.id),imageProductId:String(row.id),name:row.title,subtitle:row.subtitle,price:Number(row.sale_price),originalPrice:Number(row.mrp),imageUrl:mediaUrl(row.image_url),imageUrls:(row.images||[]).map((image:any)=>mediaUrl(image.url || (image.storage_key ? '/media/' + image.storage_key : ''))),
     category:row.category,categoryId:row.category_id,subcategory:row.subcategory,subcategoryId:row.subcategory_id?String(row.subcategory_id):undefined,
     badge:row.badge,rating:Number(row.rating??0),reviewsCount:Number(row.reviews_count??0),material:row.material,stone:row.stone,variants:row.variants||[],description:row.description||'',
     inStock:row.in_stock===true,created_at:row.created_at,variantOptions:(row.variant_options||[]).map((v:any)=>({id:String(v.id),label:v.label}))};
@@ -25,5 +25,5 @@ export async function apiSubcategories():Promise<SubcategoryItem[]>{
 }
 
 export async function apiCategories():Promise<ProductCategory[]>{
-  const data=await catalogRequest('categories');return data.categories.map((c:any)=>({id:c.id,name:c.name,tagline:'',description:'',startingPrice:Number(c.startingPrice||0),count:Number(c.count||0),imageUrl:mediaUrl(c.image_url)||'/images/products/gold-earrings.svg',items:[]}));
+  const data=await catalogRequest('categories');return data.categories.map((c:any)=>({id:c.id,name:c.name,tagline:'',description:'',startingPrice:Number(c.startingPrice||0),count:Number(c.count||0),imageUrl:mediaUrl(c.image_url),items:[]}));
 }
