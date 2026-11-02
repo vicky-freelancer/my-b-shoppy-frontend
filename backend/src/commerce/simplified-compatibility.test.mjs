@@ -46,16 +46,16 @@ for(const [mode,env] of [
 
 // Driver doubles only: no database driver, connection or SQL execution.
 const columnRows=()=>Object.entries(REQUIRED_COLUMNS).flatMap(([table_name,names])=>names.split(' ').map(column_name=>({table_name,column_name})));
-function driver({columns=columnRows(),session={},warnings=false}={}){
+function driver({columns=columnRows(),session={},warnings=false,expected={database:'u839831098_mybshoppyDB',user:'u839831098_adminmybshoppy'}}={}){
   const calls=[];
   const connection={destroyed:false,released:false,async query(q,values){
     calls.push({q,values});
     if(q==='SHOW WARNINGS LIMIT 1')return warnings?[{Level:'Warning'}]:[];
-    if(q.startsWith('SELECT DATABASE'))return [{db:'u839831098_phase6btest',account:'u839831098_phase6btest@localhost',version:'11.4.5-MariaDB',fk:1,ck:1,active:0,autocommit:1,read_only:0,...session}];
+    if(q.startsWith('SELECT DATABASE'))return [{db:'u839831098_mybshoppyDB',account:'u839831098_adminmybshoppy@localhost',version:'11.4.5-MariaDB',fk:1,ck:1,active:0,autocommit:1,read_only:0,...session}];
     if(q.includes('information_schema.COLUMNS'))return columns;
     return [];
   },destroy(){this.destroyed=true;},release(){this.released=true;}};
-  return {connection,calls,db:new Database({getConnection:async()=>connection})};
+  return {connection,calls,db:new Database({getConnection:async()=>connection},expected)};
 }
 
 test('readiness covers exactly the revised 15-table columns without a Phase 6 ledger',async()=>{
@@ -67,9 +67,14 @@ test('readiness covers exactly the revised 15-table columns without a Phase 6 le
   assert.deepEqual(await fake.db.health(),{ready:true,database:'isolated-test'});
   assert.equal(fake.connection.released,true);
   assert.ok(!fake.calls.some(({q})=>q.includes('schema_versions')||q.includes('payment_attempts')));
-  assert.deepEqual(fake.calls.find(({q})=>q.includes('information_schema.COLUMNS')).values,['u839831098_phase6btest']);
+  assert.deepEqual(fake.calls.find(({q})=>q.includes('information_schema.COLUMNS')).values,['u839831098_mybshoppyDB']);
 });
 
+test('readiness accepts the configured production database and account',async()=>{
+  const fake=driver({expected:{database:'u839831098_mybshoppyDB',user:'u839831098_adminmybshoppy'},session:{db:'u839831098_mybshoppyDB',account:'u839831098_adminmybshoppy@localhost'}});
+  assert.deepEqual(await fake.db.health(),{ready:true,database:'isolated-test'});
+  assert.equal(fake.connection.released,true);
+});
 for(const table of Object.keys(REQUIRED_COLUMNS))test('readiness refuses missing table '+table,async()=>{
   const fake=driver({columns:columnRows().filter(row=>row.table_name!==table)});
   await assert.rejects(fake.db.connection(),/DATABASE_SCHEMA_NOT_READY/);
@@ -79,7 +84,7 @@ test('readiness refuses a missing stock movement field',async()=>{
   const fake=driver({columns:columnRows().filter(row=>!(row.table_name==='inventory_movements'&&row.column_name==='reserved_delta'))});
   await assert.rejects(fake.db.connection(),/DATABASE_SCHEMA_NOT_READY/);
 });
-for(const session of [{db:'u839831098_mybshoppyDB'},{account:'root@localhost'},{version:'8.0.40-MySQL'},{fk:0},{ck:0},{active:1},{autocommit:0},{read_only:1}])test('readiness retains session guard '+JSON.stringify(session),async()=>{
+for(const session of [{db:'u839831098_otherDB'},{account:'root@localhost'},{version:'8.0.40-MySQL'},{fk:0},{ck:0},{active:1},{autocommit:0},{read_only:1}])test('readiness retains session guard '+JSON.stringify(session),async()=>{
   const fake=driver({session});
   await assert.rejects(fake.db.connection(),/DATABASE_SESSION_REFUSED/);
   assert.equal(fake.connection.destroyed,true);

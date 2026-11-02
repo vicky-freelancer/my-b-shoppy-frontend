@@ -20,20 +20,19 @@ export const REQUIRED_COLUMNS = Object.freeze({
 });
 export function databaseConfig(env) {
   if(env.MARIADB_ENABLED!=='true')return null;
-  if(env.MARIADB_LOCAL_EXECUTION_APPROVED!=='true')throw new Fault(503,'LOCAL_DATABASE_NOT_APPROVED');
-  if(!['127.0.0.1','localhost','::1'].includes(env.MARIADB_HOST)||env.MARIADB_DATABASE!=='u839831098_phase6btest'||env.MARIADB_USER!=='u839831098_phase6btest')throw new Fault(503,'DATABASE_TARGET_REFUSED');
-  if(!env.MARIADB_PASSWORD)throw new Fault(503,'DATABASE_CONFIGURATION_INCOMPLETE');
+  const host=String(env.MARIADB_HOST||'').trim(),database=String(env.MARIADB_DATABASE||'').trim(),user=String(env.MARIADB_USER||'').trim(),password=String(env.MARIADB_PASSWORD||'');
+  if(!host||!database||!user||!password)throw new Fault(503,'DATABASE_CONFIGURATION_INCOMPLETE');
   if(!Number.isInteger(Number(env.MARIADB_PORT||3306))||Number(env.MARIADB_PORT||3306)<1||Number(env.MARIADB_PORT||3306)>65535)throw new Fault(503,'DATABASE_PORT_REFUSED');
-  return {host:env.MARIADB_HOST,port:Number(env.MARIADB_PORT||3306),database:env.MARIADB_DATABASE,user:env.MARIADB_USER,password:env.MARIADB_PASSWORD,
+  return {host,port:Number(env.MARIADB_PORT||3306),database,user,password,
     connectionLimit:4,minimumIdle:0,connectTimeout:3000,acquireTimeout:5000,multipleStatements:false,bigIntAsNumber:false,insertIdAsNumber:false,dateStrings:true,timezone:'Z',charset:'utf8mb4'};
 }
 export async function createDatabase(env) {
   const config=databaseConfig(env); if(!config)return null;
   const {default:mariadb}=await import('mariadb'); const pool=mariadb.createPool(config);
-  return new Database(pool);
+  return new Database(pool,{database:config.database,user:config.user});
 }
 export class Database {
-  constructor(pool){this.pool=pool;}
+  constructor(pool,expected={}){this.pool=pool;this.expected=expected;}
   async connection(){
     const c=await this.pool.getConnection();
     try{
@@ -41,7 +40,7 @@ export class Database {
       await sql(c,'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci');
       await sql(c,'SET SESSION innodb_lock_wait_timeout=5');
       const [s]=await sql(c,'SELECT DATABASE() db,CURRENT_USER() account,VERSION() version,@@session.foreign_key_checks fk,@@session.check_constraint_checks ck,@@session.in_transaction active,@@session.autocommit autocommit,@@session.tx_read_only read_only');
-      if(s.db!=='u839831098_phase6btest'||s.account.split('@')[0]!=='u839831098_phase6btest'||!/^\d+\.\d+\.\d+.*MariaDB/i.test(s.version)||Number(s.fk)!==1||Number(s.ck)!==1||Number(s.active)!==0||Number(s.autocommit)!==1||Number(s.read_only)!==0)throw new Fault(503,'DATABASE_SESSION_REFUSED');
+      if(!this.expected.database||!this.expected.user||s.db!==this.expected.database||s.account.split('@')[0]!==this.expected.user||!/^\d+\.\d+\.\d+.*MariaDB/i.test(s.version)||Number(s.fk)!==1||Number(s.ck)!==1||Number(s.active)!==0||Number(s.autocommit)!==1||Number(s.read_only)!==0)throw new Fault(503,'DATABASE_SESSION_REFUSED');
       const columns=await sql(c,'SELECT TABLE_NAME AS table_name,COLUMN_NAME AS column_name FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=?',[s.db]);
       const present=new Set(columns.map(r=>r.table_name+'.'+r.column_name));
       for(const [table,names] of Object.entries(REQUIRED_COLUMNS)){

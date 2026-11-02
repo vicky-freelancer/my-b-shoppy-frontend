@@ -21,7 +21,6 @@ export interface ProductItem {
   variantOptions?: { id: string; label: string }[];
   description: string;
   inStock?: boolean;
-  isSupabaseSynced?: boolean;
   created_at?: string;
 }
 
@@ -72,12 +71,6 @@ export interface StoreConfig {
   defaultCountry: string;
   availableCountries: string[];
   categories: ProductCategory[];
-  supabase: {
-    url: string;
-    publishableKey: string;
-    tableName: string;
-    productsTableName: string;
-  };
   contact: {
     email: string;
     phone: string;

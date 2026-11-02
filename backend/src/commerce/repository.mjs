@@ -2,7 +2,7 @@ import { sql } from './database.mjs';
 import { Fault,id,requireThat } from './domain.mjs';
 
 const PUBLIC="p.is_active=1 AND p.archived_at IS NULL AND c.is_active=1 AND (s.id IS NULL OR s.is_active=1) AND EXISTS(SELECT 1 FROM product_variants v WHERE v.product_id=p.id AND v.is_active=1) AND EXISTS(SELECT 1 FROM product_images pi JOIN media_assets ma ON ma.id=pi.asset_id AND ma.state='ready' WHERE pi.product_id=p.id AND pi.position=0)";
-const FROM='products p JOIN categories c ON c.id=p.category_id LEFT JOIN subcategories s ON s.id=p.subcategory_id JOIN inventory i ON i.product_id=p.id';
+const FROM='products p JOIN categories c ON c.id=p.category_id LEFT JOIN subcategories s ON s.id=p.subcategory_id LEFT JOIN inventory i ON i.product_id=p.id';
 export class Repository {
   constructor(database,connection=null){this.db=database;this.c=connection;}
   run(fn){return this.c?fn(this):this.db.use(c=>fn(new Repository(this.db,c)));}
@@ -10,7 +10,7 @@ export class Repository {
   query(q,v=[]){return sql(this.c,q,v);}
   async audit(actor,action,type,resource,outcome='success',metadata={}){await this.query('INSERT INTO admin_audit_logs(admin_user_id,action,resource_type,resource_id,outcome,metadata_json) VALUES(?,?,?,?,?,?)',[actor,action,type,String(resource??''),outcome,JSON.stringify(metadata)]);}
   async categories(admin=false){return this.query(`SELECT cat.*,(SELECT COUNT(*) FROM ${FROM} WHERE ${PUBLIC} AND p.category_id=cat.id) product_count,(SELECT MIN(p.sale_price_paise) FROM ${FROM} WHERE ${PUBLIC} AND p.category_id=cat.id) starting_price_paise,(SELECT storage_key FROM media_assets m WHERE m.id=cat.image_asset_id AND m.state='ready') image_storage_key FROM categories cat ${admin?'':'WHERE cat.is_active=1'} ORDER BY cat.sort_order,cat.id`);}
-  async subcategories(admin=false){return this.query(`SELECT s.*,c.name category_name,m.storage_key FROM subcategories s JOIN categories c ON c.id=s.category_id JOIN media_assets m ON m.id=s.featured_asset_id ${admin?'':"WHERE s.is_active=1 AND c.is_active=1 AND m.state='ready'"} ORDER BY s.sort_order,s.name,s.id`);}
+  async subcategories(admin=false){return this.query(`SELECT s.*,c.name category_name,m.storage_key FROM subcategories s JOIN categories c ON c.id=s.category_id LEFT JOIN media_assets m ON m.id=s.featured_asset_id ${admin?'':"WHERE s.is_active=1 AND c.is_active=1 AND (s.featured_asset_id IS NULL OR m.state='ready')"} ORDER BY s.sort_order,s.name,s.id`);}
   async asset(assetId){const [a]=await this.query('SELECT * FROM media_assets WHERE id=?',[id(assetId)]);return a;}
   async mediaByKey(key){const [a]=await this.query("SELECT * FROM media_assets WHERE storage_key=? AND state='ready'",[key]);return a;}
   async mediaByHash(hash){const [a]=await this.query("SELECT * FROM media_assets WHERE sha256=? AND state='ready' LIMIT 1",[hash]);return a;}

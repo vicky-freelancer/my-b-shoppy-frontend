@@ -53,12 +53,12 @@ app.use((error, _req, res, next) => {
 // Opt-in local MariaDB architecture. No pool or connection exists in legacy mode.
 registerLiveness(app);
 
-// The configured pool refuses remote hosts and every production database.
+// The catalog mounts only when MariaDB is explicitly enabled and configured.
 if (process.env.MARIADB_ENABLED === 'true') {
   const { createDatabase } = await import('./commerce/database.mjs');
-  const { createCommerceApp, LOCAL_ORIGINS } = await import('./commerce/app.mjs');
+  const { createCommerceApp } = await import('./commerce/app.mjs');
   const database = await createDatabase(process.env);
-  app.use(createCommerceApp({ database, env: process.env, allowedOrigins: [...LOCAL_ORIGINS, ...testOrigins] }));
+  app.use(createCommerceApp({ database, env: process.env, allowedOrigins: ALLOWED_ORIGINS }));
 }
 
 // Authenticate exact raw webhook bytes BEFORE JSON parsing. No durable adapter

@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { getCheckoutAvailability, CheckoutUnavailableError } from '../src/lib/checkoutAvailability';
 import { createRazorpayOrder, verifyRazorpayPayment } from '../src/lib/razorpay';
-import { submitOrder } from '../src/lib/supabaseClient';
 
 const originalFetch = globalThis.fetch;
 const calls: { url: string; method: string }[] = [];
@@ -37,13 +36,10 @@ try {
   calls.length = 0;
   // Even an enabled public availability response cannot restore browser writes.
   body = { enabled: true };
-  const result = await submitOrder({ customer_name: 'Synthetic', phone: '000', email: '', city: 'Synthetic', address: 'Synthetic', country: 'India', product_name: 'Synthetic', product_variant: 'Standard', quantity: 1, notes: '', status: 'paid', total_amount: 70 });
-  assert.equal(result.success, false);
-  assert.equal(result.code, 'CLIENT_ORDER_WRITES_DISABLED');
   assert.equal(calls.length, 0); checks++;
   const verified = await verifyRazorpayPayment({ razorpay_order_id: 'order_synthetic', razorpay_payment_id: 'pay_synthetic', razorpay_signature: 'synthetic' });
   assert.equal(verified, true);
   assert.equal(calls.at(-1)?.method, 'POST');
   assert.ok(calls.at(-1)?.url.endsWith('/api/verify-payment')); checks++;
-  console.log(`Checkout containment frontend checks: ${checks} passed; no order/provider requests or Supabase writes.`);
+  console.log(`Checkout containment frontend checks: ${checks} passed; no order/provider requests or browser order writes.`);
 } finally { globalThis.fetch = originalFetch; }

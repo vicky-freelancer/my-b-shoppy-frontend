@@ -495,12 +495,6 @@ export const STORE_CONFIG: StoreConfig = {
   defaultCountry: 'India',
   availableCountries: ['India'],
   categories: CATEGORIES_CATALOG,
-  supabase: {
-    url: 'https://sdgpuyzwygyaxbmxikrp.supabase.co',
-    publishableKey: 'sb_publishable_KzzkyPT3-dX7a74Fl-iwfg_miajjdsS',
-    tableName: 'orders',
-    productsTableName: 'products',
-  },
   contact: {
     email: 'mybshoppy@gmail.com',
     phone: '96002 05955',

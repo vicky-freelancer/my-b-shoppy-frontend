@@ -2,7 +2,7 @@
 
 Recent completion fixes:
 
-- Both the storefront and sibling admin dashboard support ten parent categories, in this order: AD Jewellery, Hair Accessories, Anti Tarnish Jewellery, Ear Rings, Bows & Scrunchies, Bags, Mobile Charms, Key Chains, Mens Accessories, Stationery & Gifts. The four additions are saved in the shared Supabase categories table. Their IDs are `bows-and-scrunchies`, `key-chains`, `mobile-charms`, and `men-accessories`.
+- Both the storefront and sibling admin dashboard support ten parent categories, in this order: AD Jewellery, Hair Accessories, Anti Tarnish Jewellery, Ear Rings, Bows & Scrunchies, Bags, Mobile Charms, Key Chains, Mens Accessories, Stationery & Gifts. They are stored in the shared Hostinger MariaDB catalog. Their IDs are `bows-and-scrunchies`, `key-chains`, `mobile-charms`, and `men-accessories`.
 - `npm run test:categories --workspace frontend` checks admin product/collection payloads, legacy category aliases, images and the catalogue. The storefront refreshes products and collections on tab focus and every 30 seconds while visible.
 
 - `npm start` now starts the backend, which serves `frontend/dist` when built, including direct page URLs.
@@ -11,7 +11,7 @@ Recent completion fixes:
 - Checkout requires configured order storage, resets its confirmation screen between purchases, and retries saving a verified payment without opening another payment popup during the current session. Keep the checkout page open if saving fails and retain the payment ID for support.
 - The contact form composes an email in the customer's mail application; the customer must send that email.
 
-Payment capture and Supabase persistence still require an end-to-end test with your own test credentials. The existing browser-side order recording and legacy schema fallbacks remain; durable server-side reconciliation and database idempotency are still needed for production payment recovery.
+Payment capture and durable order persistence still require an end-to-end test with your own test credentials. The storefront now reads products and subcategories from the Hostinger MariaDB catalog API; checkout remains disabled until the payment backend is activated.
 
 Premium fashion accessories storefront (hair accessories, artificial jewellery,
 bows, scrunchies, handbags) with a Razorpay payment backend.
@@ -70,6 +70,19 @@ Use these in the Razorpay checkout popup (your key starts with `rzp_test_`):
 
 ## Production
 
+- The static dashboard at `https://admin.mybshoppy.com` sends login, session and
+  logout requests to `https://api.mybshoppy.com/api/admin/*`. Deploy the updated
+  backend and rebuild/upload the sibling admin dashboard together. An admin build
+  can override the API origin with `VITE_ADMIN_API_URL`.
+- Configure `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` on the API server. The hash
+  format is `salt:hex-digest`, using Node's `scryptSync(password, salt, 64)`.
+  Use HTTPS for both hosts; admin sessions use an HttpOnly cookie and expire after
+  eight hours. Sessions are kept in process memory, so restarting the API signs
+  administrators out and multiple API processes need shared session storage.
+- Verify the login changes with `npm run test --workspace backend` and
+  `node --experimental-strip-types scripts/check-admin-auth-response.ts` (the
+  latter requires the sibling dashboard checkout and a Node version supporting
+  TypeScript stripping).
 - `npm run build` builds the frontend into `frontend/dist` and regenerates
   `frontend/public/sitemap.xml` + `robots.txt`.
 - `npm start` (== `npm run server`) runs the Express backend, which serves both

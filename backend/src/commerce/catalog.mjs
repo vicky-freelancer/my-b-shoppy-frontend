@@ -2,7 +2,7 @@ import { CATEGORIES,Fault,requireThat,text,slug,id,integer,validateProduct } fro
 export class CatalogService {
   constructor(repo){this.repo=repo;}
   categories(admin=false){return this.repo.run(async r=>(await r.categories(admin)).map(c=>({...c,is_active:!!c.is_active,image_url:c.image_storage_key?'/media/'+c.image_storage_key:'',count:Number(c.product_count??0),startingPrice:Number(c.starting_price_paise??0)/100})));}
-  subcategories(admin=false){return this.repo.run(async r=>(await r.subcategories(admin)).map(s=>({...s,id:String(s.id),is_active:!!s.is_active,featured_image:'/media/'+s.storage_key})));}
+  subcategories(admin=false){return this.repo.run(async r=>(await r.subcategories(admin)).map(s=>({...s,id:String(s.id),is_active:!!s.is_active,featured_image:s.storage_key?'/media/'+s.storage_key:''})));}
   list(options,admin=false){return this.repo.run(r=>r.list(options,admin));}
   product(key,admin=false){return this.repo.run(async r=>{const p=await r.product(key,admin);if(!p)throw new Fault(404,'PRODUCT_NOT_FOUND');return p;});}
   async save(input,productId,actor){return this.repo.transaction(async r=>{

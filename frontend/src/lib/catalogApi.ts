@@ -1,6 +1,5 @@
 import { apiUrl,mediaUrl } from './api';
 import type { ProductItem,SubcategoryItem,ProductCategory } from '../types';
-export const mariaCatalogEnabled=()=>import.meta.env?.VITE_CATALOG_SOURCE==='mariadb'||(!import.meta.env?.VITE_CATALOG_SOURCE&&typeof window!=='undefined'&&window.location?.hostname==='mybshoppy.com');
 export async function catalogRequest(path:string,signal?:AbortSignal){
   const response=await fetch(apiUrl('/api/v1/'+path),{signal,cache:'no-store'});
   const data=await response.json();if(!response.ok)throw new Error(data.code||'Catalog service unavailable');return data;

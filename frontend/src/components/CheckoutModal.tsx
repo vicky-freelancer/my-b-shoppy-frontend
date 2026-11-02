@@ -1,18 +1,8 @@
 import React, { useState } from 'react';
 import { CartItem, OrderFormData, FormErrors, ProductItem } from '../types';
 import { STORE_CONFIG } from '../storeConfig';
-import { submitOrder } from '../lib/supabaseClient';
-import { getSupabaseClient } from '../lib/supabaseClient';
-import {
-  createRazorpayOrder,
-  loadRazorpayScript,
-  openRazorpayCheckout,
-  verifyRazorpayPayment,
-  buildRazorpayNotes,
-} from '../lib/razorpay';
 import confetti from 'canvas-confetti';
 import { CHECKOUT_UNAVAILABLE_MESSAGE, getCheckoutAvailability } from '../lib/checkoutAvailability';
-import { mariaCatalogEnabled } from '../lib/catalogApi';
 import { secureGuestCheckout } from '../lib/secureCheckout';
 import { X, ShieldCheck, CheckCircle2, Truck, AlertCircle, ShoppingBag, Loader2, Copy, Check, Lock } from 'lucide-react';
 
@@ -54,7 +44,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [confirmedPaymentId, setConfirmedPaymentId] = useState<string>('');
   const [paymentError, setPaymentError] = useState<string>('');
   const [copied, setCopied] = useState(false);
-  const [pendingOrder, setPendingOrder] = useState<OrderFormData | null>(null);
   const [checkoutEnabled, setCheckoutEnabled] = useState(false);
 
   React.useEffect(() => {
@@ -136,18 +125,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       setPaymentError(CHECKOUT_UNAVAILABLE_MESSAGE);
       return;
     }
-    if(mariaCatalogEnabled()) {
-      if(!validateForm()||!activeItems.length)return;
-      setIsSubmitting(true);setPaymentError('');
-      try { const status=await secureGuestCheckout(activeItems,formData);setConfirmedOrderId(status.order_id);setConfirmedPaymentId('Verified online payment');setOrderSuccess(true);if(!directProduct)onClearCart(); }
-      catch(error){setPaymentError(error instanceof Error?error.message:'Verification pending. Do not pay again.');}
-      finally{setIsSubmitting(false);}return;
-    }
-    if (!getSupabaseClient()) {
-      setPaymentError('Ordering is temporarily unavailable. Please contact the store before making a payment.');
-      return;
-    }
-    if (activeItems.length === 0 && !pendingOrder) return;
+    if (activeItems.length === 0) return;
 
     if (activeItems.some((item) => item.product.inStock === false)) {
       setPaymentError(
@@ -161,74 +139,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     setIsSubmitting(true);
     setPaymentError('');
 
-    const itemsSummary = activeItems
-      .map((i) => `${i.product.name} (${i.variant}) x${i.quantity}`)
-      .join(', ');
-
-    const payload: OrderFormData = {
-      ...formData,
-      product_name: activeItems[0]?.product.name || 'Luxury Item',
-      product_variant: activeItems.map((i) => `${i.variant} x${i.quantity}`).join(' | '),
-      quantity: totalUnits,
-      notes: formData.notes ? `${formData.notes} | Items: ${itemsSummary}` : `Items: ${itemsSummary}`,
-      total_amount: finalAmount,
-      items_summary: itemsSummary,
-      status: 'paid',
-    };
-
     try {
-      // 1. Ask the server to create a Razorpay order (amount in paise)
-      let paidOrder = pendingOrder;
-      if (!paidOrder) {
-      const receipt = `MBS-${Date.now().toString(36).toUpperCase()}`;
-      const amountInPaise = Math.round(finalAmount * 100);
-      const order = await createRazorpayOrder(amountInPaise, receipt, buildRazorpayNotes(payload));
-
-      // 2. Load Razorpay's checkout and open the payment popup
-      await loadRazorpayScript();
-      const payment = await openRazorpayCheckout({
-        key_id: order.key_id,
-        order_id: order.id,
-        amount: order.amount,
-        currency: order.currency,
-        name: STORE_CONFIG.storeName,
-        description: `${STORE_CONFIG.storeName} order — ${totalUnits} item(s)`,
-        prefill: {
-          name: payload.customer_name,
-          email: payload.email,
-          contact: payload.phone,
-        },
-        notes: buildRazorpayNotes(payload),
-      });
-
-      // 3. Server-side signature check — never trust the popup result alone
-      const isValid = await verifyRazorpayPayment(payment);
-      if (!isValid) {
-        throw new Error('Payment signature verification failed. Please contact support.');
-      }
-
-      paidOrder = {
-        ...payload,
-        razorpay_order_id: payment.razorpay_order_id,
-        razorpay_payment_id: payment.razorpay_payment_id,
-        razorpay_signature: payment.razorpay_signature,
-      };
-      setPendingOrder(paidOrder);
-      }
-
-      // 4. Record the PAID order in Supabase
-      const response = await submitOrder(paidOrder);
-
-      if (!response.success) {
-        throw new Error(
-          `Payment ${paidOrder.razorpay_payment_id} was received, but your order could not be saved. Retry saving below without paying again, or contact support.`,
-        );
-      }
-
-      const orderId = response.orderId || `MBS-${Math.floor(100000 + Math.random() * 900000)}`;
-      setConfirmedOrderId(orderId);
-      setConfirmedPaymentId(paidOrder.razorpay_payment_id || '');
-      setPendingOrder(null);
+      const status = await secureGuestCheckout(activeItems, formData);
+      setConfirmedOrderId(status.order_id);
+      setConfirmedPaymentId(status.payment_id || 'Verified online payment');
       setOrderSuccess(true);
       if (!directProduct) onClearCart();
 
@@ -543,7 +457,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               return (
                 <button
                   type="submit"
-                  disabled={!checkoutEnabled || isSubmitting || (activeItems.length === 0 && !pendingOrder)}
+                  disabled={!checkoutEnabled || isSubmitting || activeItems.length === 0}
                   className="w-full py-4 px-6 rounded-full bg-[#111111] hover:bg-[#241A12] text-[#F4D99B] font-extrabold text-xs uppercase tracking-widest transition duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl cursor-pointer"
                 >
                   {isSubmitting ? (
@@ -554,7 +468,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   ) : (
                     <>
                       <Lock className="w-4 h-4" />
-                      <span>{!checkoutEnabled ? 'Checkout Temporarily Unavailable' : pendingOrder ? 'Retry Saving Paid Order' : 'PAY ONLINE & PLACE ORDER'}</span>
+                      <span>{!checkoutEnabled ? 'Checkout Temporarily Unavailable' : 'PAY ONLINE & PLACE ORDER'}</span>
                     </>
                   )}
                 </button>
