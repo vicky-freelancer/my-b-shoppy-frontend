@@ -1,14 +1,19 @@
 import express from 'express';
+import { createAdminAuthRouter } from './admin-auth.mjs';
+import { createRazorpayWebhookHandler } from './payment-security.mjs';
+import { createCheckoutControl } from './checkout-control.mjs';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
+import { parseTestOrigins, loadDevelopmentEnv, registerLiveness, healthResponse } from './runtime-config.mjs';
 
 
 const backendDir = fileURLToPath(new URL('..', import.meta.url));
-dotenv.config({ path: path.join(backendDir, '.env') });
+loadDevelopmentEnv({ configure: options => dotenv.config(options), envPath: path.join(backendDir, '.env') });
+const testOrigins = parseTestOrigins(process.env);
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
@@ -16,25 +21,66 @@ const RAZORPAY_BASE = 'https://api.razorpay.com';
 const PORT = Number(process.env.PORT) || 5000;
 
 const app = express();
-// Keep the raw body so the webhook signature can be verified
-app.use(express.json({ verify: (req, _res, buf) => { req['rawBody'] = buf; } }));
+const checkout = createCheckoutControl();
 
 // CORS — this backend is deployed separately from the frontend (api.mybshoppy.com),
 // so browser calls from the storefront domain must be allowed explicitly.
 const ALLOWED_ORIGINS = [
   'https://mybshoppy.com',
+  'https://admin.mybshoppy.com',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+  ...testOrigins,
 ];
 app.use(cors({
+  credentials: true,
   origin: (origin, callback) => {
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`Origin not allowed by CORS: ${origin}`));
+      callback(Object.assign(new Error('Request origin is not allowed.'), { status: 403 }));
     }
   },
 }));
+
+app.use((error, _req, res, next) => {
+  if (error.status === 403) return res.status(403).json({ error: error.message });
+  next(error);
+});
+
+// Opt-in local MariaDB architecture. No pool or connection exists in legacy mode.
+registerLiveness(app);
+
+// The configured pool refuses remote hosts and every production database.
+if (process.env.MARIADB_ENABLED === 'true') {
+  const { createDatabase } = await import('./commerce/database.mjs');
+  const { createCommerceApp, LOCAL_ORIGINS } = await import('./commerce/app.mjs');
+  const database = await createDatabase(process.env);
+  app.use(createCommerceApp({ database, env: process.env, allowedOrigins: [...LOCAL_ORIGINS, ...testOrigins] }));
+}
+
+// Authenticate exact raw webhook bytes BEFORE JSON parsing. No durable adapter
+// is installed until the actual PostgreSQL contract is verified: valid events
+// receive retryable 503 instead of a false successful acknowledgement.
+app.post('/api/razorpay-webhook', express.raw({ type: 'application/json', limit: '64kb', inflate: false }),
+  createRazorpayWebhookHandler({ getSecret: () => process.env.RAZORPAY_WEBHOOK_SECRET }));
+// Guard only NEW purchase creation, before body parsing/provider calls. Existing
+// verification and webhook requests intentionally do not pass through this guard.
+app.get('/api/checkout/status', checkout.status);
+app.post('/api/create-order', checkout.guard);
+// Isolated catalog runs must never reach legacy signature-only payment handling.
+if (process.env.MARIADB_ENABLED === 'true' || process.env.DEPLOYMENT_PROFILE === 'isolated-test') {
+  app.post('/api/verify-payment', checkout.guard);
+}
+app.use(express.json({ limit: '100kb' }));
+
+// The static admin host uses this API for server-validated login.
+// Isolated smoke mode exposes no legacy authentication, including fallback credentials.
+if (process.env.DEPLOYMENT_PROFILE !== 'isolated-test') {
+  app.use(createAdminAuthRouter({ allowedOrigins: ['https://admin.mybshoppy.com', 'http://localhost:3000', 'http://127.0.0.1:3000', ...testOrigins] }));
+}
 
 function razorpayHeaders() {
   const auth = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64');
@@ -46,11 +92,7 @@ function razorpayHeaders() {
 
 /** Health check — lets you confirm the server is up and which key mode is active */
 app.get('/api/health', (_req, res) => {
-  res.json({
-    ok: true,
-    razorpayConfigured: Boolean(RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET),
-    mode: !RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET ? 'UNCONFIGURED' : RAZORPAY_KEY_ID.startsWith('rzp_test_') ? 'TEST' : 'LIVE',
-  });
+  res.json(healthResponse({ RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET }));
 });
 
 /**
@@ -120,27 +162,12 @@ app.post('/api/verify-payment', (req, res) => {
   res.json({ valid: true });
 });
 
-/**
- * Webhook for server-side payment confirmation.
- * Configure in Dashboard -> Settings -> Webhooks (url: /api/razorpay-webhook,
- * events: payment.authorized, payment.failed). In test mode use a public tunnel
- * like ngrok/cloudflared, or the deployed URL.
- */
-app.post('/api/razorpay-webhook', (req, res) => {
-  const signature = req.get('x-razorpay-signature') || '';
-  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-
-  if (webhookSecret) {
-    const expected = crypto.createHmac('sha256', webhookSecret).update(req['rawBody'] || '').digest('hex');
-    if (signature !== expected) {
-      return res.status(400).json({ ok: false, error: 'Invalid webhook signature' });
-    }
-  }
-
-  const event = req.body?.event;
-  const payment = req.body?.payload?.payment?.entity || {};
-  console.log(`[webhook] ${event} payment=${payment.id} order=${payment.order_id} status=${payment.status}`);
-  res.json({ ok: true });
+// Avoid the default HTML/stack response for raw-body/parser failures. Never
+// log a webhook payload, signature or customer fields.
+app.use((error, req, res, next) => {
+  if (req.path !== '/api/razorpay-webhook') return next(error);
+  const status = [400, 413, 415].includes(error.status) ? error.status : 500;
+  res.set('Cache-Control', 'no-store').status(status).json({ ok: false, error: 'Webhook request rejected.' });
 });
 
 // API-only deployments and a combined storefront deployment are both supported.
