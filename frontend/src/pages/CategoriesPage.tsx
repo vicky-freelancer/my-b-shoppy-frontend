@@ -1,4 +1,6 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { apiCategories,mariaCatalogEnabled } from '../lib/catalogApi';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { GoldHero } from '../components/GoldHero';
@@ -7,6 +9,8 @@ import { CATEGORIES_CATALOG } from '../storeConfig';
 import { useSeo } from '../lib/seo';
 
 export const CategoriesPage: React.FC = () => {
+  const live=useQuery({queryKey:['categories'],queryFn:apiCategories,enabled:mariaCatalogEnabled()});
+  const categories=mariaCatalogEnabled()?(live.data||[]):CATEGORIES_CATALOG;
   useSeo({
     title: 'Categories',
     description:
@@ -23,12 +27,12 @@ export const CategoriesPage: React.FC = () => {
           { label: 'Categories' },
         ]}
         subtitle="Nine curated worlds of elegance — hair accessories, AD jewellery, bags, anti tarnish jewellery and thoughtful gifts"
-        metaText={`${CATEGORIES_CATALOG.length} Curated Worlds`}
+        metaText={`${categories.length} Curated Worlds`}
       />
 
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-10 sm:py-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-          {CATEGORIES_CATALOG.map((category) => (
+          {categories.map((category) => (
             <Link
               key={category.id}
               to={`/categories/${category.id}`}

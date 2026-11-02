@@ -1,5 +1,5 @@
 import { apiUrl,mediaUrl } from './api';
-import type { ProductItem,SubcategoryItem } from '../types';
+import type { ProductItem,SubcategoryItem,ProductCategory } from '../types';
 export const mariaCatalogEnabled=()=>import.meta.env?.VITE_CATALOG_SOURCE==='mariadb'||(!import.meta.env?.VITE_CATALOG_SOURCE&&typeof window!=='undefined'&&window.location?.hostname==='mybshoppy.com');
 export async function catalogRequest(path:string,signal?:AbortSignal){
   const response=await fetch(apiUrl('/api/v1/'+path),{signal,cache:'no-store'});
@@ -22,4 +22,8 @@ export async function apiResolve(ids:string[],signal?:AbortSignal){
 }
 export async function apiSubcategories():Promise<SubcategoryItem[]>{
   const data=await catalogRequest('subcategories');return data.subcategories.map((s:any)=>({id:String(s.id),categoryId:s.category_id,name:s.name,slug:s.slug,featuredImage:mediaUrl(s.featured_image),isActive:!!s.is_active,sortOrder:s.sort_order}));
+}
+
+export async function apiCategories():Promise<ProductCategory[]>{
+  const data=await catalogRequest('categories');return data.categories.map((c:any)=>({id:c.id,name:c.name,tagline:'',description:'',startingPrice:Number(c.startingPrice||0),count:Number(c.count||0),imageUrl:mediaUrl(c.image_url)||'/images/products/gold-earrings.svg',items:[]}));
 }

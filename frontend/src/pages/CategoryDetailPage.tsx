@@ -1,3 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
+import { apiCategories,mariaCatalogEnabled } from '../lib/catalogApi';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Layers, SearchX } from 'lucide-react';
@@ -32,11 +34,12 @@ export const CategoryDetailPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [currentPage, setCurrentPage] = useState(1);
 
+  const liveCategories=useQuery({queryKey:['categories'],queryFn:apiCategories,enabled:mariaCatalogEnabled()});
   const forceProductView = searchParams.get('view') === 'products';
 
   const categoryMeta = useMemo(
-    () => CATEGORIES_CATALOG.find((category) => category.id === slug),
-    [slug]
+    () => (mariaCatalogEnabled()?(liveCategories.data||[]):CATEGORIES_CATALOG).find((category) => category.id === slug),
+    [slug,liveCategories.data]
   );
 
   const categorySubcategories = useMemo(
@@ -79,6 +82,7 @@ export const CategoryDetailPage: React.FC = () => {
     if (listing.data && currentPage > totalPages) setCurrentPage(totalPages);
   }, [listing.data, currentPage, totalPages]);
 
+  if (mariaCatalogEnabled() && liveCategories.isPending) return <div role="status">Loading categories...</div>;
   if (!categoryMeta) {
     return (
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center space-y-5">
