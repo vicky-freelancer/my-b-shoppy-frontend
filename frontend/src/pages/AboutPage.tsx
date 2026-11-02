@@ -2,10 +2,7 @@ import React from 'react';
 import { Award, Gem, HandHeart, Leaf, ShieldCheck, Sparkles } from 'lucide-react';
 import { GoldHero } from '../components/GoldHero';
 import { GoldBand } from '../components/GoldBand';
-import { CATEGORIES_CATALOG } from '../storeConfig';
 import { useSeo } from '../lib/seo';
-
-const totalCatalogCount = CATEGORIES_CATALOG.reduce((acc, c) => acc + (c.count || 0), 0);
 
 export const AboutPage: React.FC = () => {
   useSeo({
@@ -43,8 +40,7 @@ export const AboutPage: React.FC = () => {
               those two extremes deserved better — so we built it.
             </p>
             <p className="text-sm text-[#6B5945] leading-relaxed">
-              Today we curate over {totalCatalogCount.toLocaleString('en-IN')}+ pieces across nine
-              collections, each tested for real life: anti-tarnish finishes that survive monsoons,
+              Today we curate accessories across our collections, each tested for real life: anti-tarnish finishes that survive monsoons,
               silk that survives sleep, clasps that survive handbags. Every order ships in
               gift-ready packaging because we believe unboxing should feel like a celebration,
               not an errand.
@@ -65,7 +61,7 @@ export const AboutPage: React.FC = () => {
             <div className="absolute -bottom-6 -left-6 hidden sm:flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#FAF1DD]/95 backdrop-blur-md border border-[#D8A83E]/60 shadow-xl">
               <Gem className="w-6 h-6 text-[#B8860B]" />
               <div>
-                <p className="text-sm font-extrabold text-[#241A12]">9 Curated Collections</p>
+                <p className="text-sm font-extrabold text-[#241A12]">Curated Collections</p>
                 <p className="text-[11px] text-[#6B5945]">One uncompromising standard</p>
               </div>
             </div>
@@ -80,7 +76,6 @@ export const AboutPage: React.FC = () => {
           <div className="relative px-5 sm:px-8 lg:px-12 py-12">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {[
-                { value: `${totalCatalogCount}+`, label: 'Curated Pieces' },
                 { value: '25K+', label: 'Happy Shoppers' },
                 { value: '4.9★', label: 'Average Rating' },
                 { value: '24h', label: 'Dispatch Time' },

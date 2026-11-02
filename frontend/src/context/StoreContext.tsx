@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getProductsByIds } from '../lib/productQueries';
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { getProductsByIds, productReadPolicy } from '../lib/productQueries';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import { CartItem, ProductItem, SubcategoryItem } from '../types';
 import { apiSubcategories } from '../lib/catalogApi';
 
@@ -53,10 +53,6 @@ export const useStore = (): StoreContextValue => {
 };
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [subcategories, setSubcategories] = useState<SubcategoryItem[]>([]);
-  const [subcategoriesLoaded, setSubcategoriesLoaded] = useState(false);
-  const [subcategoriesError, setSubcategoriesError] = useState<string | null>(null);
-
   // Cart always starts empty on page load / reload. These are display snapshots;
   // query refresh/invalidation does not turn them into authoritative purchase
   // data. Server-side price, quantity and inventory validation is still required.
@@ -74,14 +70,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [directCheckoutProduct, setDirectCheckoutProduct] = useState<DirectCheckoutState | null>(null);
 
   const subcategoryQuery = useQuery({
-    queryKey: ['subcategories'], staleTime: 30_000,
+    queryKey: ['subcategories'], ...productReadPolicy,
     queryFn: apiSubcategories,
   });
-  useEffect(() => {
-    if (subcategoryQuery.data) setSubcategories(subcategoryQuery.data);
-    setSubcategoriesLoaded(!subcategoryQuery.isPending);
-    setSubcategoriesError(subcategoryQuery.error?.message || null);
-  }, [subcategoryQuery.data, subcategoryQuery.isPending, subcategoryQuery.error]);
+  const subcategories = subcategoryQuery.error ? [] : (subcategoryQuery.data ?? []);
+  const subcategoriesLoaded = !subcategoryQuery.isPending;
+  const subcategoriesError = subcategoryQuery.error?.message || null;
   const refreshSubcategories = useCallback(async () => { await subcategoryQuery.refetch(); }, [subcategoryQuery.refetch]);
 
   const addToCart = useCallback((product: ProductItem, variant?: string, quantity: number = 1) => {

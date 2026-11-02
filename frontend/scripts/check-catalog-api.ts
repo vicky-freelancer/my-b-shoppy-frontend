@@ -4,12 +4,16 @@ import { getPaginatedProducts, getProductByIdOrSlug, searchProducts, getFeatured
 
 const requests: URL[] = [];
 let fail = false;
+let empty = false;
+let malformed = false;
 globalThis.fetch = async (input) => {
   const url = new URL(String(input), 'https://store.example');
   requests.push(url);
   if (fail) return Response.json({ code: 'CATALOG_UNAVAILABLE' }, { status: 503 });
   if (url.pathname.endsWith('/categories')) return Response.json({ categories: [{ id: 'hair-accessories', name: 'Hair Accessories', image_url: '/media/category.webp' }] });
-  if (url.pathname.endsWith('/subcategories')) return Response.json({ subcategories: [{ id: 7, category_id: 'hair-accessories', name: 'Butterfly', slug: 'butterfly', featured_image: '/media/butterfly.webp', is_active: true, sort_order: 1 }] });
+  if (url.pathname.endsWith('/subcategories')) return Response.json({ subcategories: empty ? [] : [{ id: 7, category_id: 'hair-accessories', name: 'Butterfly', slug: 'butterfly', featured_image: '/media/butterfly.webp', is_active: true, sort_order: 1 }] });
+  if (malformed) return Response.json({});
+  if (empty) return Response.json({ products: [], count: 0 });
   const product = { id: 12, slug: 'clip', title: 'Clip', sale_price: 99, mrp: 120, image_url: '/media/clip.webp', category_id: 'hair-accessories', subcategory_id: 7, in_stock: true };
   return Response.json({ products: [product], count: 25 });
 };
@@ -32,6 +36,13 @@ assert.equal(requests.at(-1)!.pathname, '/api/v1/products/resolve');
 await getFeaturedProducts();
 assert.equal(requests.at(-1)!.searchParams.get('featured'), 'true');
 assert.ok(requests.every(url => url.pathname.startsWith('/api/v1/')));
+empty = true;
+assert.deepEqual(await apiSubcategories(), []);
+assert.deepEqual(await getPaginatedProducts(), { products: [], count: 0 });
+empty = false;
+malformed = true;
+await assert.rejects(getPaginatedProducts(), /Invalid catalog response/);
+malformed = false;
 fail = true;
 await assert.rejects(apiSubcategories(), /CATALOG_UNAVAILABLE/);
 await assert.rejects(getPaginatedProducts(), /CATALOG_UNAVAILABLE/);

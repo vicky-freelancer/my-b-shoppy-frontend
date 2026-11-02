@@ -13,7 +13,7 @@ export function apiProduct(row:any):ProductItem {
 }
 export async function apiListing(options:Record<string,unknown>={},signal?:AbortSignal){
   const params=new URLSearchParams();for(const [k,v]of Object.entries(options))if(v!==undefined&&v!==null&&v!=='')params.set(k,String(v));
-  const data=await catalogRequest('products?'+params,signal);return {products:(data.products||[]).map(apiProduct),count:Number(data.count)};
+  const data=await catalogRequest('products?'+params,signal);if (!Array.isArray(data.products) || !Number.isFinite(Number(data.count))) throw new Error('Invalid catalog response');return {products:data.products.map(apiProduct),count:Number(data.count)};
 }
 export async function apiResolve(ids:string[],signal?:AbortSignal){
   if(!ids.length)return [];const products:ProductItem[]=[];
