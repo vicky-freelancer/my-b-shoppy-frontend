@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { apiCategories } from '../lib/catalogApi';
+import { apiCategories, catalogErrorMessage } from '../lib/catalogApi';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { GoldHero } from '../components/GoldHero';
@@ -31,7 +31,7 @@ export const CategoriesPage: React.FC = () => {
 
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-10 sm:py-14">
         {live.isPending && <p role="status">Loading categories...</p>}
-        {live.error && <p role="alert">Categories could not be loaded. <button onClick={() => live.refetch()}>Try again</button></p>}
+        {live.error && <p role="alert" className="mb-6 rounded-xl border border-[#6B5945]/25 bg-[#FFFDF6] p-4 text-sm text-[#6B5945]">{catalogErrorMessage(live.error, 'Categories could not be loaded.')} <button onClick={() => live.refetch()} className="ml-1 font-bold text-[#B8860B] underline">Try again</button></p>}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {categories.map((category) => (
             <Link

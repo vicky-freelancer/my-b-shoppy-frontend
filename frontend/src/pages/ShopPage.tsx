@@ -9,6 +9,7 @@ import { useSeo } from '../lib/seo';
 import { SortOption } from '../lib/catalogUtils';
 
 import { useProductListing } from '../lib/useProducts';
+import { catalogErrorMessage } from '../lib/catalogApi';
 
 const itemsPerPage = 20;
 
@@ -52,7 +53,7 @@ export const ShopPage: React.FC = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        {listing.error && <p role="alert" className="text-sm text-[#6B5945]">Products could not be loaded. <button onClick={() => listing.refetch()}>Try again</button></p>}
+        {listing.error && <p role="alert" className="mb-6 rounded-xl border border-[#6B5945]/25 bg-[#FFFDF6] p-4 text-sm text-[#6B5945]">{catalogErrorMessage(listing.error, 'Products could not be loaded.')} <button onClick={() => listing.refetch()} className="ml-1 font-bold text-[#B8860B] underline">Try again</button></p>}
         {/* Full-width catalog grid in a thick gold showcase frame */}
         <GoldFrame>
           {(!listing.error || listing.data) && <ProductGrid

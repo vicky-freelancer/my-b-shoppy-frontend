@@ -1,14 +1,16 @@
 ﻿import assert from 'node:assert/strict';
-import { apiCategories, apiSubcategories } from '../src/lib/catalogApi';
+import { apiCategories, apiSubcategories, catalogErrorMessage } from '../src/lib/catalogApi';
 import { getPaginatedProducts, getProductByIdOrSlug, searchProducts, getFeaturedProducts } from '../src/lib/productQueries';
 
 const requests: URL[] = [];
 let fail = false;
+let htmlFailure = false;
 let empty = false;
 let malformed = false;
 globalThis.fetch = async (input) => {
   const url = new URL(String(input), 'https://store.example');
   requests.push(url);
+  if (htmlFailure) return new Response('<html><body>Service Unavailable</body></html>', { status: 503, headers: { 'Content-Type': 'text/html' } });
   if (fail) return Response.json({ code: 'CATALOG_UNAVAILABLE' }, { status: 503 });
   if (url.pathname.endsWith('/categories')) return Response.json({ categories: [{ id: 'hair-accessories', name: 'Hair Accessories', image_url: '/media/category.webp' }] });
   if (url.pathname.endsWith('/subcategories')) return Response.json({ subcategories: empty ? [] : [{ id: 7, category_id: 'hair-accessories', name: 'Butterfly', slug: 'butterfly', featured_image: '/media/butterfly.webp', is_active: true, sort_order: 1 }] });
@@ -46,4 +48,10 @@ malformed = false;
 fail = true;
 await assert.rejects(apiSubcategories(), /CATALOG_UNAVAILABLE/);
 await assert.rejects(getPaginatedProducts(), /CATALOG_UNAVAILABLE/);
+fail = false;
+htmlFailure = true;
+const error = await getPaginatedProducts().catch((error: unknown) => error);
+assert(error instanceof Error);
+assert.equal(error.message, 'The catalogue service is unavailable (HTTP 503).');
+assert.equal(catalogErrorMessage(error, 'Products could not be loaded.'), 'The live catalogue is temporarily unavailable. Please try again in a moment.');
 console.log('Catalog API request, filtering, media mapping and error checks passed.');

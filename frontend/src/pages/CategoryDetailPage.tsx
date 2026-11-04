@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiCategories } from '../lib/catalogApi';
+import { apiCategories, catalogErrorMessage } from '../lib/catalogApi';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Layers, SearchX } from 'lucide-react';
@@ -80,7 +80,7 @@ export const CategoryDetailPage: React.FC = () => {
   }, [listing.data, currentPage, totalPages]);
 
   if (liveCategories.isPending) return <div role="status">Loading categories...</div>;
-  if (liveCategories.error) return <p role="alert">Categories could not be loaded. <button onClick={() => liveCategories.refetch()}>Try again</button></p>;
+  if (liveCategories.error) return <p role="alert" className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-10 text-sm text-[#6B5945]">{catalogErrorMessage(liveCategories.error, 'Categories could not be loaded.')} <button onClick={() => liveCategories.refetch()} className="font-bold text-[#B8860B] underline">Try again</button></p>;
   if (!categoryMeta) {
     return (
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center space-y-5">
@@ -221,7 +221,7 @@ export const CategoryDetailPage: React.FC = () => {
           </Link>
         </div>
 
-        {listing.error && <p role="alert" className="text-sm text-[#6B5945]">Products could not be loaded. <button onClick={() => listing.refetch()}>Try again</button></p>}
+        {listing.error && <p role="alert" className="mb-6 rounded-xl border border-[#6B5945]/25 bg-[#FFFDF6] p-4 text-sm text-[#6B5945]">{catalogErrorMessage(listing.error, 'Products could not be loaded.')} <button onClick={() => listing.refetch()} className="ml-1 font-bold text-[#B8860B] underline">Try again</button></p>}
         {/* Full-width product grid — thick gold showcase frame */}
         <GoldFrame>
           {(!listing.error || listing.data) && <ProductGrid

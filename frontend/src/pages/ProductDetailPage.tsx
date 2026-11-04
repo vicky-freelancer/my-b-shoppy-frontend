@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProductByIdOrSlug, getRelatedProducts, getProductImage, productReadPolicy, productImagePolicy } from '../lib/productQueries';
+import { catalogErrorMessage } from '../lib/catalogApi';
 import { ProductImage } from '../components/ProductImage';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -68,7 +69,7 @@ export const ProductDetailPage: React.FC = () => {
   const activeVariant = selectedVariant || product?.variants[0] || 'Standard';
 
   if (detail.isPending) return <div className="py-20 text-center text-[#6B5945]" role="status">Loading product...</div>;
-  if (detail.error) return <div className="py-20 text-center text-[#6B5945]" role="alert">Product could not be loaded. <button onClick={() => detail.refetch()}>Try again</button></div>;
+  if (detail.error) return <div className="py-20 text-center text-[#6B5945]" role="alert">{catalogErrorMessage(detail.error, 'Product could not be loaded.')} <button onClick={() => detail.refetch()} className="font-bold text-[#B8860B] underline">Try again</button></div>;
   if (!product) {
     return (
       <div className="products-page max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-24 text-center space-y-5">

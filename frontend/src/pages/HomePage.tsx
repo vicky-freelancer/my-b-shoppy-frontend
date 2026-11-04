@@ -12,7 +12,7 @@ import { Reveal } from '../components/Reveal';
 import { useStore } from '../context/StoreContext';
 import { useSeo } from '../lib/seo';
 import { STORE_CONFIG } from '../storeConfig';
-import { apiCategories } from '../lib/catalogApi';
+import { apiCategories, catalogErrorMessage } from '../lib/catalogApi';
 
 const testimonials = [
   {
@@ -66,9 +66,9 @@ export const HomePage: React.FC = () => {
       />
 
       {/* ============ CATEGORIES ============ */}
-      {categoriesQuery.isPending && <p role="status">Loading categories...</p>}
-      {categoriesQuery.error && <p role="alert">Categories could not be loaded. <button onClick={() => categoriesQuery.refetch()}>Try again</button></p>}
-      {featuredQuery.error && <p role="alert">Products could not be loaded. <button onClick={() => featuredQuery.refetch()}>Try again</button></p>}
+      {(categoriesQuery.isPending || featuredQuery.isPending) && <p role="status" className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-4 text-sm text-[#6B5945]">Loading the latest catalogue...</p>}
+      {categoriesQuery.error && <p role="alert" className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-4 text-sm text-[#6B5945]">{catalogErrorMessage(categoriesQuery.error, 'Categories could not be loaded.')} <button onClick={() => categoriesQuery.refetch()} className="font-bold text-[#B8860B] underline">Try again</button></p>}
+      {featuredQuery.error && <p role="alert" className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-4 text-sm text-[#6B5945]">{catalogErrorMessage(featuredQuery.error, 'Products could not be loaded.')} <button onClick={() => featuredQuery.refetch()} className="font-bold text-[#B8860B] underline">Try again</button></p>}
       <CategoriesSection categories={categories} />
 
       {/* ============ EDITORIAL PROMO ============ */}
