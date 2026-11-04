@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { ProductCategory } from '../types';
+import { categoryImage, onCategoryImageError } from '../lib/categoryImages';
 
 interface CategoryCardProps {
   category: ProductCategory;
@@ -21,8 +22,9 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, index }) =
       style={{ aspectRatio: '4 / 4.9' }}
     >
       <img
-        src={category.imageUrl}
+        src={categoryImage(category)}
         alt={category.name}
+        onError={(event) => onCategoryImageError(event, category)}
         loading="lazy"
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
       />

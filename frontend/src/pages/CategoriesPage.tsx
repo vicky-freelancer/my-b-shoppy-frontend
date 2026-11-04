@@ -6,6 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import { GoldHero } from '../components/GoldHero';
 import { GoldBand } from '../components/GoldBand';
 import { useSeo } from '../lib/seo';
+import { categoryImage, onCategoryImageError } from '../lib/categoryImages';
 
 export const CategoriesPage: React.FC = () => {
   const live=useQuery({queryKey:['categories'],queryFn:apiCategories});
@@ -40,8 +41,9 @@ export const CategoriesPage: React.FC = () => {
               className="group relative rounded-[24px] overflow-hidden border border-[#D8A83E]/40 hover:border-[#B8860B] transition-all duration-300 shadow-[0_18px_44px_-22px_rgba(90,62,20,0.5)] block h-72 img-zoom"
             >
               <img
-                src={category.imageUrl}
+                src={categoryImage(category)}
                 alt={category.name}
+                onError={(event) => onCategoryImageError(event, category)}
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
