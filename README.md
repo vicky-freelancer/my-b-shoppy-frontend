@@ -2,7 +2,7 @@
 
 Recent completion fixes:
 
-- Both the storefront and sibling admin dashboard support ten parent categories, in this order: AD Jewellery, Hair Accessories, Anti Tarnish Jewellery, Ear Rings, Bows & Scrunchies, Bags, Mobile Charms, Key Chains, Mens Accessories, Stationery & Gifts. They are stored in the shared Hostinger MariaDB catalog. Their IDs are `bows-and-scrunchies`, `key-chains`, `mobile-charms`, and `men-accessories`.
+- Both the storefront and sibling admin dashboard support ten parent categories, in this order: AD Jewellery, Hair Accessories, Anti Tarnish Jewellery, Earrings, Bows & Scrunchies, Bags, Mobile Charms, Key Chains, Mens Accessories, Stationery & Gifts. They are stored in the shared Hostinger MariaDB catalog. Their IDs are `bows-and-scrunchies`, `key-chains`, `mobile-charms`, and `men-accessories`.
 - `npm run test:categories --workspace frontend` checks admin product/collection payloads, legacy category aliases, images and the catalogue. The storefront refreshes products and collections on tab focus and every 30 seconds while visible.
 
 - `npm start` now starts the backend, which serves `frontend/dist` when built, including direct page URLs.

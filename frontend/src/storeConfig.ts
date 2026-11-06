@@ -313,7 +313,7 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
 
 const CATEGORY_DISPLAY_ORDER = ["ad-jewellery", "hair-accessories", "anti-tarnish-jewellery", "ear-rings", "bows-and-scrunchies", "bags", "mobile-charms", "key-chains", "men-accessories", "stationery-and-gifts"];
 
-const CATEGORY_DISPLAY_NAMES: Record<string, string> = {"ad-jewellery": "AD Jewellery", "hair-accessories": "Hair Accessories", "anti-tarnish-jewellery": "Anti Tarnish Jewellery", "ear-rings": "Ear Rings", "bows-and-scrunchies": "Bows & Scrunchies", "bags": "Bags", "mobile-charms": "Mobile Charms", "key-chains": "Key Chains", "men-accessories": "Mens Accessories", "stationery-and-gifts": "Stationery & Gifts"};
+const CATEGORY_DISPLAY_NAMES: Record<string, string> = {"ad-jewellery": "AD Jewellery", "hair-accessories": "Hair Accessories", "anti-tarnish-jewellery": "Anti Tarnish Jewellery", "ear-rings": "Earrings", "bows-and-scrunchies": "Bows & Scrunchies", "bags": "Bags", "mobile-charms": "Mobile Charms", "key-chains": "Key Chains", "men-accessories": "Mens Accessories", "stationery-and-gifts": "Stationery & Gifts"};
 
 const CATEGORY_DEFINITIONS: ProductCategory[] = [
   {
@@ -369,7 +369,7 @@ const CATEGORY_DEFINITIONS: ProductCategory[] = [
     items: INITIAL_PRODUCTS.filter((p) => p.categoryId === 'stationery-and-gifts'),
   },
   ...[
-    { id: 'ear-rings', name: 'Ear Rings', image: 'Artificial Jewels.jpg', tagline: 'Everyday studs, hoops & statement earrings', description: 'Find earrings for everyday outfits and special occasions.' },
+    { id: 'ear-rings', name: 'Earrings', image: 'Artificial Jewels.jpg', tagline: 'Everyday studs, hoops & statement earrings', description: 'Find earrings for everyday outfits and special occasions.' },
     { id: 'bows-and-scrunchies', name: 'Bows & Scrunchies', image: 'Bows.jpg', tagline: 'Satin bows, soft scrunchies & everyday hair ties', description: 'Discover ribbon bows and gentle scrunchies in satin, silk and velvet.' },
     { id: 'key-chains', name: 'Key chains', image: 'Key Chains.jpg', tagline: 'Little charms for everyday carry', description: 'Personalise your keys and bags with playful key chains and keepsakes.' },
     { id: 'mobile-charms', name: 'Mobile charms', image: 'Mobile Charms.jpg', tagline: 'Charm your phone your way', description: 'Add personality to your phone with colourful straps and decorative charms.' },
