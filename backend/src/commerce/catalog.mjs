@@ -11,9 +11,14 @@ export class CatalogService {
     if(existing){requireThat(input.row_version!==undefined&&String(input.row_version)===String(existing.row_version),'PRODUCT_CHANGED',409);}
     const merged={...existing,...input};
     // Numeric rupee aliases from stored DTOs are explicitly validated once.
-    const p=validateProduct(merged);return r.saveProduct(p,existing,actor);
+    const p=validateProduct(merged);
+    requireThat(!existing?.archived_at&&p.image_asset_id,'PRODUCT_NOT_PUBLISHABLE');
+    const categories=await r.categories(true);
+    requireThat(categories.some(c=>c.id===p.category_id&&!!c.is_active),'PRODUCT_NOT_PUBLISHABLE');
+    if(p.subcategory_id){const subs=await r.subcategories(true);requireThat(subs.some(s=>String(s.id)===p.subcategory_id&&s.category_id===p.category_id&&!!s.is_active),'PRODUCT_NOT_PUBLISHABLE');}
+    return r.saveProduct(p,existing,actor);
   });}
-  lifecycle(productId,action,actor){return this.repo.transaction(r=>r.publication(productId,action,actor));}
+  lifecycle(productId,action,actor){requireThat(action==='publish'||action==='archive','INVALID_LIFECYCLE');return this.repo.transaction(r=>r.publication(productId,action,actor));}
   saveSubcategory(input,subcategoryId,actor){
     const category_id=text(input.category_id,100);requireThat(CATEGORIES.some(c=>c.id===category_id),'INVALID_CATEGORY');
     const name=text(input.name,80);requireThat(name.length>=2,'INVALID_SUBCATEGORY_NAME');

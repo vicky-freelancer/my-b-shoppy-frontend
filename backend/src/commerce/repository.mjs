@@ -76,7 +76,6 @@ export class Repository {
     const p=await this.product(id(productId),true,true);if(!p)throw new Fault(404,'PRODUCT_NOT_FOUND');
     if(action==='publish'){requireThat(!p.archived_at&&p.image_asset_id&&p.variants.length&&p.category_active&&(p.subcategory_id===null||p.subcategory_active),'PRODUCT_NOT_PUBLISHABLE');await this.query('UPDATE products SET is_active=1,row_version=row_version+1 WHERE id=?',[p.id]);}
     else if(action==='archive')await this.query('UPDATE products SET is_active=0,archived_at=UTC_TIMESTAMP(6),row_version=row_version+1 WHERE id=?',[p.id]);
-    else if(action==='draft')await this.query('UPDATE products SET is_active=0,row_version=row_version+1 WHERE id=?',[p.id]);
     else throw new Fault(422,'INVALID_LIFECYCLE');
     await this.audit(actor,'product.'+action,'product',p.id);return this.product(p.id,true);
   }
