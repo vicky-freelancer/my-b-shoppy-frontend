@@ -21,8 +21,15 @@ export const getProductsBySubcategory = (categoryId: string, subcategory: Subcat
 export const getProductsByIds = (ids: string[], signal?: AbortSignal) => apiResolve(ids, signal);
 export async function getProductByIdOrSlug(id: string, signal?: AbortSignal) { return (await getProductsByIds([id], signal))[0] || null; }
 export async function getFeaturedProducts(signal?: AbortSignal) {
-  const result = await apiListing({ featured: true, pageSize: 4 }, signal);
-  return result.products.length ? result.products : (await apiListing({ pageSize: 4 }, signal)).products;
+  const featured = await apiListing({ featured: true, pageSize: 4 }, signal);
+  if (featured.products.length >= 4) return featured.products.slice(0, 4);
+  const latest = await apiListing({ pageSize: 8, sort: 'newest' }, signal);
+  const merged = [...featured.products];
+  for (const product of latest.products) {
+    if (merged.length >= 4) break;
+    if (!merged.some((item) => item.id === product.id)) merged.push(product);
+  }
+  return merged;
 }
 export async function getRelatedProducts(product: ProductItem, signal?: AbortSignal) {
   const page = await getPaginatedProducts({ categoryId: product.categoryId, pageSize: 5, signal });

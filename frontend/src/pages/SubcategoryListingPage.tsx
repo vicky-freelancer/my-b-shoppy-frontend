@@ -55,6 +55,19 @@ export const SubcategoryListingPage: React.FC<SubcategoryListingPageProps> = ({
           </div>
         )}
 
+        {!isLoading && !error && subcategories.length > 0 && (
+          <div className="mb-5 flex items-center justify-end">
+            <Link
+              to={`${categoryPath}?view=products`}
+              className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-[#B8860B] hover:text-[#8A6A15] transition-colors"
+            >
+              <Layers className="w-4 h-4" />
+              View All Products
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        )}
+
         {isLoading ? (
           <div
             className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-5"
