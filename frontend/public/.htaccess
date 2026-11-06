@@ -1,9 +1,13 @@
 RewriteEngine On
 
-# Don't rewrite existing files or directories
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
+# Serve existing static files directly (assets, images, etc.).
+# Do NOT match directories: a real directory without index.html makes
+# LiteSpeed/Apache return 403 instead of the SPA shell.
+RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
-# Send all other routes to React/Vite
+# API and media requests must never fall back to the SPA HTML shell.
+RewriteRule ^(?:api|media)(?:/|$) - [L]
+
+# SPA fallback for every client-side route (including trailing slashes).
 RewriteRule ^ index.html [L]
