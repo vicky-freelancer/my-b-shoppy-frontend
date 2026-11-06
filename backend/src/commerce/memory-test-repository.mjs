@@ -25,7 +25,8 @@ export class MemoryTestRepository {
     requireThat(!p.subcategory_id||this.subs.some(s=>String(s.id)===p.subcategory_id&&s.category_id===p.category_id),'SUBCATEGORY_OWNER_MISMATCH');
     if(p.image_asset_id)requireThat(this.media.get(p.image_asset_id)?.state==='ready','IMAGE_NOT_READY');
     const id=existing?.id||String(this.products.size+1),reserved=Number(existing?.reserved||0);requireThat(p.quantity>=reserved,'STOCK_BELOW_RESERVATIONS',409);
-    const row={...existing,...p,id,row_version:Number(existing?.row_version||0)+1,sale_price:p.sale_price_paise/100,mrp:p.mrp_paise/100,on_hand:p.quantity,reserved,is_active:existing?.is_active||false,
+    const publishable=!!p.image_asset_id&&p.variants.length>0&&!existing?.archived_at;
+    const row={...existing,...p,id,row_version:Number(existing?.row_version||0)+1,sale_price:p.sale_price_paise/100,mrp:p.mrp_paise/100,on_hand:p.quantity,reserved,is_active:publishable?true:(existing?.is_active||false),
       category:this.cats.find(c=>c.id===p.category_id)?.name,category_active:true,subcategory_active:true,variants:p.variants,variant_options:p.variants.map((label,j)=>({id:String(Number(id)*100+j),label,is_active:true})),image_url:p.image_asset_id?'/media/'+this.media.get(p.image_asset_id).storage_key:'',created_at:'2026-01-01T00:00:00Z'};
     this.products.set(id,row);await this.audit(actor,'product.save','product',id);return structuredClone(row);
   }

@@ -66,6 +66,10 @@ export class Repository {
     await this.query('DELETE FROM product_badges WHERE product_id=?',[productId]);
     for(const [position,label] of p.badges.entries())await this.query('INSERT INTO product_badges(product_id,label,position) VALUES(?,?,?)',[productId,label,position]);
     if(p.image_asset_id){await this.query('DELETE FROM product_images WHERE product_id=? AND position=0',[productId]);await this.query('INSERT INTO product_images(product_id,position,asset_id) VALUES(?,0,?)',[productId,p.image_asset_id]);}
+    // The admin UI no longer exposes a separate publish action. A saved product
+    // with a ready cover image and at least one active variant must therefore go
+    // live automatically, otherwise every upload stays an invisible draft.
+    if(!existing?.archived_at&&p.image_asset_id&&p.variants.length)await this.query('UPDATE products SET is_active=1 WHERE id=?',[productId]);
     await this.audit(actor,existing?'product.update':'product.create','product',productId); return this.product(productId,true);
   }
   async publication(productId,action,actor){
