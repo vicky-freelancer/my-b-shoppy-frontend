@@ -162,7 +162,7 @@ export const ProductDetailPage: React.FC = () => {
                 )
               )}
               {discountPercent > 0 && (
-                <span className="absolute top-4 right-4 text-xs font-extrabold px-2.5 py-1 rounded-full bg-rose-600/90 text-white shadow-lg">
+                <span className="absolute top-4 right-4 text-xs font-extrabold px-2.5 py-1 rounded-full bg-white text-black shadow-lg">
                   -{discountPercent}%
                 </span>
               )}
