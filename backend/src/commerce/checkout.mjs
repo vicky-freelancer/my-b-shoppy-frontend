@@ -15,7 +15,7 @@ export function quote(items,products){
     return {...item,title:p.title,sku:p.sku,category:p.category,variant:v.label,unit,mrp,amount};
   });
   for(const [pid,qty] of stock){const p=products.get(pid);requireThat(Number(p.on_hand)-Number(p.reserved)>=qty,'INSUFFICIENT_STOCK',409);}
-  requireThat(subtotal>0,'ZERO_TOTAL_NOT_PAYABLE');return {lines,stock,subtotal,shipping:6000,total:subtotal+6000,currency:'INR'};
+  requireThat(subtotal>0,'ZERO_TOTAL_NOT_PAYABLE');return {lines,stock,subtotal,shipping:7000,total:subtotal+7000,currency:'INR'};
 }
 const accessFor=(scope,orderId)=>createHmac('sha256',scope).update('order:'+orderId).digest('hex');
 export class RazorpayTestProvider {

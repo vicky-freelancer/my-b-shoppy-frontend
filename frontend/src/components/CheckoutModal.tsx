@@ -87,7 +87,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     0
   );
 
-  const COURIER_CHARGE = 60;
+  const COURIER_CHARGE = 70;
   const courierCharges = activeItems.length > 0 ? COURIER_CHARGE : 0;
   const finalAmount = totalAmount + courierCharges;
 

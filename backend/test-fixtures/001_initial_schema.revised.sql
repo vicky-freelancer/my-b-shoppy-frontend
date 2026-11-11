@@ -434,7 +434,7 @@ CREATE TABLE orders (
 
     subtotal_paise BIGINT UNSIGNED NOT NULL,
 
-    shipping_paise BIGINT UNSIGNED NOT NULL DEFAULT 6000,
+    shipping_paise BIGINT UNSIGNED NOT NULL DEFAULT 7000,
 
     total_paise BIGINT UNSIGNED NOT NULL,
 

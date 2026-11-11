@@ -38,7 +38,7 @@ test('adaptive password hash is salted, verifies only matching password',async()
 test('shared variants use one stock balance and shipping once for multi-product quote',async()=>{
   const r=new MemoryTestRepository(true);const p=await r.product('1',true),p2=await r.product('11',true);const products=new Map([['1',p],['11',p2]]);
   const q=quote([{product_id:'1',variant_id:'1',quantity:2},{product_id:'1',variant_id:'2',quantity:3},{product_id:'11',variant_id:'21',quantity:1}],products);
-  assert.equal(q.stock.get('1'),5);assert.equal(q.shipping,6000);assert.equal(q.total,q.subtotal+6000);assert.equal(q.lines.length,3);
+  assert.equal(q.stock.get('1'),5);assert.equal(q.shipping,7000);assert.equal(q.total,q.subtotal+7000);assert.equal(q.lines.length,3);
   p.on_hand=4;assert.throws(()=>quote([{product_id:'1',variant_id:'1',quantity:2},{product_id:'1',variant_id:'2',quantity:3}],products),/INSUFFICIENT_STOCK/);
 });
 for(const mutation of ['inactive','wrongVariant','absent','zeroPrice'])test('trusted quote rejects '+mutation,async()=>{

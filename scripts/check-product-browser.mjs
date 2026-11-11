@@ -119,7 +119,7 @@ try {
   await page.getByPlaceholder('e.g. 742 Evergreen Terrace, Apt 4B').fill('Fixture address');
   await page.getByRole('button', { name: 'PAY ONLINE & PLACE ORDER', exact: true }).click();
   await page.getByText('pay_fixture', { exact: false }).first().waitFor();
-  assert.equal(paymentAmount, 7000, '10 product + 60 courier, converted to paise');
+  assert.equal(paymentAmount, 8000, '10 product + 70 courier, converted to paise');
   assert.deepEqual(writes, [{ table: 'orders', method: 'POST' }]);
   checks.push('Detail deep link, variants, related products, add to cart, checkout total and mocked Razorpay success');
   await goto('/product/fixture-2');
