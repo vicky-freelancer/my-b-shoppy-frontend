@@ -29,6 +29,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     email: '',
     city: '',
     address: '',
+    pincode: '',
     country: STORE_CONFIG.defaultCountry || 'India',
     product_name: '',
     product_variant: '',
@@ -112,6 +113,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     if (!formData.address.trim()) {
       errs.address = 'Street address and apartment/house number required';
+    }
+
+    if (!formData.pincode.trim()) {
+      errs.pincode = 'PIN code is required for delivery';
+    } else if (!/^[1-9][0-9]{5}$/.test(formData.pincode.trim())) {
+      errs.pincode = 'Enter a valid 6-digit Indian PIN code';
     }
 
     setErrors(errs);
@@ -378,8 +385,27 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   )}
                 </div>
 
+                {/* PIN Code */}
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-600 font-medium">PIN Code (Delivery) *</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="postal-code"
+                    maxLength={6}
+                    required
+                    value={formData.pincode}
+                    onChange={(e) => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                    placeholder="e.g. 620001"
+                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#B8860B]"
+                  />
+                  {errors.pincode && (
+                    <p className="text-[11px] text-rose-500">{errors.pincode}</p>
+                  )}
+                </div>
+
                 {/* Country */}
-                <div className="space-y-1 sm:col-span-2">
+                <div className="space-y-1">
                   <label className="text-xs text-slate-600 font-medium">Country</label>
                   <select
                     value={formData.country}

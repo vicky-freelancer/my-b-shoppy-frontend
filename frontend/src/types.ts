@@ -85,6 +85,7 @@ export interface OrderFormData {
   email: string;
   city: string;
   address: string;
+  pincode: string;
   country: string;
   category?: string;
   product_name: string;
@@ -106,6 +107,7 @@ export interface FormErrors {
   email?: string;
   city?: string;
   address?: string;
+  pincode?: string;
   country?: string;
   product_variant?: string;
 }
