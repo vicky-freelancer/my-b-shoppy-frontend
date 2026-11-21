@@ -93,6 +93,9 @@ export const ProductDetailPage: React.FC = () => {
   const discountPercent = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
+  const backPath = productSubcategory
+    ? `/categories/${product.categoryId}/${productSubcategory.slug}`
+    : `/categories/${product.categoryId}`;
 
   return (
     <div className="products-page">
@@ -343,6 +346,15 @@ export const ProductDetailPage: React.FC = () => {
                     <span className="text-[#241A12] font-semibold">{value}</span>
                   </div>
                 ))}
+            </div>
+            <div className="flex justify-end">
+              <Link
+                to={backPath}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#B8860B] bg-[#E8C875] px-5 py-3 text-sm text-[#241A12] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#D8A83E] hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                Back
+              </Link>
             </div>
           </div>
         </div>

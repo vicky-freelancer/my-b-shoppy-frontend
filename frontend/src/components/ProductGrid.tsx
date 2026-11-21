@@ -109,7 +109,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       {!isLoading && products.length === 0 && (
         <div className="py-20 text-center space-y-4 bg-[#FFFDF6] rounded-2xl border border-[#6B5945]/20 p-8">
           <SearchX className="w-12 h-12 text-[#B8860B]/50 mx-auto" />
-          <h3 className="text-lg font-bold text-[#241A12]">No products found</h3>
+          <h3 className="text-lg font-bold text-[#241A12]">Coming soon</h3>
           <p className="text-sm text-[#6B5945] max-w-md mx-auto">
             Try adjusting your category, price range, or material filters to view available items.
           </p>

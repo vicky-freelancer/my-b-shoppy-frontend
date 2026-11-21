@@ -5,7 +5,7 @@ import { CATEGORIES_CATALOG } from '../storeConfig';
 const fallbackImages = new Map(CATEGORIES_CATALOG.map((category) => [category.id, category.imageUrl]));
 
 export function categoryImage(category: Pick<ProductCategory, 'id' | 'imageUrl'>) {
-  return category.imageUrl || fallbackImages.get(category.id) || '';
+  return fallbackImages.get(category.id) || category.imageUrl || '';
 }
 
 export function onCategoryImageError(
@@ -13,7 +13,7 @@ export function onCategoryImageError(
   category: Pick<ProductCategory, 'id' | 'imageUrl'>,
 ) {
   const image = event.currentTarget;
-  const fallback = fallbackImages.get(category.id);
+  const fallback = category.imageUrl;
   if (!fallback || image.dataset.fallbackApplied === 'true') return;
   image.dataset.fallbackApplied = 'true';
   image.src = fallback;

@@ -35,14 +35,14 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, index }) =
       {/* gold border accent on hover */}
       <div className="absolute inset-3 rounded-2xl border border-[#E8C875]/0 group-hover:border-[#E8C875]/70 transition-all duration-500 pointer-events-none"></div>
 
-      <div className="absolute bottom-0 inset-x-0 p-5 sm:p-6">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#E8C875] opacity-90">
+      <div className="absolute bottom-0 inset-x-0 p-3 sm:p-6">
+        <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.28em] text-[#E8C875] opacity-90">
           {itemCount}+ pieces
         </span>
-        <h3 className="mt-1.5 font-display text-[28px] sm:text-[32px] leading-tight text-[#FFF8E8] group-hover:text-[#F4D99B] group-hover:-translate-y-1 transition-all duration-500">
+        <h3 className="mt-1.5 font-display text-[clamp(16px,4.5vw,20px)] sm:text-[32px] leading-tight text-[#FFF8E8] group-hover:text-[#F4D99B] group-hover:-translate-y-1 transition-all duration-500">
           {category.name}
         </h3>
-        <span className="mt-2.5 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#E8C875] transition-all duration-500">
+        <span className="mt-2 inline-flex items-center gap-1.5 text-[10px] sm:mt-2.5 sm:text-[11px] font-semibold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-[#E8C875] transition-all duration-500">
           Explore
           <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />
         </span>

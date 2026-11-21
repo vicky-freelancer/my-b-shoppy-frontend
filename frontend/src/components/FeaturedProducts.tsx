@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { ProductItem } from '../types';
 import { SectionHeading } from './SectionHeading';
 import { ProductCard } from './ProductCard';
@@ -29,13 +31,20 @@ export const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
 
       <div className="relative max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
         <Reveal>
+          <div className="mb-8 flex justify-center sm:mb-10">
+            <Link
+              to="/shop"
+              className="btn-arrow-cta group inline-flex items-center gap-2 text-base sm:text-lg font-bold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:text-[#6B4C08]"
+            >
+              Shop All Products
+              <ArrowRight className="arrow h-5 w-5 text-[#B8860B]" aria-hidden="true" />
+            </Link>
+          </div>
           <SectionHeading
             eyebrow="Handpicked for you"
             titleBefore="This Season's"
             titleItalic="Icons"
             subtext="TRENDING PICKS • LOVED BY MANY • JUST FOR YOU"
-            linkLabel="Shop All Products"
-            linkPath="/shop"
           />
         </Reveal>
 

@@ -324,7 +324,7 @@ const CATEGORY_DEFINITIONS: ProductCategory[] = [
     description: 'Handcrafted hair clips, pearl barrettes and non-slip claws made for every style and every mood.',
     startingPrice: 100,
     badge: 'Popular',
-    imageUrl: '/images/categories/Hair Accessories.jpg',
+    imageUrl: '/images/categories/Hair Accessories.png',
     items: INITIAL_PRODUCTS.filter((p) => p.categoryId === 'hair-accessories'),
   },
   {
@@ -335,7 +335,7 @@ const CATEGORY_DEFINITIONS: ProductCategory[] = [
     description: 'Statement pieces with a warm golden glow — designed to stay beautiful through everyday life.',
     startingPrice: 160,
     badge: 'Popular',
-    imageUrl: '/images/categories/Artificial Jewels.jpg',
+    imageUrl: '/images/categories/AD Jewellery.jpeg',
     items: INITIAL_PRODUCTS.filter((p) => p.categoryId === 'ad-jewellery'),
   },
   {
@@ -345,7 +345,7 @@ const CATEGORY_DEFINITIONS: ProductCategory[] = [
     tagline: 'Quilted totes, clutches & mini bags',
     description: 'Structured vegan-leather bags with gold hardware and roomy interiors.',
     startingPrice: 99,
-    imageUrl: '/images/categories/Hand Bags.jpg',
+    imageUrl: '/images/categories/Bags.png',
     items: INITIAL_PRODUCTS.filter((p) => p.categoryId === 'bags'),
   },
   {
@@ -355,7 +355,7 @@ const CATEGORY_DEFINITIONS: ProductCategory[] = [
     tagline: 'Tarnish-free chains, pendants & layered pieces',
     description: 'Delicate, tarnish-resistant chains and radiant pendants with a warm golden finish.',
     startingPrice: 220,
-    imageUrl: '/images/categories/Artificial Jewels.jpg',
+    imageUrl: '/images/categories/Anti Tarnish Jewellery.png',
     items: INITIAL_PRODUCTS.filter((p) => p.categoryId === 'anti-tarnish-jewellery'),
   },
   {
@@ -365,15 +365,15 @@ const CATEGORY_DEFINITIONS: ProductCategory[] = [
     tagline: 'Notebooks, pens, gift sets & keepsakes',
     description: 'Thoughtfully curated stationery and gift-ready keepsakes for every occasion.',
     startingPrice: 99,
-    imageUrl: '/images/categories/Stationery-Gift-Items.jpg',
+    imageUrl: '/images/categories/Stationery-Gift-Items.png',
     items: INITIAL_PRODUCTS.filter((p) => p.categoryId === 'stationery-and-gifts'),
   },
   ...[
-    { id: 'ear-rings', name: 'Earrings', image: 'Artificial Jewels.jpg', tagline: 'Everyday studs, hoops & statement earrings', description: 'Find earrings for everyday outfits and special occasions.' },
-    { id: 'bows-and-scrunchies', name: 'Bows & Scrunchies', image: 'Bows.jpg', tagline: 'Satin bows, soft scrunchies & everyday hair ties', description: 'Discover ribbon bows and gentle scrunchies in satin, silk and velvet.' },
-    { id: 'key-chains', name: 'Key chains', image: 'Key Chains.jpg', tagline: 'Little charms for everyday carry', description: 'Personalise your keys and bags with playful key chains and keepsakes.' },
-    { id: 'mobile-charms', name: 'Mobile charms', image: 'Mobile Charms.jpg', tagline: 'Charm your phone your way', description: 'Add personality to your phone with colourful straps and decorative charms.' },
-    { id: 'men-accessories', name: 'Men accessories', image: 'Mens Collection.jpg', tagline: 'Sharp, classic everyday essentials', description: 'Explore accessories and everyday essentials curated for him.' },
+    { id: 'ear-rings', name: 'Earrings', image: 'Earrimgs.jpeg', tagline: 'Everyday studs, hoops & statement earrings', description: 'Find earrings for everyday outfits and special occasions.' },
+    { id: 'bows-and-scrunchies', name: 'Bows & Scrunchies', image: 'Bows & Scrunchies.jpeg', tagline: 'Satin bows, soft scrunchies & everyday hair ties', description: 'Discover ribbon bows and gentle scrunchies in satin, silk and velvet.' },
+    { id: 'key-chains', name: 'Key chains', image: 'Key Chains.png', tagline: 'Little charms for everyday carry', description: 'Personalise your keys and bags with playful key chains and keepsakes.' },
+    { id: 'mobile-charms', name: 'Mobile charms', image: 'Mobile Charms.png', tagline: 'Charm your phone your way', description: 'Add personality to your phone with colourful straps and decorative charms.' },
+    { id: 'men-accessories', name: 'Men accessories', image: 'Mens Collection.png', tagline: 'Sharp, classic everyday essentials', description: 'Explore accessories and everyday essentials curated for him.' },
   ].map(({ image, ...category }) => ({
     ...category,
     startingPrice: 0,
