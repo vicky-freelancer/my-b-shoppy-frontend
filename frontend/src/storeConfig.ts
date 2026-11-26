@@ -313,7 +313,7 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
 
 const CATEGORY_DISPLAY_ORDER = ["ad-jewellery", "hair-accessories", "anti-tarnish-jewellery", "ear-rings", "bows-and-scrunchies", "bags", "mobile-charms", "key-chains", "men-accessories", "stationery-and-gifts"];
 
-const CATEGORY_DISPLAY_NAMES: Record<string, string> = {"ad-jewellery": "AD Jewellery", "hair-accessories": "Hair Accessories", "anti-tarnish-jewellery": "Anti Tarnish Jewellery", "ear-rings": "Earrings", "bows-and-scrunchies": "Bows & Scrunchies", "bags": "Hand Bags", "mobile-charms": "Mobile Charms", "key-chains": "Key Chains", "men-accessories": "Mens Accessories", "stationery-and-gifts": "Stationery & Gifts"};
+export const CATEGORY_DISPLAY_NAMES: Record<string, string> = {"ad-jewellery": "AD Jewellery", "hair-accessories": "Hair Accessories", "anti-tarnish-jewellery": "Anti Tarnish Jewellery", "ear-rings": "Earrings", "bows-and-scrunchies": "Bows & Scrunchies", "bags": "Hand Bags", "mobile-charms": "Mobile Charms", "key-chains": "Key Chains", "men-accessories": "Mens Accessories", "stationery-and-gifts": "Stationery & Gifts"};
 
 const CATEGORY_DEFINITIONS: ProductCategory[] = [
   {

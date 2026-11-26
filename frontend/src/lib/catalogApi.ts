@@ -1,6 +1,13 @@
 import { apiUrl,mediaUrl } from './api';
+import { CATEGORY_DISPLAY_NAMES } from '../storeConfig';
 import type { ProductItem,SubcategoryItem,ProductCategory } from '../types';
 const CATALOG_TIMEOUT_MS=15000;
+const LEGACY_CATEGORY_NAMES: Record<string,string> = { bags: 'Hand Bags' };
+function displayCategoryName(id:unknown,name:unknown):string {
+  if(typeof id==='string'&&CATEGORY_DISPLAY_NAMES[id])return CATEGORY_DISPLAY_NAMES[id];
+  const label=typeof name==='string'?name:'';
+  return LEGACY_CATEGORY_NAMES[label.trim().toLowerCase()]||label;
+}
 type CatalogErrorBody={code?:unknown;error?:unknown};
 function errorCode(body:unknown){
   if(!body||typeof body!=='object')return '';
@@ -41,7 +48,7 @@ export function catalogErrorMessage(error:unknown,fallback:string){
 }
 export function apiProduct(row:any):ProductItem {
   return {id:row.slug||String(row.id),imageProductId:String(row.id),name:row.title,subtitle:row.subtitle,price:Number(row.sale_price),originalPrice:Number(row.mrp),imageUrl:mediaUrl(row.image_url),imageUrls:(row.images||[]).map((image:any)=>mediaUrl(image.url || (image.storage_key ? '/media/' + image.storage_key : ''))),
-    category:row.category,categoryId:row.category_id,subcategory:row.subcategory,subcategoryId:row.subcategory_id?String(row.subcategory_id):undefined,
+    category:displayCategoryName(row.category_id,row.category),categoryId:row.category_id,subcategory:row.subcategory,subcategoryId:row.subcategory_id?String(row.subcategory_id):undefined,
     badge:row.badge,rating:Number(row.rating??0),reviewsCount:Number(row.reviews_count??0),material:row.material,stone:row.stone,variants:row.variants||[],description:row.description||'',
     inStock:row.in_stock===true,created_at:row.created_at,variantOptions:(row.variant_options||[]).map((v:any)=>({id:String(v.id),label:v.label}))};
 }
@@ -63,5 +70,5 @@ export async function apiSubcategories():Promise<SubcategoryItem[]>{
 export async function apiCategories():Promise<ProductCategory[]>{
   const data=await catalogRequest<{categories?:unknown}>('categories');
   if(!Array.isArray(data.categories))throw new Error('Invalid catalog response');
-  return data.categories.map((c:any)=>({id:c.id,name:c.name,tagline:'',description:'',startingPrice:Number(c.startingPrice||0),count:Number(c.count||0),imageUrl:mediaUrl(c.image_url),items:[]}));
+  return data.categories.map((c:any)=>({id:c.id,name:displayCategoryName(c.id,c.name),tagline:'',description:'',startingPrice:Number(c.startingPrice||0),count:Number(c.count||0),imageUrl:mediaUrl(c.image_url),items:[]}));
 }
