@@ -5,7 +5,7 @@ const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const results=[];const errors=[];
 page.on('pageerror',e=>errors.push(e.message));
-const names=['AD Jewellery','Hair Accessories','Anti Tarnish Jewellery','Ear Rings','Bows & Scrunchies','Bags','Mobile Charms','Key Chains','Mens Accessories','Stationery & Gifts'];
+const names=['AD Jewellery','Hair Accessories','Anti Tarnish Jewellery','Ear Rings','Bows & Scrunchies','Hand Bags','Mobile Charms','Key Chains','Mens Accessories','Stationery & Gifts'];
 const ids=['ad-jewellery','hair-accessories','anti-tarnish-jewellery','ear-rings','bows-and-scrunchies','bags','mobile-charms','key-chains','men-accessories','stationery-and-gifts'];
 const product={id:1,title:'QA Gold Hoops',sku:'QA-HOOPS',category:'Ear Rings',category_id:'ear-rings',cover_image:'',mrp:250,sale_price:200,quantity:10,badges:['Bestseller'],created_at:new Date().toISOString()};
 const order={id:1,customer_name:'QA Customer',phone:'0000000000',city:'Trichy',address:'QA Address',product_variant:'QA Gold Hoops',quantity:2,amount:400,price_per_unit:200,status:'pending',created_at:new Date().toISOString()};

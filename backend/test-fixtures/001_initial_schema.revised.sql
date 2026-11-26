@@ -530,7 +530,7 @@ INSERT INTO categories (id,name,slug,sort_order) VALUES
 
 ('bows-and-scrunchies','Bows & Scrunchies','bows-and-scrunchies',4),
 
-('bags','Bags','bags',5),
+('bags','Hand Bags','bags',5),
 
 ('mobile-charms','Mobile Charms','mobile-charms',6),
 

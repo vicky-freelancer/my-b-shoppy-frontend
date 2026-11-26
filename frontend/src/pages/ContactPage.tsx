@@ -227,7 +227,7 @@ export const ContactPage: React.FC = () => {
           <aside className="lg:col-span-2 space-y-5">
             <div className="relative rounded-[28px] overflow-hidden border border-[#D8A83E]/40 h-56">
               <img
-                src="/images/categories/Hand Bags.jpg"
+                src="/images/categories/Hand Bags.png"
                 alt="my B shoppy accessories flatlay"
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover"

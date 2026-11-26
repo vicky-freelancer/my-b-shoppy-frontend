@@ -11,7 +11,7 @@ export const EditorialPromo: React.FC = () => {
           <div className="relative overflow-hidden rounded-[28px] border border-[#D8A83E]/40 shadow-[0_44px_90px_-40px_rgba(90,62,20,0.55)] min-h-[460px] md:min-h-[520px] flex items-stretch">
             {/* Background: luxury golden accessory photography */}
             <img
-              src="/images/categories/Hair Accessories.jpg"
+              src="/images/categories/Hair Accessories.png"
               alt=""
               loading="lazy"
               className="absolute inset-0 w-full h-full object-cover"

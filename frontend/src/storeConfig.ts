@@ -175,7 +175,7 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
     subtitle: 'Soft blue minimal handbag with gold chain',
     price: 99,
     imageUrl: '/images/products/lite-blue-bag.svg',
-    category: 'Bags',
+    category: 'Hand Bags',
     categoryId: 'bags',
     badge: 'NEW',
     rating: 4.7,
@@ -192,7 +192,7 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
     subtitle: 'Quilted black bag with gold turnlock',
     price: 99,
     imageUrl: '/images/products/black-bag.svg',
-    category: 'Bags',
+    category: 'Hand Bags',
     categoryId: 'bags',
     rating: 4.8,
     reviewsCount: 19,
@@ -208,7 +208,7 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
     subtitle: 'Gilded clutch with pearl clasp',
     price: 459,
     imageUrl: '/images/products/gold-bag.svg',
-    category: 'Bags',
+    category: 'Hand Bags',
     categoryId: 'bags',
     badge: 'EXCLUSIVE',
     rating: 5.0,
@@ -313,7 +313,7 @@ export const INITIAL_PRODUCTS: ProductItem[] = [
 
 const CATEGORY_DISPLAY_ORDER = ["ad-jewellery", "hair-accessories", "anti-tarnish-jewellery", "ear-rings", "bows-and-scrunchies", "bags", "mobile-charms", "key-chains", "men-accessories", "stationery-and-gifts"];
 
-const CATEGORY_DISPLAY_NAMES: Record<string, string> = {"ad-jewellery": "AD Jewellery", "hair-accessories": "Hair Accessories", "anti-tarnish-jewellery": "Anti Tarnish Jewellery", "ear-rings": "Earrings", "bows-and-scrunchies": "Bows & Scrunchies", "bags": "Bags", "mobile-charms": "Mobile Charms", "key-chains": "Key Chains", "men-accessories": "Mens Accessories", "stationery-and-gifts": "Stationery & Gifts"};
+const CATEGORY_DISPLAY_NAMES: Record<string, string> = {"ad-jewellery": "AD Jewellery", "hair-accessories": "Hair Accessories", "anti-tarnish-jewellery": "Anti Tarnish Jewellery", "ear-rings": "Earrings", "bows-and-scrunchies": "Bows & Scrunchies", "bags": "Hand Bags", "mobile-charms": "Mobile Charms", "key-chains": "Key Chains", "men-accessories": "Mens Accessories", "stationery-and-gifts": "Stationery & Gifts"};
 
 const CATEGORY_DEFINITIONS: ProductCategory[] = [
   {
@@ -340,12 +340,12 @@ const CATEGORY_DEFINITIONS: ProductCategory[] = [
   },
   {
     id: 'bags',
-    name: 'Bags',
+    name: 'Hand Bags',
     count: 38,
     tagline: 'Quilted totes, clutches & mini bags',
     description: 'Structured vegan-leather bags with gold hardware and roomy interiors.',
     startingPrice: 99,
-    imageUrl: '/images/categories/Bags.png',
+    imageUrl: '/images/categories/Hand Bags.png',
     items: INITIAL_PRODUCTS.filter((p) => p.categoryId === 'bags'),
   },
   {

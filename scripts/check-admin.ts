@@ -9,7 +9,7 @@ const taxonomy=await import(base+'subcategories.ts');
 const db=await import(base+'supabase.ts');
 const products=await import(base+'products.ts');
 const utils=await import(base+'utils.ts');
-const names=['AD Jewellery','Hair Accessories','Anti Tarnish Jewellery','Ear Rings','Bows & Scrunchies','Bags','Mobile Charms','Key Chains','Mens Accessories','Stationery & Gifts'];
+const names=['AD Jewellery','Hair Accessories','Anti Tarnish Jewellery','Ear Rings','Bows & Scrunchies','Hand Bags','Mobile Charms','Key Chains','Mens Accessories','Stationery & Gifts'];
 let replies:any[]=[]; let calls:any[]=[];
 db.supabase.from=(table:string)=>{
  const call:any={table,steps:[]};calls.push(call);

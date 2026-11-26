@@ -53,7 +53,7 @@ export const AboutPage: React.FC = () => {
 
           <div className="relative order-1 lg:order-2">
             <img
-              src="/images/categories/Artificial Jewels.jpg"
+              src="/images/categories/AD Jewellery.jpeg"
               alt="Curated gold jewellery collection"
               loading="lazy"
               className="rounded-[28px] border border-[#D8A83E]/40 shadow-[0_40px_80px_-36px_rgba(90,62,20,0.5)] w-full h-[420px] object-cover"

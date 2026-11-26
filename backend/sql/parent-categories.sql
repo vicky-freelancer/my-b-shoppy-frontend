@@ -7,7 +7,7 @@ insert into public.categories (id, name, slug, is_active) values
   ('anti-tarnish-jewellery', 'Anti Tarnish Jewellery', 'anti-tarnish-jewellery', true),
   ('ear-rings', 'Ear Rings', 'ear-rings', true),
   ('bows-and-scrunchies', 'Bows & Scrunchies', 'bows-and-scrunchies', true),
-  ('bags', 'Bags', 'bags', true),
+  ('bags', 'Hand Bags', 'bags', true),
   ('mobile-charms', 'Mobile Charms', 'mobile-charms', true),
   ('key-chains', 'Key Chains', 'key-chains', true),
   ('men-accessories', 'Mens Accessories', 'men-accessories', true),
