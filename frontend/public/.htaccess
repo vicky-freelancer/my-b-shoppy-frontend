@@ -1,4 +1,6 @@
 RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.mybshoppy\.com$ [NC]
+RewriteRule ^ https://mybshoppy.com%{REQUEST_URI} [R=301,L,NE]
 
 # Serve existing static files directly (assets, images, etc.).
 # Do NOT match directories: a real directory without index.html makes
