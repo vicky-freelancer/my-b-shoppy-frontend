@@ -1,54 +1,94 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { products, respond } from './product-fixtures.mjs';
+import { products, restFixture } from './product-fixtures.mjs';
 import { writeFileSync } from 'node:fs';
 
 const browser = await chromium.launch({ headless: true });
 const base = process.env.PRODUCT_TEST_BASE_URL || 'http://127.0.0.1:3000';
 assert.ok(['127.0.0.1', 'localhost'].includes(new URL(base).hostname), 'Browser tests require a local server');
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-const errors = [], requests = [], writes = [], checks = [];
+page.setDefaultTimeout(30_000);
+const errors = [], requests = [], writes = [], checks = [], listingResponses = [];
+const recordCheck = checks.push.bind(checks);
+checks.push = (...items) => { for (const item of items) console.log('PASS:', item); return recordCheck(...items); };
 page.on('pageerror', error => errors.push(error.message));
-let paymentAmount;
-let slowDescending = false;
+let checkoutEnabled = false;
+let catalogFailure = false;
+let responseGate;
+const makeGate = predicate => {
+  let release, signal, settle;
+  const started = new Promise(resolve => { signal = resolve; });
+  const blocked = new Promise(resolve => { release = resolve; });
+  const finished = new Promise(resolve => { settle = resolve; });
+  return { predicate, started, signal, blocked, release, finished, settle };
+};
 let fixtureRows = products.map(row => ({ ...row }));
 let beforePayload;
+// Exercise the same two predicates used by the SQL repository, including
+// duplicate display names and legacy labels that must not override an ID.
+{
+  const probe = [
+    { ...products[0], id: 101, subcategory_id: '1', subcategory: 'Fancy Rings' },
+    { ...products[0], id: 102, subcategory_id: '2', subcategory: 'Fancy Rings' },
+    { ...products[0], id: 103, subcategory_id: null, subcategory: 'Fancy Rings' },
+    { ...products[0], id: 104, category_id: 'hair-accessories', subcategory_id: '2', subcategory: 'Fancy Rings' },
+  ];
+  const list = query => restFixture(`https://fixture.invalid/api/v1/products?${query}`, probe).body.products.map(p => p.id);
+  assert.deepEqual(list('categoryId=ad-jewellery&subcategoryId=1'), ['101']);
+  assert.deepEqual(list('categoryId=ad-jewellery&subcategoryId=2'), ['102']);
+  assert.deepEqual(list('categoryId=hair-accessories&subcategoryId=2'), ['104']);
+  assert.ok(list('categoryId=ad-jewellery').includes('103'));
+  console.log('PASS: REST subcategory ID, missing ID, conflicting label and duplicate-name fixtures');
+}
 await page.addInitScript(() => {
   window.Razorpay = class {
-    constructor(options) { this.options = options; }
+    constructor(options) { this.options = options; window.__fixturePaymentOptions = options; }
     on() {}
     open() { this.options.handler({ razorpay_order_id: 'order_fixture', razorpay_payment_id: 'pay_fixture', razorpay_signature: 'fixture-signature' }); }
   };
 });
 await page.route('**/*', async route => {
   const request = route.request(), url = request.url();
-  if (url.includes('.supabase.co/rest/v1/')) {
-    if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: {
-      'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS',
-      'access-control-allow-headers': request.headers()['access-control-request-headers'] || '*',
-    } });
-    if (!['GET', 'HEAD'].includes(request.method())) {
-      writes.push({ table: new URL(url).pathname.split('/').pop(), method: request.method() });
-      return route.fulfill({ status: 201, json: [], headers: { 'access-control-allow-origin': '*' } });
+  const parsed = new URL(url);
+  if (parsed.pathname.startsWith('/api/')) {
+    requests.push(parsed);
+    const headers = { 'access-control-allow-origin': base, 'access-control-allow-credentials': 'true' };
+    if (request.method() === 'GET' && parsed.pathname === '/api/checkout/status')
+      return route.fulfill({ json: checkoutEnabled ? { enabled: true } : { enabled: false, code: 'CHECKOUT_TEMPORARILY_UNAVAILABLE' }, headers });
+    if (checkoutEnabled && request.method() === 'GET' && parsed.pathname === '/api/v1/checkout/session')
+      return route.fulfill({ json: {}, headers });
+    if (checkoutEnabled && request.method() === 'POST' && parsed.pathname === '/api/v1/checkout') {
+      const payload = request.postDataJSON();
+      writes.push({ path: parsed.pathname, payload });
+      return route.fulfill({ json: { order_id: 'order_fixture', access_token: 'fixture_access', provider_order_id: 'provider_fixture', key_id: 'fixture_key', total_paise: 8000 }, headers });
     }
-    requests.push(new URL(url));
-    if (beforePayload && new URL(url).searchParams.get('select')?.includes('variants')) {
-      const mutate = beforePayload; beforePayload = undefined; mutate();
+    if (checkoutEnabled && request.method() === 'POST' && parsed.pathname === '/api/v1/orders/order_fixture/confirm') {
+      writes.push({ path: parsed.pathname, payload: request.postDataJSON() });
+      return route.fulfill({ json: { order_id: 'order_fixture', payment_id: 'pay_fixture', payment_status: 'paid' }, headers });
     }
-    if (slowDescending && new URL(url).searchParams.get('order')?.startsWith('price.desc')) {
-      await new Promise(resolve => setTimeout(resolve, 800));
+    if (request.method() === 'GET') {
+      if (catalogFailure && parsed.pathname === '/api/v1/products') return route.fulfill({ status: 503, json: { code: 'CATALOG_UNAVAILABLE' }, headers });
+      const response = restFixture(url, fixtureRows);
+      if (response) {
+        if (beforePayload && parsed.pathname === '/api/v1/products' && parsed.searchParams.get('page') === '2') { const mutate = beforePayload; beforePayload = undefined; mutate(); const updated = restFixture(url, fixtureRows); listingResponses.push({ query: parsed.search, count: updated.body.count, ids: updated.body.products.map(p => p.id) }); return route.fulfill({ status: 200, json: updated.body, headers }); }
+        if (responseGate?.predicate(parsed)) {
+          const gate = responseGate; responseGate = undefined; gate.signal(); await gate.blocked;
+          try { await route.fulfill({ status: gate.fail ? 503 : response.status, json: gate.fail ? { code: 'CATALOG_UNAVAILABLE' } : response.body, headers }); gate.settle('fulfilled'); }
+          catch { gate.settle('cancelled'); }
+          return;
+        }
+        if (parsed.pathname === '/api/v1/products') listingResponses.push({ query: parsed.search, count: response.body.count, ids: response.body.products.map(p => p.id) });
+        return route.fulfill({ status: response.status, json: response.body, headers });
+      }
     }
-    const response = respond(url, fixtureRows);
-    if (request.method() === 'HEAD') return route.fulfill({ status: 200, body: '', headers: response.headers });
-    return route.fulfill({ status: response.status, json: response.status === 416
-      ? { message: 'Requested range not satisfiable' } : response.rows, headers: response.headers });
+    writes.push({ method: request.method(), path: parsed.pathname });
+    errors.push(`Unexpected API request: ${request.method()} ${url}`);
+    return route.abort();
   }
-  if (url.includes('/api/create-order')) {
-    paymentAmount = request.postDataJSON().amount;
-    return route.fulfill({ json: { id: 'order_fixture', amount: paymentAmount, currency: 'INR', key_id: 'rzp_test_fixture' } });
+  if (url.startsWith('http') && parsed.origin !== base) {
+    if (!['fonts.googleapis.com', 'fonts.gstatic.com'].includes(parsed.hostname)) errors.push(`Unexpected external request: ${url}`);
+    return route.abort();
   }
-  if (url.includes('/api/verify-payment')) return route.fulfill({ json: { valid: true } });
-  if (url.startsWith('http') && new URL(url).origin !== base) return route.abort();
   return route.continue();
 });
 const goto = async path => page.goto(`${base}${path}`);
@@ -62,7 +102,7 @@ const expectPrice = async amount => {
   let text = '';
   for (let attempt = 0; attempt < 100; attempt++) {
     text = await page.locator('a[href="/product/fixture-47"]').textContent();
-    if (text.includes(`₹${amount}`)) return;
+    if (text.includes(`\u20b9${amount}`)) return;
     await new Promise(resolve => setTimeout(resolve, 50));
   }
   assert.fail(`Expected price ${amount}; received ${text}`);
@@ -82,12 +122,13 @@ try {
   await expectCount(20);
   await page.getByRole('combobox').selectOption('price-asc');
   await page.waitForFunction(() => document.querySelector('a[href^="/product/"]')?.getAttribute('href') === '/product/fixture-1');
-  slowDescending = true;
-  const delayed = page.waitForRequest(request => new URL(request.url()).searchParams.get('order')?.startsWith('price.desc'));
+  const delayedSort = makeGate(u => u.pathname === '/api/v1/products' && u.searchParams.get('sort') === 'price-desc');
+  responseGate = delayedSort;
   await page.getByRole('combobox').selectOption('price-desc');
-  await delayed;
+  await delayedSort.started;
   await page.getByRole('combobox').selectOption('price-asc');
-  await page.waitForTimeout(1000);
+  delayedSort.release();
+  await delayedSort.finished;
   assert.equal(await cards().first().getAttribute('href'), '/product/fixture-1');
   checks.push('Rapid sort navigation ignores cancelled late responses');
   checks.push('Shop pagination, counts and global sorting');
@@ -101,14 +142,16 @@ try {
   checks.push('Wishlist toggle and modal');
   await goto('/categories/ad-jewellery');
   await page.getByRole('heading', { name: 'Fancy Rings', exact: true }).waitFor();
-  await goto('/categories/ad-jewellery/fancy-rings'); await expectCount(11);
-  checks.push('Category discovery and legacy subcategory matching');
+  await goto('/categories/ad-jewellery/fancy-rings'); await expectCount(10);
+  assert.equal(await page.locator('a[href="/product/fixture-11"]').count(), 0);
+  checks.push('Category discovery and ID-based subcategory matching');
   await goto('/product/fixture-1');
   await page.getByRole('heading', { name: 'Fixture Product 1', exact: true }).waitFor();
   await expectCount(4);
   await page.getByRole('button', { name: 'Silver', exact: true }).click();
   await page.getByRole('button', { name: 'Add to Cart', exact: true }).click();
   assert.ok((await page.locator('body').innerText()).includes('Silver'));
+  checkoutEnabled = true;
   await page.getByRole('button', { name: 'ORDER NOW', exact: true }).click();
   await page.getByRole('dialog', { name: 'Checkout', exact: true }).waitFor();
   // The checkout code and calculations are unchanged. Exercise a fully mocked
@@ -116,11 +159,13 @@ try {
   await page.getByPlaceholder('e.g. Jessica Sterling').fill('Fixture Customer');
   await page.getByPlaceholder('e.g. +91 98765 43210').fill('9999999999');
   await page.getByPlaceholder('e.g. Tiruchirappalli, TN').fill('Chennai');
+  await page.getByPlaceholder('e.g. 620001').fill('620001');
   await page.getByPlaceholder('e.g. 742 Evergreen Terrace, Apt 4B').fill('Fixture address');
   await page.getByRole('button', { name: 'PAY ONLINE & PLACE ORDER', exact: true }).click();
   await page.getByText('pay_fixture', { exact: false }).first().waitFor();
-  assert.equal(paymentAmount, 8000, '10 product + 70 courier, converted to paise');
-  assert.deepEqual(writes, [{ table: 'orders', method: 'POST' }]);
+  assert.equal(await page.evaluate(() => window.__fixturePaymentOptions.amount), 8000, 'fixture order amount reaches the payment UI in paise');
+  assert.deepEqual(writes.map(item => item.path), ['/api/v1/checkout', '/api/v1/orders/order_fixture/confirm']);
+  assert.deepEqual(writes[0].payload.items, [{ product_id: '1', variant_id: '11', quantity: 1 }]);
   checks.push('Detail deep link, variants, related products, add to cart, checkout total and mocked Razorpay success');
   await goto('/product/fixture-2');
   await page.getByRole('heading', { name: 'Fixture Product 2', exact: true }).waitFor();
@@ -147,15 +192,240 @@ try {
   await page.getByRole('button', { name: 'Next Page', exact: true }).click();
   await expectCount(10);
   await page.getByText('10 Items Available', { exact: true }).waitFor();
-  checks.push('Concurrent deletion/416 clamps filtered pagination and replaces cached earlier page');
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), Array.from({ length: 10 }, (_, i) => `/product/fixture-${10 - i}`));
+  assert.equal(await page.getByRole('button', { name: 'Next Page', exact: true }).count(), 0);
+  assert.ok(listingResponses.some(r => r.query.includes('page=2') && r.query.includes('categoryId=ad-jewellery') && r.count === 10 && r.ids.length === 0));
+  checks.push('Catalogue shrink clamps category pagination and refreshes exact product IDs');
 
   fixtureRows = products.map(row => ({ ...row }));
-  await goto('/categories/ad-jewellery/fancy-rings'); await expectCount(11);
+  await goto('/shop'); await expectCount(20);
+  const beforeShopRecovery = listingResponses.length;
+  beforePayload = () => { fixtureRows = fixtureRows.slice(0, 10); };
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await expectCount(10);
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), Array.from({ length: 10 }, (_, i) => `/product/fixture-${10 - i}`));
+  await page.getByText('10 Items Available', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Next Page', exact: true }).count(), 0);
+  const recoveryRequests = listingResponses.slice(beforeShopRecovery);
+  assert.equal(recoveryRequests.filter(r => new URLSearchParams(r.query).get('page') === '1').length, 1);
+  assert.ok(recoveryRequests.some(r => new URLSearchParams(r.query).get('page') === '2' && r.count === 10 && r.ids.length === 0));
+  checks.push('Catalogue shrink clamps shop pagination with one immediate destination refetch');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  await goto('/shop'); await expectCount(20);
+  const beforeCachedNavigation = listingResponses.length;
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('a[href^="/product/"]')?.getAttribute('href') === '/product/fixture-27');
+  await page.getByRole('button', { name: 'Previous Page', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('a[href^="/product/"]')?.getAttribute('href') === '/product/fixture-47');
+  assert.equal(listingResponses.slice(beforeCachedNavigation).filter(r => new URLSearchParams(r.query).get('page') === '1').length, 0);
+  checks.push('Normal page navigation reuses the fresh page-one cache');
+
+  await goto('/shop'); await expectCount(20);
+  beforePayload = () => { fixtureRows = []; };
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await page.getByText('Catalogue is being curated').waitFor();
+  assert.equal(await cards().count(), 0);
+  assert.equal(await page.getByRole('button', { name: 'Next Page', exact: true }).count(), 0);
+  fixtureRows = products.map(row => ({ ...row }));
+  await page.reload(); await expectCount(20);
+  checks.push('Empty shrink clamps pagination and an expanded catalogue reloads');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  await goto('/shop'); await expectCount(20);
+  const gatedShop = makeGate(u => u.pathname === '/api/v1/products' && u.searchParams.get('page') === '1');
+  responseGate = gatedShop;
+  beforePayload = () => { fixtureRows = fixtureRows.slice(0, 10); };
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await gatedShop.started;
+  await page.getByText('Loading products...', { exact: true }).waitFor();
+  assert.equal(await cards().count(), 0, 'known stale cards must not be displayed during recovery');
+  gatedShop.release();
+  await expectCount(10);
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), Array.from({ length: 10 }, (_, i) => `/product/fixture-${10 - i}`));
+  assert.equal(await page.getByText('Loading products...', { exact: true }).count(), 0);
+  checks.push('Gated destination hides stale products until recovery resolves');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  await goto('/categories/ad-jewellery?view=products'); await expectCount(20);
+  const gatedCategory = makeGate(u => u.pathname === '/api/v1/products' && u.searchParams.get('page') === '1' && u.searchParams.get('categoryId') === 'ad-jewellery');
+  responseGate = gatedCategory;
+  beforePayload = () => { fixtureRows = fixtureRows.slice(0, 10); };
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await gatedCategory.started;
+  await page.getByText('Loading products...', { exact: true }).waitFor();
+  fixtureRows = products.map(row => ({ ...row }));
+  await page.evaluate(() => { history.pushState({}, '', '/categories/hair-accessories?view=products'); dispatchEvent(new PopStateEvent('popstate')); });
+  await expectCount(12);
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), Array.from({ length: 12 }, (_, i) => `/product/fixture-${47 - i}`));
+  gatedCategory.release();
+  const oldCategoryOutcome = await gatedCategory.finished;
+  console.log('Old category route handler:', oldCategoryOutcome);
+  assert.ok(['fulfilled', 'cancelled'].includes(oldCategoryOutcome));
+  await page.getByText('12 Items Available', { exact: true }).waitFor();
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), Array.from({ length: 12 }, (_, i) => `/product/fixture-${47 - i}`));
+  assert.equal(await page.getByRole('button', { name: 'Next Page', exact: true }).count(), 0);
+  checks.push('Delayed category recovery cannot replace the newer category listing');
+
+  fixtureRows = products.map(row => ({ ...row, subcategory_id: row.id <= 35 ? '1' : row.subcategory_id }));
+  await goto('/categories/ad-jewellery/fancy-rings'); await expectCount(20);
+  const gatedSub = makeGate(u => u.pathname === '/api/v1/products' && u.searchParams.get('page') === '1' && u.searchParams.get('subcategoryId') === '1');
+  responseGate = gatedSub;
+  beforePayload = () => { fixtureRows = fixtureRows.slice(0, 10); };
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await gatedSub.started;
+  await page.getByText('Loading products...', { exact: true }).waitFor();
+  fixtureRows = products.map(row => ({ ...row }));
+  await page.evaluate(() => { history.pushState({}, '', '/categories/hair-accessories/fancy-rings'); dispatchEvent(new PopStateEvent('popstate')); });
+  await expectCount(1);
+  gatedSub.release(); await gatedSub.finished;
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), ['/product/fixture-36']);
+  assert.equal(await page.getByRole('button', { name: 'Next Page', exact: true }).count(), 0);
+  checks.push('Settled old subcategory recovery does not replace the active collection');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  await goto('/shop'); await expectCount(20);
+  const gatedSortRecovery = makeGate(u => u.pathname === '/api/v1/products' && u.searchParams.get('page') === '1' && u.searchParams.get('sort') === 'newest');
+  responseGate = gatedSortRecovery;
+  beforePayload = () => { fixtureRows = fixtureRows.slice(0, 10); };
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await gatedSortRecovery.started;
+  await page.getByText('Loading products...', { exact: true }).waitFor();
+  await page.getByRole('combobox').selectOption('price-asc');
+  await expectCount(10);
+  gatedSortRecovery.release(); await gatedSortRecovery.finished;
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), Array.from({ length: 10 }, (_, i) => `/product/fixture-${i + 1}`));
+  assert.equal(await page.getByRole('button', { name: 'Next Page', exact: true }).count(), 0);
+  checks.push('Sort change during gated recovery keeps the active sorted listing');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  await goto('/shop'); await expectCount(20);
+  fixtureRows = fixtureRows.slice(0, 20);
+  const olderShrink = makeGate(u => u.pathname === '/api/v1/products' && u.searchParams.get('page') === '2' && u.searchParams.get('sort') === 'newest');
+  responseGate = olderShrink;
+  const shrinkRequestStart = requests.length;
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await olderShrink.started;
+  fixtureRows = fixtureRows.slice(0, 10);
+  await page.getByRole('combobox').selectOption('price-asc');
+  await expectCount(10);
+  olderShrink.release(); await olderShrink.finished;
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), Array.from({ length: 10 }, (_, i) => `/product/fixture-${i + 1}`));
+  await page.getByText('10 Items Available', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Next Page', exact: true }).count(), 0);
+  const shrinkRequests = requests.slice(shrinkRequestStart).filter(u => u.pathname === '/api/v1/products');
+  assert.equal(shrinkRequests.filter(u => u.searchParams.get('page') === '2' && u.searchParams.get('sort') === 'newest').length, 1);
+  assert.equal(shrinkRequests.filter(u => u.searchParams.get('page') === '1' && u.searchParams.get('sort') === 'price-asc').length, 1);
+  checks.push('Out-of-order shrink responses preserve the newer sort and count');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  await goto('/shop'); await expectCount(20);
+  const gatedFailure = makeGate(u => u.pathname === '/api/v1/products' && u.searchParams.get('page') === '1');
+  responseGate = gatedFailure;
+  beforePayload = () => { fixtureRows = fixtureRows.slice(0, 10); };
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await gatedFailure.started;
+  await page.getByText('Loading products...', { exact: true }).waitFor();
+  catalogFailure = true; gatedFailure.fail = true; gatedFailure.release(); await gatedFailure.finished;
+  await page.getByRole('alert').filter({ hasText: 'catalogue is temporarily unavailable' }).waitFor();
+  assert.equal(await cards().count(), 0);
+  assert.equal(await page.getByText('Loading products...', { exact: true }).count(), 0);
+  catalogFailure = false;
+  await page.getByRole('button', { name: 'Try again' }).click(); await expectCount(10);
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), Array.from({ length: 10 }, (_, i) => `/product/fixture-${10 - i}`));
+  checks.push('Failed gated recovery shows error and retry restores correct products');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  await goto('/shop'); await expectCount(20);
+  const gatedSearch = makeGate(u => u.pathname === '/api/v1/products' && u.searchParams.get('page') === '1');
+  responseGate = gatedSearch;
+  beforePayload = () => { fixtureRows = fixtureRows.slice(0, 10); };
+  await page.getByRole('button', { name: 'Next Page', exact: true }).click();
+  await gatedSearch.started;
+  await page.getByRole('button', { name: 'Search products', exact: true }).click();
+  await page.getByPlaceholder(/Search hair accessories/).fill('unique description needle');
+  await page.getByRole('heading', { name: 'Fixture Product 1', exact: true, level: 4 }).waitFor();
+  gatedSearch.release(); await gatedSearch.finished;
+  await page.getByRole('heading', { name: 'Fixture Product 1', exact: true, level: 4 }).waitFor();
+  checks.push('Search modal remains usable during gated listing recovery');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  await goto('/categories/ad-jewellery?view=products'); await expectCount(20);
+  const refreshListings = () => page.evaluate(async () => { const { invalidateProductQueries } = await import('/src/lib/productQueries.ts'); await invalidateProductQueries(); });
+  fixtureRows = fixtureRows.slice(0, 10);
+  await refreshListings(); await expectCount(10);
+  assert.deepEqual(await cards().evaluateAll(nodes => nodes.map(n => n.getAttribute('href'))), Array.from({ length: 10 }, (_, i) => `/product/fixture-${10 - i}`));
+  assert.equal(await page.getByRole('button', { name: 'Next Page', exact: true }).count(), 0);
+  fixtureRows = [];
+  await refreshListings();
+  await page.getByText('Coming soon', { exact: true }).waitFor();
+  assert.equal(await cards().count(), 0);
+  fixtureRows = products.map(row => ({ ...row }));
+  await refreshListings(); await expectCount(20);
+  assert.equal(await cards().first().getAttribute('href'), '/product/fixture-35');
+  await page.getByText('35 Items Available', { exact: true }).waitFor();
+  checks.push('Page-one refresh handles shrink, empty and expansion');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  await goto('/categories/ad-jewellery/fancy-rings'); await expectCount(10);
   fixtureRows[0].subcategory_id = '22222222-2222-4222-8222-222222222222';
   fixtureRows[0].subcategory = 'Fancy Rings';
   await page.getByRole('combobox').selectOption('price-asc');
-  await expectCount(10);
+  await expectCount(9);
   checks.push('Subcategory move refreshes membership');
+
+  fixtureRows = products.map(row => ({ ...row }));
+  checkoutEnabled = false;
+  await goto('/product/fixture-1');
+  await page.getByRole('heading', { name: 'Fixture Product 1', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Add to Cart', exact: true }).click();
+  const cartLine = page.locator('h4').filter({ hasText: 'Fixture Product 1' }).locator('..');
+  await cartLine.locator('div.flex.items-center.border button').nth(1).click();
+  await page.getByRole('heading', { name: 'Shopping Bag (2)' }).waitFor();
+  await page.getByRole('button', { name: 'Close cart' }).click();
+  await page.getByRole('link', { name: 'SHOP', exact: true }).first().click();
+  await page.getByRole('button', { name: 'View cart, 2 items' }).waitFor();
+  await page.getByRole('button', { name: 'View cart, 2 items' }).click();
+  await page.getByRole('button', { name: 'ORDER NOW', exact: true }).click();
+  await page.getByRole('button', { name: 'Checkout Temporarily Unavailable' }).waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Checkout Temporarily Unavailable' }).isDisabled(), true);
+  await page.getByRole('button', { name: 'Close checkout' }).click();
+  checkoutEnabled = true;
+  await page.getByRole('button', { name: 'View cart, 2 items' }).click();
+  await page.getByRole('button', { name: 'ORDER NOW', exact: true }).click();
+  await page.getByRole('button', { name: 'PAY ONLINE & PLACE ORDER' }).waitFor({ state: 'visible' });
+  await page.getByRole('button', { name: 'PAY ONLINE & PLACE ORDER' }).click();
+  assert.equal(await page.getByPlaceholder('e.g. Jessica Sterling').evaluate(el => el.validity.valueMissing), true);
+  await page.getByRole('button', { name: 'Close checkout' }).click();
+  await page.getByRole('button', { name: 'View cart, 2 items' }).click();
+  await page.getByTitle('Remove item').click();
+  await page.getByText('Your shopping bag is empty').waitFor();
+  await page.getByRole('button', { name: 'Close cart' }).click();
+  await page.getByRole('button', { name: 'Add Fixture Product 47 to cart' }).click();
+  await page.getByRole('heading', { name: 'Shopping Bag (1)' }).waitFor();
+  await page.reload();
+  await page.getByRole('button', { name: 'View cart, 0 items' }).waitFor();
+  checks.push('Cart quantity, SPA persistence, removal, refresh reset and checkout safeguards');
+
+  fixtureRows = [];
+  await goto('/shop');
+  await page.getByText('Catalogue is being curated').waitFor();
+  assert.equal(await cards().count(), 0);
+  catalogFailure = true;
+  await goto('/shop');
+  await page.getByRole('alert').filter({ hasText: 'catalogue is temporarily unavailable' }).waitFor();
+  catalogFailure = false;
+  fixtureRows = products.map(row => ({ ...row }));
+  await page.getByRole('button', { name: 'Try again' }).click();
+  await expectCount(20);
+  checks.push('Empty catalogue, API failure and retry recovery');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await goto('/shop'); await expectCount(20);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  checks.push('Mobile and desktop listing fit the viewport');
 
   fixtureRows = products.map(row => ({ ...row }));
   await page.clock.install();
@@ -165,8 +435,8 @@ try {
     const image = document.querySelector('a[href="/product/fixture-47"] img');
     return image?.complete && image.naturalWidth > 0;
   });
-  const imageReads = () => requests.filter(url => url.searchParams.get('select') === 'id,image_url').length;
-  const listingReads = () => requests.filter(url => url.searchParams.get('select')?.includes('variants')).length;
+  const imageReads = () => requests.filter(url => /^\/api\/v1\/products\/\d+$/.test(url.pathname)).length;
+  const listingReads = () => requests.filter(url => url.pathname === '/api/v1/products').length;
   const imagesBefore = imageReads();
   const listingsBefore = listingReads();
   fixtureRows[46].price = 777; fixtureRows[46].sale_price = 777;

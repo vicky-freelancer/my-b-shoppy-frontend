@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { SearchX } from 'lucide-react';
 import { GoldHero } from '../components/GoldHero';
 import { GoldBand } from '../components/GoldBand';
@@ -8,7 +8,7 @@ import { useStore } from '../context/StoreContext';
 import { useSeo } from '../lib/seo';
 import { SortOption } from '../lib/catalogUtils';
 
-import { useProductListing } from '../lib/useProducts';
+import { useListingPageRecovery, useProductListing } from '../lib/useProducts';
 import { catalogErrorMessage } from '../lib/catalogApi';
 
 const itemsPerPage = 20;
@@ -35,10 +35,8 @@ export const ShopPage: React.FC = () => {
   const paginatedProducts = listing.data?.products || [];
   const totalCount = listing.data?.count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
-  const isLoading = listing.isPending;
-  useEffect(() => {
-    if (listing.data && currentPage > totalPages) setCurrentPage(totalPages);
-  }, [listing.data, currentPage, totalPages]);
+  const recovering = useListingPageRecovery({ page: currentPage, sort: sortBy }, listing.data?.count, setCurrentPage);
+  const isLoading = listing.isPending || recovering;
 
   return (
     <div className="products-page">

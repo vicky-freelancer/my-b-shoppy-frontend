@@ -11,7 +11,7 @@ import { SubcategoryListingPage } from './SubcategoryListingPage';
 import { useStore } from '../context/StoreContext';
 import { useSeo } from '../lib/seo';
 import { SortOption } from '../lib/catalogUtils';
-import { useProductListing } from '../lib/useProducts';
+import { useListingPageRecovery, useProductListing } from '../lib/useProducts';
 const itemsPerPage = 20;
 
 export const CategoryDetailPage: React.FC = () => {
@@ -74,10 +74,8 @@ export const CategoryDetailPage: React.FC = () => {
   const paginatedProducts = listing.data?.products || [];
   const totalCount = listing.data?.count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
-  const isLoading = listing.isPending;
-  useEffect(() => {
-    if (listing.data && currentPage > totalPages) setCurrentPage(totalPages);
-  }, [listing.data, currentPage, totalPages]);
+  const recovering = useListingPageRecovery({ categoryId: slug, subcategory: selectedSubcategory, page: currentPage, sort: sortBy }, listing.data?.count, setCurrentPage);
+  const isLoading = listing.isPending || recovering;
 
   if (liveCategories.isPending) return <div role="status">Loading categories...</div>;
   if (liveCategories.error) return <p role="alert" className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 py-10 text-sm text-[#6B5945]">{catalogErrorMessage(liveCategories.error, 'Categories could not be loaded.')} <button onClick={() => liveCategories.refetch()} className="font-bold text-[#B8860B] underline">Try again</button></p>;
